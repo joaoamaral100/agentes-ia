@@ -33,21 +33,23 @@ function cleanForTTS(text: string): string {
     .replace(/[\u2600-\u27BF]/g, '')
     .replace(/[*_#~>]/g, '')
     .replace(/\s+/g, ' ')
-    .trim()
+    .trim();
 }
 
 // ─── VoiceAssistant ───────────────────────────────────────────────────────────
 
 export default function VoiceAssistant() {
   const [voiceState, setVoiceState]     = useState<VoiceState>("idle");
+  const [transcript, setTranscript]     = useState("");
   const [responseText, setResponseText] = useState("");
   const [minimized, setMinimized]       = useState(false);
-  const recRef        = useRef<any>(null);
-  const audioRef      = useRef<HTMLAudioElement | null>(null);
-  const gotResultRef  = useRef(false);
-  const clicksRef     = useRef(0);
+  const recRef     = useRef<any>(null);
+  const audioRef   = useRef<HTMLAudioElement | null>(null);
+  const clicksRef  = useRef(0);
 
-  async function speakWithOpenAI(text: string) {
+  async function speakText(text: string) {
+    setVoiceState("speaking");
+    console.log("Falando...");
     const clean = cleanForTTS(text);
     try {
       const res = await fetch("/api/voice", {
@@ -55,9 +57,9 @@ export default function VoiceAssistant() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text: clean, type: "tts" }),
       });
-      if (!res.ok) throw new Error("TTS failed");
-      const blob = await res.blob();
-      const url  = URL.createObjectURL(blob);
+      if (!res.ok) throw new Error(`TTS HTTP ${res.status}`);
+      const blob  = await res.blob();
+      const url   = URL.createObjectURL(blob);
       const audio = new Audio(url);
       audioRef.current = audio;
       audio.onended = () => {
@@ -65,28 +67,39 @@ export default function VoiceAssistant() {
         audioRef.current = null;
         setVoiceState("idle");
         setMinimized(true);
-        setTimeout(() => setResponseText(""), 2000);
+        setTimeout(() => { setTranscript(""); setResponseText(""); }, 2000);
       };
       audio.play();
-    } catch {
+    } catch (err) {
+      console.error("Erro TTS:", err);
       setVoiceState("idle");
     }
   }
 
-  async function handleClick() {
-    // If active — cancel everything
-    if (voiceState !== "idle") {
-      recRef.current?.stop();
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current = null;
-      }
+  async function handleTranscript(text: string) {
+    console.log("Transcript:", text);
+    setTranscript(text);
+    setVoiceState("processing");
+    console.log("Processando...");
+    try {
+      const res = await fetch("/api/voice", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text, type: "chat" }),
+      });
+      if (!res.ok) throw new Error(`Chat HTTP ${res.status}`);
+      const data     = await res.json();
+      const response = data.response || "Desculpe, não consegui processar.";
+      console.log("Resposta:", response);
+      setResponseText(response);
+      await speakText(response);
+    } catch (err) {
+      console.error("Erro chat:", err);
       setVoiceState("idle");
-      setResponseText("");
-      return;
     }
+  }
 
-    if (typeof window === "undefined") return;
+  function startListening() {
     const SR =
       (window as any).SpeechRecognition ||
       (window as any).webkitSpeechRecognition;
@@ -97,41 +110,49 @@ export default function VoiceAssistant() {
     }
 
     const rec = new SR();
-    rec.lang             = "pt-BR";
-    rec.continuous       = false;
-    rec.interimResults   = false;
-    recRef.current       = rec;
-    gotResultRef.current = false;
+    rec.lang           = "pt-BR";
+    rec.continuous     = false;
+    rec.interimResults = false;
+    recRef.current     = rec;
 
-    rec.onstart = () => setVoiceState("listening");
+    let gotResult = false;
 
-    rec.onresult = async (event: any) => {
-      gotResultRef.current = true;
+    rec.onresult = (event: any) => {
+      gotResult = true;
       const text = event.results[0][0].transcript;
-      setVoiceState("processing");
+      handleTranscript(text);
+    };
 
-      try {
-        const res = await fetch("/api/voice", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text, type: "chat" }),
-        });
-        const data   = await res.json();
-        const answer = data.response || "Desculpe, não consegui processar.";
-        setResponseText(answer);
-        setVoiceState("speaking");
-        await speakWithOpenAI(answer);
-      } catch {
+    rec.onerror = (event: any) => {
+      console.error("Erro reconhecimento:", event.error);
+      setVoiceState("idle");
+    };
+
+    rec.onend = () => {
+      if (!gotResult) {
+        console.log("Nenhum resultado de voz.");
         setVoiceState("idle");
       }
     };
 
-    rec.onerror = () => setVoiceState("idle");
-    rec.onend   = () => {
-      if (!gotResultRef.current) setVoiceState("idle");
-    };
-
     rec.start();
+    setVoiceState("listening");
+    console.log("Ouvindo...");
+  }
+
+  function handleClick() {
+    if (voiceState !== "idle") {
+      recRef.current?.stop();
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+      setVoiceState("idle");
+      setTranscript("");
+      setResponseText("");
+      return;
+    }
+    startListening();
   }
 
   const STATE_LABEL: Record<VoiceState, string | null> = {
@@ -163,7 +184,6 @@ export default function VoiceAssistant() {
     };
   };
 
-  // Minimized dot — double-click to restore
   function handleMiniClick() {
     clicksRef.current += 1;
     if (clicksRef.current >= 2) {
@@ -198,17 +218,22 @@ export default function VoiceAssistant() {
   return (
     <div className="fixed bottom-6 right-6 z-[100] flex flex-col items-end gap-2">
 
-      {/* Response bubble */}
-      {responseText && voiceState === "speaking" && (
+      {/* Bubble com transcript + resposta */}
+      {(transcript || responseText) && voiceState !== "idle" && (
         <div
-          className="max-w-[260px] rounded-xl p-4 text-[13px] leading-relaxed text-white animate-fade-in-up"
+          className="max-w-[260px] rounded-xl p-4 text-[13px] leading-relaxed text-white"
           style={{
             background: "rgba(0,8,20,0.95)",
             border: "1px solid rgba(0,212,255,0.3)",
             boxShadow: "0 0 20px rgba(0,212,255,0.15)",
           }}
         >
-          {responseText}
+          {transcript && (
+            <p style={{ color: "#94a3b8", marginBottom: responseText ? "8px" : "0" }}>
+              {transcript}
+            </p>
+          )}
+          {responseText && <p>{responseText}</p>}
         </div>
       )}
 
@@ -228,7 +253,6 @@ export default function VoiceAssistant() {
 
       {/* Button */}
       <div className="relative">
-        {/* Ripple rings — listening */}
         {voiceState === "listening" && (
           <>
             <span
@@ -241,8 +265,6 @@ export default function VoiceAssistant() {
             />
           </>
         )}
-
-        {/* Pulse — processing */}
         {voiceState === "processing" && (
           <span
             className="absolute inset-0 rounded-full animate-ping"
@@ -268,11 +290,7 @@ export default function VoiceAssistant() {
           }}
           title={voiceState === "idle" ? "Ativar assistente JARVIS por voz" : "Cancelar"}
         >
-          {voiceState === "idle" || voiceState === "processing" ? (
-            <MicSVG />
-          ) : (
-            <StopSVG />
-          )}
+          {voiceState === "idle" || voiceState === "processing" ? <MicSVG /> : <StopSVG />}
         </button>
       </div>
     </div>
