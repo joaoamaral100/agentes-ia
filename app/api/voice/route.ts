@@ -3,22 +3,51 @@ import Anthropic from "@anthropic-ai/sdk";
 export const runtime = "nodejs";
 export const maxDuration = 30;
 
-const SYSTEM_PROMPT = `Você é JARVIS, um assistente de IA especializado em ajudar criadores de conteúdo do TikTok Shopping a usar a plataforma JARVIS. Você responde de forma curta, direta e em português brasileiro. Você conhece os 3 agentes: Gerador de Imagens (cria prompts de imagem), Gerador de Copys (cria textos de venda), Gerador de Vídeos (cria prompts de vídeo). Você explica como usar cada um de forma simples. Máximo 3 frases por resposta. Comece sempre com: Sim, [nome da ação]...`;
+const SYSTEM_PROMPT = `Você é JARVIS, um assistente de IA especializado em ajudar criadores de conteúdo do TikTok Shopping a usar a plataforma JARVIS. Responda em português brasileiro, sem emojis, sem markdown, texto limpo e natural. Máximo 2 frases por resposta.`;
 
 export async function POST(req: Request) {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) {
-    return Response.json({ error: "API key não configurada." }, { status: 500 });
-  }
-
-  let text: string;
+  let body: { text?: string; type?: string };
   try {
-    const body = await req.json();
-    text = body.text;
+    body = await req.json();
   } catch {
     return Response.json({ error: "Corpo inválido." }, { status: 400 });
   }
 
+  const { text, type } = body;
+
+  if (type === "tts") {
+    const openaiKey = process.env.OPENAI_API_KEY;
+    if (!openaiKey) {
+      return Response.json({ error: "OpenAI API key não configurada." }, { status: 500 });
+    }
+    if (!text?.trim()) {
+      return Response.json({ error: "Nenhum texto enviado." }, { status: 400 });
+    }
+
+    const ttsRes = await fetch("https://api.openai.com/v1/audio/speech", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${openaiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ model: "tts-1", voice: "onyx", speed: 0.9, input: text }),
+    });
+
+    if (!ttsRes.ok) {
+      return Response.json({ error: "Erro ao gerar áudio." }, { status: 500 });
+    }
+
+    const audioBuffer = await ttsRes.arrayBuffer();
+    return new Response(audioBuffer, {
+      headers: { "Content-Type": "audio/mpeg" },
+    });
+  }
+
+  // Default: text generation with Claude
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) {
+    return Response.json({ error: "API key não configurada." }, { status: 500 });
+  }
   if (!text?.trim()) {
     return Response.json({ error: "Nenhum texto enviado." }, { status: 400 });
   }

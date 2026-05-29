@@ -25,45 +25,51 @@ function StopSVG() {
   );
 }
 
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function cleanForTTS(text: string): string {
+  return text
+    .replace(/[\u{1F000}-\u{1FFFF}]/gu, "")
+    .replace(/[\u{2600}-\u{27BF}]/gu, "")
+    .replace(/[*_`#~>]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 // ─── VoiceAssistant ───────────────────────────────────────────────────────────
 
 export default function VoiceAssistant() {
   const [voiceState, setVoiceState]     = useState<VoiceState>("idle");
   const [responseText, setResponseText] = useState("");
   const [minimized, setMinimized]       = useState(false);
-  const recRef       = useRef<any>(null);
-  const gotResultRef = useRef(false);
-  const clicksRef    = useRef(0);
+  const recRef        = useRef<any>(null);
+  const audioRef      = useRef<HTMLAudioElement | null>(null);
+  const gotResultRef  = useRef(false);
+  const clicksRef     = useRef(0);
 
-  function speak(text: string) {
-    if (typeof window === "undefined") return;
-    const utterance   = new SpeechSynthesisUtterance(text);
-    utterance.lang    = "pt-BR";
-    utterance.rate    = 0.85;
-    utterance.pitch   = 0.7;
-    utterance.volume  = 1.0;
-
-    const trySpeak = () => {
-      const voices = speechSynthesis.getVoices();
-      const voice  =
-        voices.find((v) => v.lang.includes("pt") && v.name.toLowerCase().includes("male")) ||
-        voices.find((v) => v.name === "Google UK English Male") ||
-        voices.find((v) => v.name.toLowerCase().includes("male")) ||
-        voices.find((v) => v.lang === "en-GB") ||
-        voices[0];
-      if (voice) utterance.voice = voice;
-      utterance.onend = () => {
+  async function speakWithOpenAI(text: string) {
+    const clean = cleanForTTS(text);
+    try {
+      const res = await fetch("/api/voice", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: clean, type: "tts" }),
+      });
+      if (!res.ok) throw new Error("TTS failed");
+      const blob = await res.blob();
+      const url  = URL.createObjectURL(blob);
+      const audio = new Audio(url);
+      audioRef.current = audio;
+      audio.onended = () => {
+        URL.revokeObjectURL(url);
+        audioRef.current = null;
         setVoiceState("idle");
         setMinimized(true);
         setTimeout(() => setResponseText(""), 2000);
       };
-      speechSynthesis.speak(utterance);
-    };
-
-    if (speechSynthesis.getVoices().length) {
-      trySpeak();
-    } else {
-      speechSynthesis.onvoiceschanged = trySpeak;
+      audio.play();
+    } catch {
+      setVoiceState("idle");
     }
   }
 
@@ -71,7 +77,10 @@ export default function VoiceAssistant() {
     // If active — cancel everything
     if (voiceState !== "idle") {
       recRef.current?.stop();
-      if (typeof window !== "undefined") speechSynthesis.cancel();
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
       setVoiceState("idle");
       setResponseText("");
       return;
@@ -88,10 +97,10 @@ export default function VoiceAssistant() {
     }
 
     const rec = new SR();
-    rec.lang            = "pt-BR";
-    rec.continuous      = false;
-    rec.interimResults  = false;
-    recRef.current      = rec;
+    rec.lang             = "pt-BR";
+    rec.continuous       = false;
+    rec.interimResults   = false;
+    recRef.current       = rec;
     gotResultRef.current = false;
 
     rec.onstart = () => setVoiceState("listening");
@@ -107,11 +116,11 @@ export default function VoiceAssistant() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ text }),
         });
-        const data = await res.json();
+        const data   = await res.json();
         const answer = data.response || "Desculpe, não consegui processar.";
         setResponseText(answer);
         setVoiceState("speaking");
-        speak(answer);
+        await speakWithOpenAI(answer);
       } catch {
         setVoiceState("idle");
       }
@@ -175,9 +184,7 @@ export default function VoiceAssistant() {
             background: "linear-gradient(135deg, #0066ff, #00d4ff)",
             boxShadow: "0 0 8px rgba(0,212,255,0.4)",
           }}
-          onMouseEnter={(e) => {
-            setMinimized(false);
-          }}
+          onMouseEnter={() => setMinimized(false)}
         >
           <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
             <rect x="9" y="2" width="6" height="12" rx="3" />
