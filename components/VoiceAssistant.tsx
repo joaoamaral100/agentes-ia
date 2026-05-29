@@ -30,22 +30,31 @@ function StopSVG() {
 export default function VoiceAssistant() {
   const [voiceState, setVoiceState]     = useState<VoiceState>("idle");
   const [responseText, setResponseText] = useState("");
-  const recRef      = useRef<any>(null);
+  const [minimized, setMinimized]       = useState(false);
+  const recRef       = useRef<any>(null);
   const gotResultRef = useRef(false);
+  const clicksRef    = useRef(0);
 
   function speak(text: string) {
     if (typeof window === "undefined") return;
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang  = "pt-BR";
-    utterance.rate  = 1.0;
-    utterance.pitch = 1.1;
+    const utterance   = new SpeechSynthesisUtterance(text);
+    utterance.lang    = "pt-BR";
+    utterance.rate    = 0.85;
+    utterance.pitch   = 0.7;
+    utterance.volume  = 1.0;
 
     const trySpeak = () => {
-      const voices  = speechSynthesis.getVoices();
-      const ptVoice = voices.find((v) => v.lang.startsWith("pt"));
-      if (ptVoice) utterance.voice = ptVoice;
+      const voices = speechSynthesis.getVoices();
+      const voice  =
+        voices.find((v) => v.lang.includes("pt") && v.name.toLowerCase().includes("male")) ||
+        voices.find((v) => v.name === "Google UK English Male") ||
+        voices.find((v) => v.name.toLowerCase().includes("male")) ||
+        voices.find((v) => v.lang === "en-GB") ||
+        voices[0];
+      if (voice) utterance.voice = voice;
       utterance.onend = () => {
         setVoiceState("idle");
+        setMinimized(true);
         setTimeout(() => setResponseText(""), 2000);
       };
       speechSynthesis.speak(utterance);
@@ -144,6 +153,40 @@ export default function VoiceAssistant() {
       boxShadow: "0 0 24px rgba(0,212,255,0.4)",
     };
   };
+
+  // Minimized dot — double-click to restore
+  function handleMiniClick() {
+    clicksRef.current += 1;
+    if (clicksRef.current >= 2) {
+      clicksRef.current = 0;
+      setMinimized(false);
+    } else {
+      setTimeout(() => { clicksRef.current = 0; }, 400);
+    }
+  }
+
+  if (minimized && voiceState === "idle") {
+    return (
+      <div className="fixed bottom-6 right-6 z-[100]" title="Falar com JARVIS (duplo clique para expandir)">
+        <button
+          onClick={handleMiniClick}
+          className="group flex h-5 w-5 items-center justify-center rounded-full transition-all duration-300 hover:h-14 hover:w-14"
+          style={{
+            background: "linear-gradient(135deg, #0066ff, #00d4ff)",
+            boxShadow: "0 0 8px rgba(0,212,255,0.4)",
+          }}
+          onMouseEnter={(e) => {
+            setMinimized(false);
+          }}
+        >
+          <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
+            <rect x="9" y="2" width="6" height="12" rx="3" />
+            <path d="M5 10a7 7 0 0014 0" />
+          </svg>
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed bottom-6 right-6 z-[100] flex flex-col items-end gap-2">
