@@ -3,6 +3,57 @@
 import { useState } from "react";
 import { AGENTS, AgentId } from "@/lib/agents";
 
+// ─── SVG icons ────────────────────────────────────────────────────────────────
+
+function CameraIcon({ size = 20, style }: { size?: number; style?: React.CSSProperties }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={style}>
+      <rect x="2" y="6" width="20" height="14" rx="2" />
+      <circle cx="12" cy="13" r="4" />
+      <path d="M8 6l2-3h4l2 3" />
+      <circle cx="18" cy="9" r="1" fill="currentColor" />
+    </svg>
+  );
+}
+
+function CopyIcon({ size = 20, style }: { size?: number; style?: React.CSSProperties }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={style}>
+      <path d="M12 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
+      <path d="M15 3h6v6" />
+      <path d="M10 14l9-9" />
+      <path d="M6 12h6M6 16h4" />
+    </svg>
+  );
+}
+
+function VideoIcon({ size = 20, style }: { size?: number; style?: React.CSSProperties }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={style}>
+      <rect x="2" y="4" width="15" height="16" rx="2" />
+      <path d="M17 8l5 4-5 4V8z" fill="currentColor" stroke="none" />
+      <path d="M6 9h6M6 12h8M6 15h5" />
+    </svg>
+  );
+}
+
+function PlusIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <line x1="12" y1="5" x2="12" y2="19" />
+      <line x1="5" y1="12" x2="19" y2="12" />
+    </svg>
+  );
+}
+
+function AgentIcon({ id, size = 20, style }: { id: string; size?: number; style?: React.CSSProperties }) {
+  if (id === "imagens") return <CameraIcon size={size} style={style} />;
+  if (id === "copys")   return <CopyIcon   size={size} style={style} />;
+  return                       <VideoIcon  size={size} style={style} />;
+}
+
+// ─── Sidebar ──────────────────────────────────────────────────────────────────
+
 interface SidebarProps {
   activeAgent: AgentId;
   onSelect: (id: AgentId) => void;
@@ -33,9 +84,7 @@ export default function Sidebar({ activeAgent, onSelect, onNewChat }: SidebarPro
               height={32}
               onError={() => setLogoError(true)}
               className="glow-pulse-anim h-8 w-8 shrink-0 rounded-lg object-contain"
-              style={{
-                filter: "brightness(0) invert(1) sepia(1) saturate(5) hue-rotate(180deg)",
-              }}
+              style={{ filter: "invert(1)" }}
             />
           ) : (
             <div
@@ -79,6 +128,10 @@ export default function Sidebar({ activeAgent, onSelect, onNewChat }: SidebarPro
 
         {AGENTS.map((agent) => {
           const active = agent.id === activeAgent;
+          const iconStyle: React.CSSProperties = active
+            ? { color: "#00d4ff", filter: "drop-shadow(0 0 4px #00d4ff)" }
+            : { color: "#4a9ebb" };
+
           return (
             <button
               key={agent.id}
@@ -115,9 +168,9 @@ export default function Sidebar({ activeAgent, onSelect, onNewChat }: SidebarPro
                 }
               }}
             >
-              {/* Icon */}
+              {/* Icon container */}
               <span
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-lg transition-all"
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-all"
                 style={
                   active
                     ? {
@@ -127,7 +180,7 @@ export default function Sidebar({ activeAgent, onSelect, onNewChat }: SidebarPro
                     : { background: "rgba(0,212,255,0.06)" }
                 }
               >
-                {agent.icon}
+                <AgentIcon id={agent.id} size={18} style={iconStyle} />
               </span>
 
               {/* Label */}
@@ -138,10 +191,7 @@ export default function Sidebar({ activeAgent, onSelect, onNewChat }: SidebarPro
                 >
                   {agent.name}
                 </span>
-                <span
-                  className="block truncate text-[11px]"
-                  style={{ color: "rgba(74,158,187,0.5)" }}
-                >
+                <span className="block truncate text-[11px]" style={{ color: "rgba(74,158,187,0.5)" }}>
                   {agent.description}
                 </span>
               </span>
@@ -166,7 +216,7 @@ export default function Sidebar({ activeAgent, onSelect, onNewChat }: SidebarPro
         />
         <button
           onClick={() => onNewChat(activeAgent)}
-          className="flex w-full items-center justify-center gap-1.5 rounded-lg px-3 py-2.5 text-[12px] font-medium transition-all duration-200"
+          className="flex w-full items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-[12px] font-medium transition-all duration-200"
           style={{
             border: "1px solid rgba(0,212,255,0.3)",
             color: "#00d4ff",
@@ -188,7 +238,7 @@ export default function Sidebar({ activeAgent, onSelect, onNewChat }: SidebarPro
             });
           }}
         >
-          <span className="text-base leading-none">+</span>
+          <PlusIcon />
           Nova conversa
         </button>
       </div>

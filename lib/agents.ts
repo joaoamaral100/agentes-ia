@@ -15,7 +15,7 @@ export const AGENTS: Agent[] = [
     id: "imagens",
     name: "Gerador de Imagens",
     description: "Cria prompts visuais detalhados",
-    icon: "🎨",
+    icon: "imagens",
     placeholder: "Ex: C1 POV, C2 Fábrica, C3 Terceira Pessoa...",
     greeting:
       `Olá! Vamos criar suas imagens de venda. Me responda tudo abaixo de uma vez:
@@ -112,7 +112,7 @@ CENA 3 — <formato>
     id: "copys",
     name: "Gerador de Copys",
     description: "Copies virais para TikTok Shopping",
-    icon: "✍️",
+    icon: "copys",
     placeholder: "Ex: C1 POV, C2 Fábrica, C3 Terceira Pessoa...",
     greeting:
       `Olá! Vamos criar suas copies de venda. Me responda tudo abaixo de uma vez:
@@ -216,7 +216,7 @@ NUNCA: copys genéricas, repetir estrutura entre A e B, inventar característica
     id: "videos",
     name: "Gerador de Vídeos",
     description: "Prompts de vídeo para IA",
-    icon: "🎬",
+    icon: "videos",
     placeholder: "Cole os 3 roteiros/copies aqui...",
     greeting:
       `Olá! Vamos criar seus prompts de vídeo. Me envie tudo abaixo de uma vez:

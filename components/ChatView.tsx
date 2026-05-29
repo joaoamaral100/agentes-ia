@@ -4,6 +4,70 @@ import { useEffect, useRef, useState } from "react";
 import { Agent } from "@/lib/agents";
 import MessageBubble, { ChatMessage, ImageData } from "./MessageBubble";
 
+// ─── SVG icons ────────────────────────────────────────────────────────────────
+
+function CameraIcon({ size = 20, style }: { size?: number; style?: React.CSSProperties }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={style}>
+      <rect x="2" y="6" width="20" height="14" rx="2" />
+      <circle cx="12" cy="13" r="4" />
+      <path d="M8 6l2-3h4l2 3" />
+      <circle cx="18" cy="9" r="1" fill="currentColor" />
+    </svg>
+  );
+}
+function CopyTextIcon({ size = 20, style }: { size?: number; style?: React.CSSProperties }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={style}>
+      <path d="M12 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
+      <path d="M15 3h6v6" />
+      <path d="M10 14l9-9" />
+      <path d="M6 12h6M6 16h4" />
+    </svg>
+  );
+}
+function VideoPlayIcon({ size = 20, style }: { size?: number; style?: React.CSSProperties }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={style}>
+      <rect x="2" y="4" width="15" height="16" rx="2" />
+      <path d="M17 8l5 4-5 4V8z" fill="currentColor" stroke="none" />
+      <path d="M6 9h6M6 12h8M6 15h5" />
+    </svg>
+  );
+}
+function AgentIcon({ id, size = 20, style }: { id: string; size?: number; style?: React.CSSProperties }) {
+  if (id === "imagens") return <CameraIcon    size={size} style={style} />;
+  if (id === "copys")   return <CopyTextIcon  size={size} style={style} />;
+  return                       <VideoPlayIcon size={size} style={style} />;
+}
+function MicIcon({ size = 18, style }: { size?: number; style?: React.CSSProperties }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={style}>
+      <rect x="9" y="2" width="6" height="12" rx="3" />
+      <path d="M5 10a7 7 0 0014 0" />
+      <line x1="12" y1="17" x2="12" y2="21" />
+      <line x1="9" y1="21" x2="15" y2="21" />
+    </svg>
+  );
+}
+function UploadIcon({ size = 18, style }: { size?: number; style?: React.CSSProperties }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={style}>
+      <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+      <polyline points="17 8 12 3 7 8" />
+      <line x1="12" y1="3" x2="12" y2="15" />
+    </svg>
+  );
+}
+function SendIcon({ size = 18, style }: { size?: number; style?: React.CSSProperties }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={style}>
+      <line x1="22" y1="2" x2="11" y2="13" />
+      <polygon points="22 2 15 22 11 13 2 9 22 2" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
 // ─── constants ────────────────────────────────────────────────────────────────
 const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"];
 const ACCEPTED_EXT   = ".jpg,.jpeg,.png,.gif,.webp";
@@ -237,13 +301,13 @@ export default function ChatView({ agent, messages, onMessagesChange }: ChatView
         }}
       >
         <div
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-xl glow-pulse-anim"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl glow-pulse-anim"
           style={{
             background: "rgba(0,212,255,0.1)",
             border: "1px solid rgba(0,212,255,0.3)",
           }}
         >
-          {agent.icon}
+          <AgentIcon id={agent.id} size={18} style={{ color: "#00d4ff" }} />
         </div>
         <div>
           <h2
@@ -283,14 +347,18 @@ export default function ChatView({ agent, messages, onMessagesChange }: ChatView
             /* ── Empty state ── */
             <div className="mt-10 text-center">
               <div
-                className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl text-4xl glow-pulse-anim"
+                className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl glow-pulse-anim"
                 style={{
                   background: "rgba(0,212,255,0.08)",
                   border: "1px solid rgba(0,212,255,0.3)",
                   boxShadow: "0 0 40px rgba(0,212,255,0.15)",
                 }}
               >
-                {agent.icon}
+                <AgentIcon
+                  id={agent.id}
+                  size={40}
+                  style={{ color: "#00d4ff", opacity: 0.85, filter: "drop-shadow(0 0 8px rgba(0,212,255,0.7))" }}
+                />
               </div>
               <h3
                 className="mb-3 text-2xl font-bold tracking-tight gradient-text"
@@ -425,17 +493,19 @@ export default function ChatView({ agent, messages, onMessagesChange }: ChatView
               onClick={() => fileInputRef.current?.click()}
               disabled={!canAttachMore}
               title="Anexar imagem"
-              className="mb-0.5 flex h-8 w-8 items-center justify-center rounded-xl text-sm transition-all duration-200"
+              className="mb-0.5 flex h-8 w-8 items-center justify-center rounded-xl transition-all duration-200"
               style={{
-                color: canAttachMore ? "#00d4ff" : "rgba(0,212,255,0.2)",
+                color: canAttachMore ? "#4a9ebb" : "rgba(0,212,255,0.2)",
                 background: "transparent",
               }}
               onMouseEnter={(e) => {
-                if (canAttachMore) (e.currentTarget as HTMLElement).style.background = "rgba(0,212,255,0.1)";
+                if (canAttachMore) Object.assign((e.currentTarget as HTMLElement).style, { background: "rgba(0,212,255,0.1)", color: "#00d4ff" });
               }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}
+              onMouseLeave={(e) => {
+                if (canAttachMore) Object.assign((e.currentTarget as HTMLElement).style, { background: "transparent", color: "#4a9ebb" });
+              }}
             >
-              📎
+              <UploadIcon size={17} />
             </button>
 
             {/* Hidden file input */}
@@ -471,20 +541,20 @@ export default function ChatView({ agent, messages, onMessagesChange }: ChatView
             <button
               onClick={toggleMic}
               title={listening ? "Parar gravação" : "Gravar voz (pt-BR)"}
-              className={["mb-0.5 flex h-8 w-8 items-center justify-center rounded-xl text-sm transition-all duration-200", listening ? "mic-listening" : ""].join(" ")}
+              className={["mb-0.5 flex h-8 w-8 items-center justify-center rounded-xl transition-all duration-200", listening ? "mic-listening" : ""].join(" ")}
               style={
                 listening
                   ? { background: "rgba(239,68,68,0.15)", color: "#f87171" }
-                  : { background: "transparent", color: "rgba(0,212,255,0.4)" }
+                  : { background: "transparent", color: "#4a9ebb" }
               }
               onMouseEnter={(e) => {
                 if (!listening) Object.assign((e.currentTarget as HTMLElement).style, { background: "rgba(0,212,255,0.1)", color: "#00d4ff" });
               }}
               onMouseLeave={(e) => {
-                if (!listening) Object.assign((e.currentTarget as HTMLElement).style, { background: "transparent", color: "rgba(0,212,255,0.4)" });
+                if (!listening) Object.assign((e.currentTarget as HTMLElement).style, { background: "transparent", color: "#4a9ebb" });
               }}
             >
-              🎤
+              <MicIcon size={17} />
             </button>
 
             {/* Send button */}
@@ -498,13 +568,12 @@ export default function ChatView({ agent, messages, onMessagesChange }: ChatView
                       background: "linear-gradient(135deg, #0066ff, #00d4ff)",
                       boxShadow: "0 0 14px rgba(0,212,255,0.35)",
                       color: "#000814",
-                      fontWeight: 700,
                     }
                   : { background: "rgba(0,212,255,0.05)", color: "rgba(0,212,255,0.15)" }
               }
               aria-label="Enviar"
             >
-              ↑
+              <SendIcon size={16} />
             </button>
           </div>
         </div>
