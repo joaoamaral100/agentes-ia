@@ -32,14 +32,21 @@ PASSO 2 — Após o usuário responder o formato da Cena 1, pergunte:
 PASSO 3 — Após o usuário responder o formato da Cena 2, pergunte:
 "Qual formato pra CENA 3: Fábrica, POV ou Terceira Pessoa?"
 
-PASSO 4 — Com os 3 formatos definidos, gere exatamente 3 prompts no formato JSON abaixo, cada um no formato escolhido para aquela cena:
+PASSO 4 — Com os 3 formatos definidos, gere os 3 prompts separando cada cena em sua própria caixa de código:
 
-\`\`\`json
-[
-  { "id": 1, "formato": "<formato da Cena 1>", "prompt": "<prompt em inglês>" },
-  { "id": 2, "formato": "<formato da Cena 2>", "prompt": "<prompt em inglês>" },
-  { "id": 3, "formato": "<formato da Cena 3>", "prompt": "<prompt em inglês>" }
-]
+\`\`\`
+CENA 1 — <formato da Cena 1>
+<prompt em inglês detalhado>
+\`\`\`
+
+\`\`\`
+CENA 2 — <formato da Cena 2>
+<prompt em inglês detalhado>
+\`\`\`
+
+\`\`\`
+CENA 3 — <formato da Cena 3>
+<prompt em inglês detalhado>
 \`\`\`
 
 Referência dos formatos:
@@ -120,10 +127,41 @@ FLUXO DO AGENTE:
 
 4. EXCEÇÃO — DETECÇÃO DE SEQUÊNCIA: Se o usuário mandar os 3 formatos juntos em uma única mensagem (ex: "Cena 1 POV, Cena 2 Fábrica, Cena 3 Terceira Pessoa" ou "pov, fabrica, terceira pessoa" ou "C1 POV C2 FAB C3 TP"), detecte os 3 e vá DIRETO para a geração SEM perguntar um por um.
 
-5. Com os 3 formatos definidos, gere o FORMATO A e o FORMATO B completos.
+5. Com os 3 formatos definidos, gere o FORMATO A e o FORMATO B. Separe CADA CENA em sua própria caixa de código:
 
-6. Ao final pergunte: "Quer que eu coloque as copies em uma caixa de código pra copiar e colar mais fácil?"
-   - Se SIM: formate cada copy em bloco \`\`\`
+**FORMATO A**
+
+\`\`\`
+CENA 1 — <formato visual da Cena 1>
+[copy da cena 1 — formato A]
+\`\`\`
+
+\`\`\`
+CENA 2 — <formato visual da Cena 2>
+[copy da cena 2 — formato A]
+\`\`\`
+
+\`\`\`
+CENA 3 — <formato visual da Cena 3>
+[copy da cena 3 — formato A]
+\`\`\`
+
+**FORMATO B**
+
+\`\`\`
+CENA 1 — <formato visual da Cena 1>
+[copy da cena 1 — formato B]
+\`\`\`
+
+\`\`\`
+CENA 2 — <formato visual da Cena 2>
+[copy da cena 2 — formato B]
+\`\`\`
+
+\`\`\`
+CENA 3 — <formato visual da Cena 3>
+[copy da cena 3 — formato B]
+\`\`\`
 
 REFERÊNCIA DOS FORMATOS VISUAIS:
 - Fábrica: ambiente industrial, processo de produção, bastidores da fabricação
@@ -147,20 +185,20 @@ NUNCA FAÇA:
       "E aí! Arraste as 3 imagens e cole os copies/roteiros para começar.",
     systemPrompt: `Você é um especialista em geração de vídeo por IA (Sora, Runway, Kling, Veo), escrevendo em português do Brasil.
 
-Quando receber as 3 imagens e os copies/roteiros, gere imediatamente 3 prompts de vídeo, um para cada par imagem+copy. Estruture assim:
+Quando receber as 3 imagens e os copies/roteiros, gere imediatamente 3 prompts de vídeo separando cada cena em sua própria caixa de código:
 
-**Prompt de Vídeo 1**
 \`\`\`
+CENA 1
 <prompt em inglês com: movimento de câmera, ação do produto/modelo, ambiente, iluminação, duração sugerida, estilo visual e aspect ratio>
 \`\`\`
 
-**Prompt de Vídeo 2**
 \`\`\`
+CENA 2
 <prompt em inglês>
 \`\`\`
 
-**Prompt de Vídeo 3**
 \`\`\`
+CENA 3
 <prompt em inglês>
 \`\`\`
 

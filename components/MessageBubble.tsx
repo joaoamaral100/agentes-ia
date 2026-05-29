@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment } from "react";
+import { Fragment, useState } from "react";
 
 export interface ImageData {
   base64: string;
@@ -15,24 +15,56 @@ export interface ChatMessage {
   apiText?: string;
 }
 
-/**
- * Renderizador de markdown minimalista: trata blocos de código (```),
- * negrito (**texto**) e quebras de linha. Mantém o app sem dependências extras.
- */
+// ─── CodeBlock with copy button ───────────────────────────────────────────────
+
+function CodeBlock({ content }: { content: string }) {
+  const [copied, setCopied] = useState(false);
+
+  function copy() {
+    navigator.clipboard.writeText(content.trim()).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }).catch(() => {
+      // fallback for environments without clipboard API
+      const el = document.createElement("textarea");
+      el.value = content.trim();
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand("copy");
+      document.body.removeChild(el);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }
+
+  return (
+    <div className="relative my-2">
+      <pre className="overflow-x-auto rounded-lg bg-black/40 p-3 pt-9 text-sm">
+        <code className="whitespace-pre-wrap break-words">{content.trim()}</code>
+      </pre>
+      <button
+        onClick={copy}
+        className={`absolute right-2 top-2 rounded px-2.5 py-1 text-xs font-medium transition-all ${
+          copied
+            ? "bg-green-500/20 text-green-400"
+            : "bg-white/10 text-gray-400 hover:bg-white/20 hover:text-white"
+        }`}
+      >
+        {copied ? "Copiado! ✓" : "Copiar"}
+      </button>
+    </div>
+  );
+}
+
+// ─── markdown renderer ────────────────────────────────────────────────────────
+
 function renderContent(content: string) {
   const parts = content.split(/(```[\s\S]*?```)/g);
 
   return parts.map((part, i) => {
     if (part.startsWith("```")) {
       const inner = part.replace(/^```[a-zA-Z]*\n?/, "").replace(/```$/, "");
-      return (
-        <pre
-          key={i}
-          className="my-2 overflow-x-auto rounded-lg bg-black/40 p-3 text-sm"
-        >
-          <code>{inner.trim()}</code>
-        </pre>
-      );
+      return <CodeBlock key={i} content={inner} />;
     }
 
     const lines = part.split("\n");
@@ -58,6 +90,8 @@ function renderInline(text: string) {
     return <Fragment key={i}>{seg}</Fragment>;
   });
 }
+
+// ─── MessageBubble ────────────────────────────────────────────────────────────
 
 export default function MessageBubble({ message }: { message: ChatMessage }) {
   const isUser = message.role === "user";
