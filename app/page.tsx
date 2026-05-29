@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Sidebar from "@/components/Sidebar";
 import ChatView from "@/components/ChatView";
+import LoginScreen from "@/components/LoginScreen";
 import { ChatMessage } from "@/components/MessageBubble";
 import { AGENTS, AgentId, getAgent } from "@/lib/agents";
 
@@ -14,9 +15,25 @@ const emptyState: ChatState = AGENTS.reduce((acc, a) => {
 }, {} as ChatState);
 
 export default function Home() {
+  // null = checking, false = not authenticated, true = authenticated
+  const [authenticated, setAuthenticated] = useState<boolean | null>(null);
   const [activeAgent, setActiveAgent] = useState<AgentId>("imagens");
   const [chats, setChats] = useState<ChatState>(emptyState);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    const stored = localStorage.getItem("jarvis_auth");
+    setAuthenticated(stored === "true");
+  }, []);
+
+  if (authenticated === null) {
+    // Prevent flash — render nothing until localStorage is checked
+    return null;
+  }
+
+  if (!authenticated) {
+    return <LoginScreen onSuccess={() => setAuthenticated(true)} />;
+  }
 
   const agent = getAgent(activeAgent)!;
 
@@ -28,16 +45,11 @@ export default function Home() {
     updateMessages(id, []);
   }
 
-  function handleSelect(id: AgentId) {
-    setActiveAgent(id);
-    setSidebarOpen(false);
-  }
-
   return (
     <main className="flex h-screen w-screen overflow-hidden">
       <Sidebar
         activeAgent={activeAgent}
-        onSelect={handleSelect}
+        onSelect={(id) => { setActiveAgent(id); setSidebarOpen(false); }}
         onNewChat={(id) => { handleNewChat(id); setSidebarOpen(false); }}
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
