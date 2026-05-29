@@ -29,11 +29,11 @@ function StopSVG() {
 
 function cleanForTTS(text: string): string {
   return text
-    .replace(/[\u{1F000}-\u{1FFFF}]/gu, "")
-    .replace(/[\u{2600}-\u{27BF}]/gu, "")
-    .replace(/[*_`#~>]/g, "")
-    .replace(/\s+/g, " ")
-    .trim();
+    .replace(/[\uD800-\uDFFF]/g, '')
+    .replace(/[\u2600-\u27BF]/g, '')
+    .replace(/[*_#~>]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
 }
 
 // ─── VoiceAssistant ───────────────────────────────────────────────────────────
