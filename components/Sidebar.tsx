@@ -45,17 +45,6 @@ function PlusIcon() {
   );
 }
 
-function BextLogo() {
-  return (
-    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path
-        d="M20 4L8 16L14 16L12 28L24 16L18 16L20 4Z"
-        fill="#00d4ff"
-        style={{ filter: "drop-shadow(0 0 6px rgba(0,212,255,0.8))" }}
-      />
-    </svg>
-  );
-}
 
 function AgentIcon({ id, size = 20, style }: { id: string; size?: number; style?: React.CSSProperties }) {
   if (id === "imagens") return <CameraIcon size={size} style={style} />;
@@ -86,7 +75,16 @@ export default function Sidebar({ activeAgent, onSelect, onNewChat }: SidebarPro
       {/* Brand */}
       <div className="px-5 py-5">
         <div className="flex items-center gap-3">
-          <BextLogo />
+          <img
+            src="/logo.png"
+            alt="BEXT"
+            style={{
+              width: 36,
+              height: 36,
+              objectFit: "contain",
+              filter: "invert(1) sepia(1) saturate(3) hue-rotate(175deg) brightness(1.5) drop-shadow(0 0 8px rgba(0, 212, 255, 0.7))",
+            }}
+          />
           <p
             className="text-sm font-bold"
             style={{
