@@ -4,21 +4,131 @@ import { useEffect, useRef, useState } from "react";
 import { Agent } from "@/lib/agents";
 import MessageBubble, { ChatMessage, ImageData } from "./MessageBubble";
 
+// ─── constants ───────────────────────────────────────────────────────────────
+
+const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"];
+const ACCEPTED_EXT = ".jpg,.jpeg,.png,.gif,.webp";
+const MAX_MB = 10;
+
+// ─── helpers ─────────────────────────────────────────────────────────────────
+
+function formatSize(bytes: number) {
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function validateImage(file: File): string | null {
+  if (!ACCEPTED_TYPES.includes(file.type))
+    return "Formato inválido. Use JPG, PNG, GIF ou WebP.";
+  if (file.size > MAX_MB * 1024 * 1024)
+    return `Imagem muito grande. Máximo ${MAX_MB} MB.`;
+  return null;
+}
+
 async function fileToImageData(file: File): Promise<ImageData> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => {
       const result = reader.result as string;
-      resolve({
-        base64: result.split(",")[1],
-        mediaType: file.type || "image/jpeg",
-        name: file.name,
-      });
+      resolve({ base64: result.split(",")[1], mediaType: file.type, name: file.name });
     };
     reader.onerror = reject;
     reader.readAsDataURL(file);
   });
 }
+
+// ─── DropZone component ───────────────────────────────────────────────────────
+
+function DropZone({
+  label,
+  file,
+  error,
+  onFile,
+}: {
+  label: string;
+  file: File | null;
+  error: string | null;
+  onFile: (file: File, error: string | null) => void;
+}) {
+  const [dragging, setDragging] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  function process(f: File) {
+    onFile(f, validateImage(f));
+  }
+
+  function onDragOver(e: React.DragEvent) {
+    e.preventDefault();
+    setDragging(true);
+  }
+  function onDragLeave(e: React.DragEvent) {
+    e.preventDefault();
+    setDragging(false);
+  }
+  function onDrop(e: React.DragEvent) {
+    e.preventDefault();
+    setDragging(false);
+    const f = e.dataTransfer.files[0];
+    if (f) process(f);
+  }
+  function onChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const f = e.target.files?.[0];
+    if (f) process(f);
+    e.target.value = "";
+  }
+
+  const isValid = file !== null && error === null;
+
+  return (
+    <div>
+      <p className="mb-1.5 text-xs font-medium text-gray-400">{label}</p>
+      <div
+        onDragOver={onDragOver}
+        onDragLeave={onDragLeave}
+        onDrop={onDrop}
+        onClick={() => inputRef.current?.click()}
+        className={[
+          "cursor-pointer select-none rounded-xl border-2 border-dashed p-4 text-center transition-all",
+          dragging
+            ? "scale-[1.02] border-blue-400/70 bg-blue-500/10"
+            : isValid
+            ? "border-green-500/50 bg-green-500/5"
+            : error
+            ? "border-red-400/50 bg-red-500/5"
+            : "border-white/20 bg-white/5 hover:border-white/35",
+        ].join(" ")}
+      >
+        <input
+          ref={inputRef}
+          type="file"
+          accept={ACCEPTED_EXT}
+          className="hidden"
+          onChange={onChange}
+        />
+        {dragging ? (
+          <p className="text-sm text-blue-300">Solte aqui...</p>
+        ) : isValid ? (
+          <div className="space-y-0.5">
+            <p className="truncate text-sm font-medium text-green-400">✓ {file!.name}</p>
+            <p className="text-xs text-gray-500">{formatSize(file!.size)}</p>
+          </div>
+        ) : (
+          <div className="space-y-1">
+            <p className="text-sm text-gray-300">
+              Arraste ou <span className="underline">escolha imagem</span>
+            </p>
+            <p className="text-xs text-gray-600">
+              JPG · PNG · GIF · WebP · máx {MAX_MB} MB
+            </p>
+          </div>
+        )}
+      </div>
+      {error && <p className="mt-1 text-xs text-red-400">{error}</p>}
+    </div>
+  );
+}
+
+// ─── types ───────────────────────────────────────────────────────────────────
 
 type UploadMode = "none" | "single-image" | "single-image+price" | "3images+copys";
 
@@ -28,10 +138,13 @@ interface ChatViewProps {
   onMessagesChange: (messages: ChatMessage[]) => void;
 }
 
+// ─── ChatView ─────────────────────────────────────────────────────────────────
+
 export default function ChatView({ agent, messages, onMessagesChange }: ChatViewProps) {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [uploadedImages, setUploadedImages] = useState<File[]>([]);
+  const [images, setImages] = useState<(File | null)[]>([null, null, null]);
+  const [imageErrors, setImageErrors] = useState<(string | null)[]>([null, null, null]);
   const [price, setPrice] = useState("");
   const [copysText, setCopysText] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -42,11 +155,23 @@ export default function ChatView({ agent, messages, onMessagesChange }: ChatView
   }, [messages, loading]);
 
   useEffect(() => {
-    setUploadedImages([]);
-    setPrice("");
-    setCopysText("");
+    resetUpload();
     setInput("");
   }, [agent.id]);
+
+  function resetUpload() {
+    setImages([null, null, null]);
+    setImageErrors([null, null, null]);
+    setPrice("");
+    setCopysText("");
+  }
+
+  function handleImageAt(index: number, file: File, error: string | null) {
+    setImages((prev) => { const n = [...prev]; n[index] = file; return n; });
+    setImageErrors((prev) => { const n = [...prev]; n[index] = error; return n; });
+  }
+
+  // ── upload mode detection ──────────────────────────────────────────────────
 
   function detectUploadMode(): UploadMode {
     if (agent.id === "videos") return "3images+copys";
@@ -56,7 +181,6 @@ export default function ChatView({ agent, messages, onMessagesChange }: ChatView
 
     const last = assistantMsgs[assistantMsgs.length - 1].content.toLowerCase();
 
-    // Primary: several possible phrasings Claude might use
     const askingForImage =
       last.includes("manda a imagem do produto") ||
       last.includes("agora manda a imagem") ||
@@ -65,8 +189,6 @@ export default function ChatView({ agent, messages, onMessagesChange }: ChatView
       last.includes("mande a imagem do produto") ||
       last.includes("agora envie a imagem");
 
-    // Fallback: after 4 assistant messages (3 format questions + trigger)
-    // and the last message is NOT still asking for a scene format
     const doneAskingFormats =
       assistantMsgs.length >= 4 &&
       !last.includes("cena 1") &&
@@ -78,43 +200,57 @@ export default function ChatView({ agent, messages, onMessagesChange }: ChatView
 
     if (agent.id === "imagens" && showUpload) return "single-image";
     if (agent.id === "copys" && showUpload) return "single-image+price";
-
     return "none";
   }
 
   const uploadMode = detectUploadMode();
+  const validImages = images.filter((f, i) => f !== null && imageErrors[i] === null) as File[];
+
+  // ── can send ──────────────────────────────────────────────────────────────
 
   function canSend(): boolean {
     if (loading) return false;
-    if (uploadMode === "single-image") return uploadedImages.length === 1;
-    if (uploadMode === "single-image+price") return uploadedImages.length === 1 && price.trim().length > 0;
-    if (uploadMode === "3images+copys") return uploadedImages.length === 3 && copysText.trim().length > 0;
+    if (uploadMode === "single-image") return validImages.length >= 1;
+    if (uploadMode === "single-image+price")
+      return validImages.length >= 1 && price.trim().length > 0;
+    if (uploadMode === "3images+copys")
+      return validImages.length === 3 && copysText.trim().length > 0;
     return input.trim().length > 0;
   }
 
-  function handleImageChange(e: React.ChangeEvent<HTMLInputElement>, maxCount: number) {
-    const files = Array.from(e.target.files ?? []).slice(0, maxCount);
-    setUploadedImages(files);
-  }
+  // ── send ──────────────────────────────────────────────────────────────────
 
   async function sendMessage() {
     if (!canSend()) return;
 
-    const imageData: ImageData[] = uploadedImages.length > 0
-      ? await Promise.all(uploadedImages.map(fileToImageData))
-      : [];
+    const imagesToSend =
+      uploadMode === "3images+copys" ? validImages : validImages.slice(0, 1);
+
+    let imageData: ImageData[] = [];
+    try {
+      imageData =
+        imagesToSend.length > 0
+          ? await Promise.all(imagesToSend.map(fileToImageData))
+          : [];
+    } catch {
+      onMessagesChange([
+        ...messages,
+        { role: "assistant", content: "⚠️ Erro ao processar a imagem. Tente novamente." },
+      ]);
+      return;
+    }
 
     let displayContent = input.trim();
     let apiText: string | undefined;
 
     if (uploadMode === "single-image") {
-      displayContent = `[Imagem: ${uploadedImages[0].name}]`;
+      displayContent = `[Imagem: ${imagesToSend[0].name} · ${formatSize(imagesToSend[0].size)}]`;
       apiText = "Aqui está a imagem do produto.";
     } else if (uploadMode === "single-image+price") {
-      displayContent = `[Imagem: ${uploadedImages[0].name}] · Preço: ${price}`;
+      displayContent = `[Imagem: ${imagesToSend[0].name} · ${formatSize(imagesToSend[0].size)}] · Preço: ${price}`;
       apiText = `Aqui está a imagem do produto. O preço é: ${price}.`;
     } else if (uploadMode === "3images+copys") {
-      displayContent = `[3 imagens enviadas]\n\n${copysText}`;
+      displayContent = `[${imagesToSend.length} imagens enviadas]\n\n${copysText}`;
       apiText = `Aqui estão as 3 imagens do produto e os copies/roteiros:\n\n${copysText}`;
     }
 
@@ -128,9 +264,7 @@ export default function ChatView({ agent, messages, onMessagesChange }: ChatView
     const history = [...messages, userMessage];
     onMessagesChange(history);
     setInput("");
-    setUploadedImages([]);
-    setPrice("");
-    setCopysText("");
+    resetUpload();
     setLoading(true);
 
     const withPlaceholder: ChatMessage[] = [...history, { role: "assistant", content: "" }];
@@ -163,11 +297,9 @@ export default function ChatView({ agent, messages, onMessagesChange }: ChatView
         acc += decoder.decode(value, { stream: true });
         onMessagesChange([...history, { role: "assistant", content: acc }]);
       }
-    } catch {
-      onMessagesChange([
-        ...history,
-        { role: "assistant", content: "⚠️ Falha de conexão com o servidor." },
-      ]);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Falha de conexão com o servidor.";
+      onMessagesChange([...history, { role: "assistant", content: `⚠️ ${msg}` }]);
     } finally {
       setLoading(false);
     }
@@ -179,6 +311,8 @@ export default function ChatView({ agent, messages, onMessagesChange }: ChatView
       sendMessage();
     }
   }
+
+  // ── render ────────────────────────────────────────────────────────────────
 
   const isEmpty = messages.length === 0;
   const lastIsEmptyAssistant =
@@ -221,42 +355,33 @@ export default function ChatView({ agent, messages, onMessagesChange }: ChatView
         </div>
       </div>
 
+      {/* ── input area ── */}
       <div className="px-4 pb-6">
         <div className="mx-auto w-full max-w-3xl space-y-2">
 
-          {/* Upload: single image (imagens agent) */}
+          {/* Gerador de Imagens: single image drop zone */}
           {uploadMode === "single-image" && (
             <div className="rounded-xl border border-white/15 bg-userbubble p-3">
-              <p className="mb-2 text-xs text-gray-400">Imagem do produto</p>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => handleImageChange(e, 1)}
-                className="cursor-pointer text-sm text-gray-300 file:mr-3 file:rounded-lg file:border-0 file:bg-white/10 file:px-3 file:py-1 file:text-xs file:text-white hover:file:bg-white/20"
+              <DropZone
+                label="Imagem do produto"
+                file={images[0]}
+                error={imageErrors[0]}
+                onFile={(f, err) => handleImageAt(0, f, err)}
               />
-              {uploadedImages[0] && (
-                <p className="mt-1 text-xs text-green-400">{uploadedImages[0].name} ✓</p>
-              )}
             </div>
           )}
 
-          {/* Upload: single image + price (copys agent) */}
+          {/* Gerador de Copys: single image + price */}
           {uploadMode === "single-image+price" && (
             <div className="rounded-xl border border-white/15 bg-userbubble p-3 space-y-3">
+              <DropZone
+                label="Imagem do produto"
+                file={images[0]}
+                error={imageErrors[0]}
+                onFile={(f, err) => handleImageAt(0, f, err)}
+              />
               <div>
-                <p className="mb-1 text-xs text-gray-400">Imagem do produto</p>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => handleImageChange(e, 1)}
-                  className="cursor-pointer text-sm text-gray-300 file:mr-3 file:rounded-lg file:border-0 file:bg-white/10 file:px-3 file:py-1 file:text-xs file:text-white hover:file:bg-white/20"
-                />
-                {uploadedImages[0] && (
-                  <p className="mt-1 text-xs text-green-400">{uploadedImages[0].name} ✓</p>
-                )}
-              </div>
-              <div>
-                <p className="mb-1 text-xs text-gray-400">Preço do produto</p>
+                <p className="mb-1.5 text-xs font-medium text-gray-400">Preço do produto</p>
                 <input
                   type="text"
                   value={price}
@@ -268,31 +393,22 @@ export default function ChatView({ agent, messages, onMessagesChange }: ChatView
             </div>
           )}
 
-          {/* Upload: 3 images + copys textarea (videos agent) */}
+          {/* Gerador de Vídeos: 3 image drop zones + copys textarea */}
           {uploadMode === "3images+copys" && (
             <div className="rounded-xl border border-white/15 bg-userbubble p-3 space-y-3">
-              <div>
-                <p className="mb-1 text-xs text-gray-400">
-                  3 imagens do produto
-                  <span className={`ml-2 ${uploadedImages.length === 3 ? "text-green-400" : "text-gray-500"}`}>
-                    {uploadedImages.length}/3
-                  </span>
-                </p>
-                <input
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={(e) => handleImageChange(e, 3)}
-                  className="cursor-pointer text-sm text-gray-300 file:mr-3 file:rounded-lg file:border-0 file:bg-white/10 file:px-3 file:py-1 file:text-xs file:text-white hover:file:bg-white/20"
-                />
-                {uploadedImages.length > 0 && (
-                  <p className="mt-1 text-xs text-gray-400">
-                    {uploadedImages.map((f) => f.name).join(", ")}
-                  </p>
-                )}
+              <div className="grid grid-cols-3 gap-2">
+                {([0, 1, 2] as const).map((i) => (
+                  <DropZone
+                    key={i}
+                    label={`Cena ${i + 1}`}
+                    file={images[i]}
+                    error={imageErrors[i]}
+                    onFile={(f, err) => handleImageAt(i, f, err)}
+                  />
+                ))}
               </div>
               <div>
-                <p className="mb-1 text-xs text-gray-400">3 copies / roteiros</p>
+                <p className="mb-1.5 text-xs font-medium text-gray-400">3 copies / roteiros</p>
                 <textarea
                   value={copysText}
                   onChange={(e) => setCopysText(e.target.value)}
@@ -304,7 +420,7 @@ export default function ChatView({ agent, messages, onMessagesChange }: ChatView
             </div>
           )}
 
-          {/* Text input for normal conversation */}
+          {/* Normal text input */}
           {uploadMode === "none" && (
             <div className="flex items-end gap-2 rounded-2xl border border-white/15 bg-userbubble p-2">
               <textarea
@@ -327,7 +443,7 @@ export default function ChatView({ agent, messages, onMessagesChange }: ChatView
             </div>
           )}
 
-          {/* Send button for upload modes */}
+          {/* Send button for all upload modes */}
           {uploadMode !== "none" && (
             <button
               onClick={sendMessage}
@@ -340,7 +456,9 @@ export default function ChatView({ agent, messages, onMessagesChange }: ChatView
         </div>
 
         <p className="mt-2 text-center text-xs text-gray-600">
-          {uploadMode === "none" ? "Enter envia · Shift+Enter quebra linha" : "Preencha todos os campos para enviar"}
+          {uploadMode === "none"
+            ? "Enter envia · Shift+Enter quebra linha"
+            : "Preencha todos os campos para enviar"}
         </p>
       </div>
     </div>
