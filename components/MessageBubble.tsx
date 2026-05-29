@@ -25,7 +25,6 @@ function CodeBlock({ content }: { content: string }) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }).catch(() => {
-      // fallback for environments without clipboard API
       const el = document.createElement("textarea");
       el.value = content.trim();
       document.body.appendChild(el);
@@ -38,25 +37,34 @@ function CodeBlock({ content }: { content: string }) {
   }
 
   return (
-    <div className="relative my-2">
-      <pre className="overflow-x-auto rounded-lg bg-black/40 p-3 pt-9 text-sm">
+    <div className="relative my-3 overflow-hidden rounded-xl border border-[#1f1f1f] bg-[#060606]">
+      {/* Top bar */}
+      <div className="flex items-center justify-between border-b border-[#1a1a1a] bg-[#0d0d0d] px-4 py-2">
+        <span className="text-[10px] font-medium uppercase tracking-widest text-[#3a3a3a]">
+          texto
+        </span>
+        <button
+          onClick={copy}
+          className={[
+            "rounded-md px-2.5 py-1 text-[11px] font-medium transition-all duration-150",
+            copied
+              ? "bg-emerald-500/15 text-emerald-400"
+              : "bg-[#1a1a1a] text-[#666666] hover:bg-[#242424] hover:text-[#aaaaaa]",
+          ].join(" ")}
+        >
+          {copied ? "Copiado! ✓" : "Copiar"}
+        </button>
+      </div>
+
+      {/* Code content */}
+      <pre className="overflow-x-auto p-4 text-[13px] font-mono leading-relaxed text-[#d4d4d4]">
         <code className="whitespace-pre-wrap break-words">{content.trim()}</code>
       </pre>
-      <button
-        onClick={copy}
-        className={`absolute right-2 top-2 rounded px-2.5 py-1 text-xs font-medium transition-all ${
-          copied
-            ? "bg-green-500/20 text-green-400"
-            : "bg-white/10 text-gray-400 hover:bg-white/20 hover:text-white"
-        }`}
-      >
-        {copied ? "Copiado! ✓" : "Copiar"}
-      </button>
     </div>
   );
 }
 
-// ─── markdown renderer ────────────────────────────────────────────────────────
+// ─── Markdown renderer ────────────────────────────────────────────────────────
 
 function renderContent(content: string) {
   const parts = content.split(/(```[\s\S]*?```)/g);
@@ -85,7 +93,11 @@ function renderInline(text: string) {
   const segments = text.split(/(\*\*[^*]+\*\*)/g);
   return segments.map((seg, i) => {
     if (seg.startsWith("**") && seg.endsWith("**")) {
-      return <strong key={i}>{seg.slice(2, -2)}</strong>;
+      return (
+        <strong key={i} className="font-semibold text-[#e8e8e8]">
+          {seg.slice(2, -2)}
+        </strong>
+      );
     }
     return <Fragment key={i}>{seg}</Fragment>;
   });
@@ -96,13 +108,19 @@ function renderInline(text: string) {
 export default function MessageBubble({ message }: { message: ChatMessage }) {
   const isUser = message.role === "user";
 
+  if (isUser) {
+    return (
+      <div className="flex justify-end">
+        <div className="max-w-[80%] rounded-2xl rounded-br-sm bg-user-bubble px-4 py-3 text-[14px] leading-relaxed text-white shadow-accent-sm">
+          {renderContent(message.content)}
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
-      <div
-        className={`max-w-[85%] rounded-2xl px-4 py-3 text-[15px] leading-relaxed ${
-          isUser ? "bg-userbubble text-white" : "bg-transparent text-gray-100"
-        }`}
-      >
+    <div className="flex justify-start">
+      <div className="max-w-[88%] text-[14px] leading-relaxed text-[#c8c8c8]">
         {renderContent(message.content)}
       </div>
     </div>

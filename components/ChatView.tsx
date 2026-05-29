@@ -37,7 +37,7 @@ async function fileToImageData(file: File): Promise<ImageData> {
   });
 }
 
-// ─── DropZone component ───────────────────────────────────────────────────────
+// ─── DropZone ─────────────────────────────────────────────────────────────────
 
 function DropZone({
   label,
@@ -57,17 +57,10 @@ function DropZone({
     onFile(f, validateImage(f));
   }
 
-  function onDragOver(e: React.DragEvent) {
-    e.preventDefault();
-    setDragging(true);
-  }
-  function onDragLeave(e: React.DragEvent) {
-    e.preventDefault();
-    setDragging(false);
-  }
+  function onDragOver(e: React.DragEvent) { e.preventDefault(); setDragging(true); }
+  function onDragLeave(e: React.DragEvent) { e.preventDefault(); setDragging(false); }
   function onDrop(e: React.DragEvent) {
-    e.preventDefault();
-    setDragging(false);
+    e.preventDefault(); setDragging(false);
     const f = e.dataTransfer.files[0];
     if (f) process(f);
   }
@@ -81,49 +74,45 @@ function DropZone({
 
   return (
     <div>
-      <p className="mb-1.5 text-xs font-medium text-gray-400">{label}</p>
+      <p className="mb-2 text-[11px] font-medium uppercase tracking-wider text-[#444444]">{label}</p>
       <div
         onDragOver={onDragOver}
         onDragLeave={onDragLeave}
         onDrop={onDrop}
         onClick={() => inputRef.current?.click()}
         className={[
-          "cursor-pointer select-none rounded-xl border-2 border-dashed p-4 text-center transition-all",
+          "cursor-pointer select-none rounded-xl border border-dashed p-5 text-center transition-all duration-200",
           dragging
-            ? "scale-[1.02] border-blue-400/70 bg-blue-500/10"
+            ? "scale-[1.02] border-violet-500/60 bg-violet-600/8 shadow-[0_0_20px_rgba(124,58,237,0.15)]"
             : isValid
-            ? "border-green-500/50 bg-green-500/5"
+            ? "border-emerald-500/35 bg-emerald-600/5"
             : error
-            ? "border-red-400/50 bg-red-500/5"
-            : "border-white/20 bg-white/5 hover:border-white/35",
+            ? "border-red-500/35 bg-red-600/5"
+            : "border-[#242424] bg-[#0f0f0f] hover:border-violet-600/30 hover:bg-violet-600/4",
         ].join(" ")}
       >
-        <input
-          ref={inputRef}
-          type="file"
-          accept={ACCEPTED_EXT}
-          className="hidden"
-          onChange={onChange}
-        />
+        <input ref={inputRef} type="file" accept={ACCEPTED_EXT} className="hidden" onChange={onChange} />
+
         {dragging ? (
-          <p className="text-sm text-blue-300">Solte aqui...</p>
+          <p className="text-sm text-violet-300">Solte aqui...</p>
         ) : isValid ? (
-          <div className="space-y-0.5">
-            <p className="truncate text-sm font-medium text-green-400">✓ {file!.name}</p>
-            <p className="text-xs text-gray-500">{formatSize(file!.size)}</p>
+          <div className="space-y-1">
+            <p className="truncate text-[13px] font-medium text-emerald-400">✓ {file!.name}</p>
+            <p className="text-[11px] text-[#444444]">{formatSize(file!.size)}</p>
           </div>
         ) : (
-          <div className="space-y-1">
-            <p className="text-sm text-gray-300">
-              Arraste ou <span className="underline">escolha imagem</span>
+          <div className="space-y-1.5">
+            <div className="mx-auto mb-2 flex h-8 w-8 items-center justify-center rounded-lg bg-[#1a1a1a] text-[#3a3a3a]">
+              ↑
+            </div>
+            <p className="text-[13px] text-[#555555]">
+              Arraste ou <span className="text-[#888888] underline decoration-dotted">escolha</span>
             </p>
-            <p className="text-xs text-gray-600">
-              JPG · PNG · GIF · WebP · máx {MAX_MB} MB
-            </p>
+            <p className="text-[11px] text-[#333333]">JPG · PNG · GIF · WebP · máx {MAX_MB} MB</p>
           </div>
         )}
       </div>
-      {error && <p className="mt-1 text-xs text-red-400">{error}</p>}
+      {error && <p className="mt-1.5 text-[11px] text-red-400">{error}</p>}
     </div>
   );
 }
@@ -147,6 +136,7 @@ export default function ChatView({ agent, messages, onMessagesChange }: ChatView
   const [imageErrors, setImageErrors] = useState<(string | null)[]>([null, null, null]);
   const [price, setPrice] = useState("");
   const [copysText, setCopysText] = useState("");
+  const [inputFocused, setInputFocused] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -171,51 +161,42 @@ export default function ChatView({ agent, messages, onMessagesChange }: ChatView
     setImageErrors((prev) => { const n = [...prev]; n[index] = error; return n; });
   }
 
-  // ── upload mode detection ──────────────────────────────────────────────────
+  // ── upload mode ───────────────────────────────────────────────────────────
 
   function detectUploadMode(): UploadMode {
-    // Videos: upload always visible
     if (agent.id === "videos") return "3images+copys";
-
-    // imagens / copys: show upload only before the first message is sent
     if (messages.length === 0) {
       if (agent.id === "imagens") return "single-image";
       if (agent.id === "copys") return "single-image+price";
     }
-
-    // After first send, switch to text input for format Q&A
     return "none";
   }
 
   const uploadMode = detectUploadMode();
   const validImages = images.filter((f, i) => f !== null && imageErrors[i] === null) as File[];
 
-  // ── can send ──────────────────────────────────────────────────────────────
+  // ── can send ─────────────────────────────────────────────────────────────
 
   function canSend(): boolean {
     if (loading) return false;
     if (uploadMode === "single-image") return validImages.length >= 1;
-    if (uploadMode === "single-image+price")
-      return validImages.length >= 1 && price.trim().length > 0;
-    if (uploadMode === "3images+copys")
-      return validImages.length === 3 && copysText.trim().length > 0;
+    if (uploadMode === "single-image+price") return validImages.length >= 1 && price.trim().length > 0;
+    if (uploadMode === "3images+copys") return validImages.length === 3 && copysText.trim().length > 0;
     return input.trim().length > 0;
   }
 
-  // ── send ──────────────────────────────────────────────────────────────────
+  // ── send ─────────────────────────────────────────────────────────────────
 
   async function sendMessage() {
     if (!canSend()) return;
 
-    const imagesToSend =
-      uploadMode === "3images+copys" ? validImages : validImages.slice(0, 1);
+    const imagesToSend = uploadMode === "3images+copys" ? validImages : validImages.slice(0, 1);
 
     let imageData: ImageData[] = [];
     try {
-      imageData =
-        imagesToSend.length > 0
-          ? await Promise.all(imagesToSend.map(fileToImageData))
-          : [];
+      imageData = imagesToSend.length > 0
+        ? await Promise.all(imagesToSend.map(fileToImageData))
+        : [];
     } catch {
       onMessagesChange([
         ...messages,
@@ -251,8 +232,7 @@ export default function ChatView({ agent, messages, onMessagesChange }: ChatView
     resetUpload();
     setLoading(true);
 
-    const withPlaceholder: ChatMessage[] = [...history, { role: "assistant", content: "" }];
-    onMessagesChange(withPlaceholder);
+    onMessagesChange([...history, { role: "assistant", content: "" }]);
 
     try {
       const res = await fetch("/api/chat", {
@@ -296,42 +276,53 @@ export default function ChatView({ agent, messages, onMessagesChange }: ChatView
     }
   }
 
-  // ── render ────────────────────────────────────────────────────────────────
-
   const isEmpty = messages.length === 0;
   const lastIsEmptyAssistant =
     messages.length > 0 &&
     messages[messages.length - 1].role === "assistant" &&
     messages[messages.length - 1].content === "";
 
+  // ── render ────────────────────────────────────────────────────────────────
+
   return (
-    <div className="flex h-full flex-1 flex-col bg-chatbg">
-      <header className="flex items-center gap-3 border-b border-white/10 px-6 py-4">
-        <span className="text-2xl">{agent.icon}</span>
+    <div className="flex h-full flex-1 flex-col bg-[#0a0a0a]">
+
+      {/* Header */}
+      <header className="flex items-center gap-3 border-b border-[#141414] bg-[#0a0a0a]/80 px-6 py-4 backdrop-blur-sm">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-violet-600/12 text-xl shadow-[0_0_12px_rgba(124,58,237,0.18)]">
+          {agent.icon}
+        </div>
         <div>
-          <h2 className="text-base font-semibold text-gray-100">{agent.name}</h2>
-          <p className="text-xs text-gray-500">{agent.description}</p>
+          <h2 className="text-[14px] font-semibold tracking-tight text-[#f0f0f0]">{agent.name}</h2>
+          <p className="text-[11px] text-[#3d3d3d]">{agent.description}</p>
         </div>
       </header>
 
+      {/* Messages */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto">
-        <div className="mx-auto w-full max-w-3xl px-4 py-6">
+        <div className="mx-auto w-full max-w-2xl px-5 py-8">
           {isEmpty ? (
-            <div className="mt-20 text-center">
-              <div className="mb-4 text-5xl">{agent.icon}</div>
-              <h3 className="mb-3 text-xl font-semibold text-gray-200">{agent.name}</h3>
-              <p className="mx-auto max-w-md text-sm text-gray-400">{agent.greeting}</p>
+            <div className="mt-16 text-center">
+              <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-violet-600/10 text-3xl shadow-[0_0_24px_rgba(124,58,237,0.15)]">
+                {agent.icon}
+              </div>
+              <h3 className="mb-2 text-lg font-semibold tracking-tight text-[#e8e8e8]">
+                {agent.name}
+              </h3>
+              <p className="mx-auto max-w-sm text-[13px] leading-relaxed text-[#444444]">
+                {agent.greeting}
+              </p>
             </div>
           ) : (
-            <div className="space-y-5">
+            <div className="space-y-6">
               {messages.map((m, i) => (
                 <MessageBubble key={i} message={m} />
               ))}
               {lastIsEmptyAssistant && (
-                <div className="flex gap-1 px-4">
-                  <span className="typing-dot h-2 w-2 rounded-full bg-gray-400" />
-                  <span className="typing-dot h-2 w-2 rounded-full bg-gray-400" />
-                  <span className="typing-dot h-2 w-2 rounded-full bg-gray-400" />
+                <div className="flex items-center gap-1.5 px-1">
+                  <span className="typing-dot h-1.5 w-1.5 rounded-full bg-[#555555]" />
+                  <span className="typing-dot h-1.5 w-1.5 rounded-full bg-[#555555]" />
+                  <span className="typing-dot h-1.5 w-1.5 rounded-full bg-[#555555]" />
                 </div>
               )}
             </div>
@@ -339,13 +330,13 @@ export default function ChatView({ agent, messages, onMessagesChange }: ChatView
         </div>
       </div>
 
-      {/* ── input area ── */}
-      <div className="px-4 pb-6">
-        <div className="mx-auto w-full max-w-3xl space-y-2">
+      {/* Input area */}
+      <div className="px-5 pb-6 pt-2">
+        <div className="mx-auto w-full max-w-2xl space-y-2">
 
-          {/* Gerador de Imagens: single image drop zone */}
+          {/* ── single image (imagens) ── */}
           {uploadMode === "single-image" && (
-            <div className="rounded-xl border border-white/15 bg-userbubble p-3">
+            <div className="rounded-2xl border border-[#1e1e1e] bg-[#0f0f0f] p-4">
               <DropZone
                 label="Imagem do produto"
                 file={images[0]}
@@ -355,9 +346,9 @@ export default function ChatView({ agent, messages, onMessagesChange }: ChatView
             </div>
           )}
 
-          {/* Gerador de Copys: single image + price */}
+          {/* ── single image + price (copys) ── */}
           {uploadMode === "single-image+price" && (
-            <div className="rounded-xl border border-white/15 bg-userbubble p-3 space-y-3">
+            <div className="rounded-2xl border border-[#1e1e1e] bg-[#0f0f0f] p-4 space-y-4">
               <DropZone
                 label="Imagem do produto"
                 file={images[0]}
@@ -365,22 +356,24 @@ export default function ChatView({ agent, messages, onMessagesChange }: ChatView
                 onFile={(f, err) => handleImageAt(0, f, err)}
               />
               <div>
-                <p className="mb-1.5 text-xs font-medium text-gray-400">Preço do produto</p>
+                <p className="mb-2 text-[11px] font-medium uppercase tracking-wider text-[#444444]">
+                  Preço
+                </p>
                 <input
                   type="text"
                   value={price}
                   onChange={(e) => setPrice(e.target.value)}
                   placeholder="Ex: R$ 89,90"
-                  className="w-full rounded-lg border border-white/15 bg-transparent px-3 py-2 text-sm text-gray-100 placeholder-gray-500 focus:border-white/30 focus:outline-none"
+                  className="w-full rounded-xl border border-[#1f1f1f] bg-[#0a0a0a] px-3.5 py-2.5 text-[13px] text-[#e0e0e0] placeholder-[#333333] outline-none transition-colors focus:border-violet-600/40 focus:ring-1 focus:ring-violet-600/20"
                 />
               </div>
             </div>
           )}
 
-          {/* Gerador de Vídeos: 3 image drop zones + copys textarea */}
+          {/* ── 3 images + copys (videos) ── */}
           {uploadMode === "3images+copys" && (
-            <div className="rounded-xl border border-white/15 bg-userbubble p-3 space-y-3">
-              <div className="grid grid-cols-3 gap-2">
+            <div className="rounded-2xl border border-[#1e1e1e] bg-[#0f0f0f] p-4 space-y-4">
+              <div className="grid grid-cols-3 gap-3">
                 {([0, 1, 2] as const).map((i) => (
                   <DropZone
                     key={i}
@@ -392,34 +385,50 @@ export default function ChatView({ agent, messages, onMessagesChange }: ChatView
                 ))}
               </div>
               <div>
-                <p className="mb-1.5 text-xs font-medium text-gray-400">3 copies / roteiros</p>
+                <p className="mb-2 text-[11px] font-medium uppercase tracking-wider text-[#444444]">
+                  Copies / Roteiros
+                </p>
                 <textarea
                   value={copysText}
                   onChange={(e) => setCopysText(e.target.value)}
                   placeholder="Cole aqui os 3 copies ou roteiros..."
                   rows={5}
-                  className="w-full resize-none rounded-lg border border-white/15 bg-transparent px-3 py-2 text-sm text-gray-100 placeholder-gray-500 focus:border-white/30 focus:outline-none"
+                  className="w-full resize-none rounded-xl border border-[#1f1f1f] bg-[#0a0a0a] px-3.5 py-3 text-[13px] leading-relaxed text-[#e0e0e0] placeholder-[#333333] outline-none transition-colors focus:border-violet-600/40 focus:ring-1 focus:ring-violet-600/20"
                 />
               </div>
             </div>
           )}
 
-          {/* Normal text input */}
+          {/* ── text input for format Q&A ── */}
           {uploadMode === "none" && (
-            <div className="flex items-end gap-2 rounded-2xl border border-white/15 bg-userbubble p-2">
+            <div
+              className={[
+                "flex items-end gap-2 rounded-2xl border bg-[#0f0f0f] p-2 transition-all duration-200",
+                inputFocused
+                  ? "border-violet-600/30 shadow-[0_0_0_1px_rgba(124,58,237,0.12)]"
+                  : "border-[#1e1e1e]",
+              ].join(" ")}
+            >
               <textarea
                 ref={textareaRef}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
+                onFocus={() => setInputFocused(true)}
+                onBlur={() => setInputFocused(false)}
                 rows={1}
                 placeholder={agent.placeholder}
-                className="max-h-40 flex-1 resize-none bg-transparent px-3 py-2 text-[15px] text-gray-100 placeholder-gray-500 focus:outline-none"
+                className="max-h-40 flex-1 resize-none bg-transparent px-3 py-2 text-[14px] leading-relaxed text-[#e0e0e0] placeholder-[#333333] focus:outline-none"
               />
               <button
                 onClick={sendMessage}
                 disabled={!canSend()}
-                className="mb-0.5 mr-0.5 flex h-9 w-9 items-center justify-center rounded-lg bg-white text-black transition-opacity disabled:opacity-30"
+                className={[
+                  "mb-0.5 mr-0.5 flex h-8 w-8 items-center justify-center rounded-xl transition-all duration-200",
+                  canSend()
+                    ? "bg-user-bubble text-white shadow-accent-sm hover:opacity-90 hover:scale-105"
+                    : "bg-[#1a1a1a] text-[#333333] cursor-not-allowed",
+                ].join(" ")}
                 aria-label="Enviar"
               >
                 ↑
@@ -427,19 +436,24 @@ export default function ChatView({ agent, messages, onMessagesChange }: ChatView
             </div>
           )}
 
-          {/* Send button for all upload modes */}
+          {/* ── send button for upload modes ── */}
           {uploadMode !== "none" && (
             <button
               onClick={sendMessage}
               disabled={!canSend()}
-              className="w-full rounded-xl bg-white py-2.5 text-sm font-medium text-black transition-opacity disabled:opacity-30"
+              className={[
+                "w-full rounded-xl py-3 text-[13px] font-semibold tracking-wide transition-all duration-200",
+                canSend()
+                  ? "bg-user-bubble text-white shadow-accent-sm hover:opacity-90 hover:shadow-accent-md"
+                  : "cursor-not-allowed bg-[#141414] text-[#333333]",
+              ].join(" ")}
             >
               Enviar
             </button>
           )}
         </div>
 
-        <p className="mt-2 text-center text-xs text-gray-600">
+        <p className="mt-2.5 text-center text-[11px] text-[#2a2a2a]">
           {uploadMode === "none"
             ? "Enter envia · Shift+Enter quebra linha"
             : "Preencha todos os campos para enviar"}

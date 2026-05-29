@@ -8,39 +8,40 @@ body {
 }
 
 body {
-  background-color: #212121;
-  color: #ececec;
+  background-color: #0a0a0a;
+  color: #f2f2f2;
+  font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* Scrollbar discreta no estilo ChatGPT */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-::-webkit-scrollbar-thumb {
-  background-color: #4a4a4a;
-  border-radius: 4px;
-}
-::-webkit-scrollbar-track {
-  background-color: transparent;
-}
+/* ── Premium thin scrollbar ─────────────────────────────────────────────────── */
+::-webkit-scrollbar          { width: 3px; height: 3px; }
+::-webkit-scrollbar-thumb    { background: #2a2a2a; border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: #3a3a3a; }
+::-webkit-scrollbar-track    { background: transparent; }
 
-/* Animação de digitação */
+/* ── Typing dots ─────────────────────────────────────────────────────────────── */
 @keyframes blink {
-  0%,
-  100% {
-    opacity: 0.2;
-  }
-  50% {
-    opacity: 1;
-  }
+  0%, 100% { opacity: 0.15; transform: scale(0.85); }
+  50%       { opacity: 0.75; transform: scale(1); }
 }
 .typing-dot {
-  animation: blink 1.2s infinite;
+  animation: blink 1.4s ease-in-out infinite;
 }
-.typing-dot:nth-child(2) {
-  animation-delay: 0.2s;
+.typing-dot:nth-child(2) { animation-delay: 0.18s; }
+.typing-dot:nth-child(3) { animation-delay: 0.36s; }
+
+/* ── Accent glow pulse (used on active icons) ────────────────────────────────── */
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 8px  rgba(124,58,237,0.18); }
+  50%       { box-shadow: 0 0 18px rgba(124,58,237,0.32); }
 }
-.typing-dot:nth-child(3) {
-  animation-delay: 0.4s;
+.accent-glow-pulse { animation: glow-pulse 3s ease-in-out infinite; }
+
+/* ── Gradient border utility ─────────────────────────────────────────────────── */
+.gradient-border {
+  background:
+    linear-gradient(#141414, #141414) padding-box,
+    linear-gradient(135deg, rgba(124,58,237,0.35), #242424 50%, rgba(124,58,237,0.15)) border-box;
+  border: 1px solid transparent;
 }
