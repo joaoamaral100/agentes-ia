@@ -16,6 +16,7 @@ const emptyState: ChatState = AGENTS.reduce((acc, a) => {
 export default function Home() {
   const [activeAgent, setActiveAgent] = useState<AgentId>("imagens");
   const [chats, setChats] = useState<ChatState>(emptyState);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const agent = getAgent(activeAgent)!;
 
@@ -27,18 +28,26 @@ export default function Home() {
     updateMessages(id, []);
   }
 
+  function handleSelect(id: AgentId) {
+    setActiveAgent(id);
+    setSidebarOpen(false);
+  }
+
   return (
     <main className="flex h-screen w-screen overflow-hidden">
       <Sidebar
         activeAgent={activeAgent}
-        onSelect={setActiveAgent}
-        onNewChat={handleNewChat}
+        onSelect={handleSelect}
+        onNewChat={(id) => { handleNewChat(id); setSidebarOpen(false); }}
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
       />
       <ChatView
         key={activeAgent}
         agent={agent}
         messages={chats[activeAgent]}
         onMessagesChange={(msgs) => updateMessages(activeAgent, msgs)}
+        onMenuClick={() => setSidebarOpen(true)}
       />
     </main>
   );

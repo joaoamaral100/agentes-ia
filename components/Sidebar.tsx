@@ -80,17 +80,42 @@ function AgentIcon({ id, size = 20, style }: { id: string; size?: number; style?
 
 // ─── Sidebar ──────────────────────────────────────────────────────────────────
 
+function CloseIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <line x1="18" y1="6" x2="6" y2="18" />
+      <line x1="6" y1="6" x2="18" y2="18" />
+    </svg>
+  );
+}
+
 interface SidebarProps {
   activeAgent: AgentId;
   onSelect: (id: AgentId) => void;
   onNewChat: (id: AgentId) => void;
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
-export default function Sidebar({ activeAgent, onSelect, onNewChat }: SidebarProps) {
+export default function Sidebar({ activeAgent, onSelect, onNewChat, isOpen = false, onClose }: SidebarProps) {
 
   return (
+    <>
+      {/* Mobile backdrop */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm md:hidden"
+          onClick={onClose}
+        />
+      )}
+
     <aside
-      className="dot-grid relative flex h-full w-60 shrink-0 flex-col"
+      className={[
+        "dot-grid flex h-full flex-col",
+        "fixed inset-y-0 left-0 z-50 w-[280px] transition-transform duration-300 ease-in-out",
+        isOpen ? "translate-x-0" : "-translate-x-full",
+        "md:relative md:w-60 md:shrink-0 md:translate-x-0",
+      ].join(" ")}
       style={{
         background: "rgba(0, 8, 20, 0.95)",
         backdropFilter: "blur(20px)",
@@ -99,8 +124,16 @@ export default function Sidebar({ activeAgent, onSelect, onNewChat }: SidebarPro
       }}
     >
       {/* Brand */}
-      <div className="px-5 py-5">
+      <div className="flex items-center justify-between px-5 py-5">
         <JarvisLogo />
+        {/* X button — mobile only */}
+        <button
+          onClick={onClose}
+          className="flex h-8 w-8 items-center justify-center rounded-lg md:hidden"
+          style={{ color: "#4a9ebb" }}
+        >
+          <CloseIcon />
+        </button>
       </div>
 
       <div
@@ -234,5 +267,6 @@ export default function Sidebar({ activeAgent, onSelect, onNewChat }: SidebarPro
         </button>
       </div>
     </aside>
+    </>
   );
 }

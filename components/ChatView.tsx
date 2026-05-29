@@ -59,6 +59,16 @@ function UploadIcon({ size = 18, style }: { size?: number; style?: React.CSSProp
     </svg>
   );
 }
+function HamburgerIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <line x1="3" y1="6"  x2="21" y2="6" />
+      <line x1="3" y1="12" x2="21" y2="12" />
+      <line x1="3" y1="18" x2="21" y2="18" />
+    </svg>
+  );
+}
+
 function SendIcon({ size = 18, style }: { size?: number; style?: React.CSSProperties }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={style}>
@@ -106,9 +116,10 @@ interface ChatViewProps {
   agent: Agent;
   messages: ChatMessage[];
   onMessagesChange: (messages: ChatMessage[]) => void;
+  onMenuClick?: () => void;
 }
 
-export default function ChatView({ agent, messages, onMessagesChange }: ChatViewProps) {
+export default function ChatView({ agent, messages, onMessagesChange, onMenuClick }: ChatViewProps) {
   const [input, setInput]               = useState("");
   const [loading, setLoading]           = useState(false);
   const [attachedImages, setAttached]   = useState<File[]>([]);
@@ -292,7 +303,7 @@ export default function ChatView({ agent, messages, onMessagesChange }: ChatView
 
       {/* Header */}
       <header
-        className="flex items-center gap-3 px-6 py-4"
+        className="flex items-center gap-3 px-4 py-4 md:px-6"
         style={{
           background: "rgba(0,8,20,0.9)",
           backdropFilter: "blur(20px)",
@@ -300,8 +311,18 @@ export default function ChatView({ agent, messages, onMessagesChange }: ChatView
           borderBottom: "1px solid rgba(0,212,255,0.15)",
         }}
       >
+        {/* Hamburger — mobile only */}
+        <button
+          onClick={onMenuClick}
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg md:hidden"
+          style={{ color: "#4a9ebb" }}
+        >
+          <HamburgerIcon />
+        </button>
+
+        {/* Agent icon — desktop only */}
         <div
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl glow-pulse-anim"
+          className="hidden h-9 w-9 shrink-0 items-center justify-center rounded-xl glow-pulse-anim md:flex"
           style={{
             background: "rgba(0,212,255,0.1)",
             border: "1px solid rgba(0,212,255,0.3)",
@@ -309,10 +330,9 @@ export default function ChatView({ agent, messages, onMessagesChange }: ChatView
         >
           <AgentIcon id={agent.id} size={18} style={{ color: "#00d4ff" }} />
         </div>
+
         <div>
-          <h2
-            className="text-[14px] font-semibold tracking-tight gradient-text"
-          >
+          <h2 className="text-[14px] font-semibold tracking-tight gradient-text">
             {agent.name}
           </h2>
           <p className="text-[11px]" style={{ color: "#4a9ebb" }}>{agent.description}</p>
