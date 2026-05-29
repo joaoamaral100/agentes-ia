@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { AGENTS, AgentId } from "@/lib/agents";
 
 // ─── SVG icons ────────────────────────────────────────────────────────────────
@@ -46,6 +45,18 @@ function PlusIcon() {
   );
 }
 
+function BextLogo() {
+  return (
+    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path
+        d="M20 4L8 16L14 16L12 28L24 16L18 16L20 4Z"
+        fill="#00d4ff"
+        style={{ filter: "drop-shadow(0 0 6px rgba(0,212,255,0.8))" }}
+      />
+    </svg>
+  );
+}
+
 function AgentIcon({ id, size = 20, style }: { id: string; size?: number; style?: React.CSSProperties }) {
   if (id === "imagens") return <CameraIcon size={size} style={style} />;
   if (id === "copys")   return <CopyIcon   size={size} style={style} />;
@@ -61,7 +72,6 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ activeAgent, onSelect, onNewChat }: SidebarProps) {
-  const [logoError, setLogoError] = useState(false);
 
   return (
     <aside
@@ -76,30 +86,7 @@ export default function Sidebar({ activeAgent, onSelect, onNewChat }: SidebarPro
       {/* Brand */}
       <div className="px-5 py-5">
         <div className="flex items-center gap-3">
-          {!logoError ? (
-            <img
-              src="/logo.jpg"
-              alt="BEXT"
-              onError={() => setLogoError(true)}
-              style={{
-                width: 36,
-                height: 36,
-                objectFit: "contain",
-                filter: "brightness(0) invert(1) drop-shadow(0 0 6px rgba(0, 212, 255, 0.6))",
-              }}
-            />
-          ) : (
-            <span
-              style={{
-                color: "#00d4ff",
-                fontWeight: 700,
-                fontSize: 20,
-                textShadow: "0 0 10px rgba(0,212,255,0.8)",
-              }}
-            >
-              B
-            </span>
-          )}
+          <BextLogo />
           <p
             className="text-sm font-bold"
             style={{
