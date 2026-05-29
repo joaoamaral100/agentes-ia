@@ -78,12 +78,13 @@ export default function Sidebar({ activeAgent, onSelect, onNewChat }: SidebarPro
           <img
             src="/logo.png"
             alt="BEXT"
+            width={36}
+            height={36}
             style={{
-              width: 36,
-              height: 36,
               objectFit: "contain",
-              filter: "invert(1) sepia(1) saturate(3) hue-rotate(175deg) brightness(1.5) drop-shadow(0 0 8px rgba(0, 212, 255, 0.7))",
+              filter: "brightness(0) saturate(100%) invert(72%) sepia(98%) saturate(400%) hue-rotate(155deg) brightness(100%)",
             }}
+            onError={(e) => { e.currentTarget.style.display = "none"; }}
           />
           <p
             className="text-sm font-bold"
