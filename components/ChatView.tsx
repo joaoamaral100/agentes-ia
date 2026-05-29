@@ -4,299 +4,171 @@ import { useEffect, useRef, useState } from "react";
 import { Agent } from "@/lib/agents";
 import MessageBubble, { ChatMessage, ImageData } from "./MessageBubble";
 
-// ─── per-agent themes ─────────────────────────────────────────────────────────
-
-const HEADER_THEMES = {
-  imagens: { glow: "rgba(139,92,246,0.25)", bg: "rgba(139,92,246,0.12)" },
-  copys:   { glow: "rgba(251,146,60,0.25)",  bg: "rgba(251,146,60,0.12)"  },
-  videos:  { glow: "rgba(6,182,212,0.25)",   bg: "rgba(6,182,212,0.12)"  },
-} as const;
-
-const AGENT_TIPS = {
-  imagens: [
-    { icon: "⚡", text: "Envie formatos + imagem juntos" },
-    { icon: "🎯", text: "Use referência de cenário" },
-    { icon: "✨", text: "3 cenas por geração" },
-  ],
-  copys: [
-    { icon: "🛒", text: "TikTok Shopping optimized" },
-    { icon: "📝", text: "2 formatos por resposta" },
-    { icon: "⚡", text: "Envie tudo de uma vez" },
-  ],
-  videos: [
-    { icon: "🎬", text: "3 imagens + 3 copies" },
-    { icon: "🎥", text: "Sora · Runway · Kling · Veo" },
-    { icon: "✨", text: "Prompts 9:16 para TikTok" },
-  ],
-} as const;
-
-// ─── constants ───────────────────────────────────────────────────────────────
-
+// ─── constants ────────────────────────────────────────────────────────────────
 const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"];
 const ACCEPTED_EXT   = ".jpg,.jpeg,.png,.gif,.webp";
 const MAX_MB         = 10;
-
-// ─── helpers ─────────────────────────────────────────────────────────────────
 
 function formatSize(bytes: number) {
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
-
 function validateImage(file: File): string | null {
-  if (!ACCEPTED_TYPES.includes(file.type)) return "Formato inválido. Use JPG, PNG, GIF ou WebP.";
-  if (file.size > MAX_MB * 1024 * 1024) return `Imagem muito grande. Máximo ${MAX_MB} MB.`;
+  if (!ACCEPTED_TYPES.includes(file.type)) return "Formato inválido.";
+  if (file.size > MAX_MB * 1024 * 1024) return `Máximo ${MAX_MB} MB.`;
   return null;
 }
-
 async function fileToImageData(file: File): Promise<ImageData> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => {
-      const result = reader.result as string;
-      resolve({ base64: result.split(",")[1], mediaType: file.type, name: file.name });
+      const r = reader.result as string;
+      resolve({ base64: r.split(",")[1], mediaType: file.type, name: file.name });
     };
     reader.onerror = reject;
     reader.readAsDataURL(file);
   });
 }
 
-// ─── DropZone ─────────────────────────────────────────────────────────────────
-
-function DropZone({
-  label,
-  file,
-  error,
-  onFile,
-}: {
-  label: string;
-  file: File | null;
-  error: string | null;
-  onFile: (file: File, error: string | null) => void;
-}) {
-  const [dragging, setDragging] = useState(false);
-  const [preview, setPreview]   = useState<string | null>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
-
-  function process(f: File) {
-    const err = validateImage(f);
-    onFile(f, err);
-    if (!err) {
-      const url = URL.createObjectURL(f);
-      setPreview(url);
-    } else {
-      setPreview(null);
-    }
-  }
-
-  function onDragOver(e: React.DragEvent) { e.preventDefault(); setDragging(true); }
-  function onDragLeave(e: React.DragEvent) { e.preventDefault(); setDragging(false); }
-  function onDrop(e: React.DragEvent) {
-    e.preventDefault(); setDragging(false);
-    const f = e.dataTransfer.files[0];
-    if (f) process(f);
-  }
-  function onChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const f = e.target.files?.[0];
-    if (f) process(f);
-    e.target.value = "";
-  }
-
-  const isValid = file !== null && error === null;
-
-  const inner = (
-    <div
-      onClick={() => inputRef.current?.click()}
-      className={[
-        "cursor-pointer select-none rounded-xl p-4 text-center transition-all duration-200",
-        isValid
-          ? "bg-emerald-950/30"
-          : error
-          ? "bg-red-950/20"
-          : dragging
-          ? "bg-violet-950/20"
-          : "bg-[#0d0d0d] hover:bg-[#111]",
-      ].join(" ")}
-    >
-      <input ref={inputRef} type="file" accept={ACCEPTED_EXT} className="hidden" onChange={onChange} />
-
-      {dragging ? (
-        <p className="py-2 text-sm font-medium text-violet-300">Solte aqui...</p>
-      ) : isValid && preview ? (
-        <div className="space-y-1.5">
-          <div className="relative mx-auto w-fit">
-            <img
-              src={preview}
-              alt={file!.name}
-              className="mx-auto max-h-24 max-w-full rounded-lg object-cover opacity-90"
-            />
-            <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-emerald-500/20">
-              <span className="text-lg">✓</span>
-            </div>
-          </div>
-          <p className="truncate text-[12px] font-medium text-emerald-400">{file!.name}</p>
-          <p className="text-[11px] text-[#3a3a3a]">{formatSize(file!.size)}</p>
-        </div>
-      ) : (
-        <div className="space-y-2 py-1">
-          <div className="mx-auto flex h-8 w-8 items-center justify-center rounded-lg bg-[#1a1a1a] text-[#333]">
-            ↑
-          </div>
-          <p className="text-[13px] text-[#4a4a4a]">
-            Arraste ou <span className="text-[#666] underline decoration-dotted">escolha</span>
-          </p>
-          <p className="text-[11px] text-[#2a2a2a]">JPG · PNG · GIF · WebP · máx {MAX_MB} MB</p>
-        </div>
-      )}
-    </div>
-  );
-
-  return (
-    <div
-      onDragOver={onDragOver}
-      onDragLeave={onDragLeave}
-      onDrop={onDrop}
-    >
-      <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-[#333]">{label}</p>
-
-      {/* Rotating gradient border when dragging */}
-      {dragging ? (
-        <div className="dropzone-spin-wrapper">
-          <div className="dropzone-spin-inner">{inner}</div>
-        </div>
-      ) : (
-        <div
-          className={[
-            "rounded-xl border transition-all duration-200",
-            isValid
-              ? "border-emerald-500/30"
-              : error
-              ? "border-red-500/30"
-              : "border-[#1e1e1e] hover:border-violet-600/30",
-          ].join(" ")}
-        >
-          {inner}
-        </div>
-      )}
-
-      {error && <p className="mt-1.5 text-[11px] text-red-400">{error}</p>}
-    </div>
-  );
+// ─── max images per agent ─────────────────────────────────────────────────────
+function maxImages(agentId: string) {
+  if (agentId === "videos")  return 3;
+  if (agentId === "imagens") return 2;
+  return 1;
 }
 
-// ─── types ───────────────────────────────────────────────────────────────────
-
-type UploadMode = "none" | "single-image" | "single-image+price" | "3images+copys";
-
+// ─── ChatView ─────────────────────────────────────────────────────────────────
 interface ChatViewProps {
   agent: Agent;
   messages: ChatMessage[];
   onMessagesChange: (messages: ChatMessage[]) => void;
 }
 
-// ─── ChatView ─────────────────────────────────────────────────────────────────
-
 export default function ChatView({ agent, messages, onMessagesChange }: ChatViewProps) {
   const [input, setInput]               = useState("");
   const [loading, setLoading]           = useState(false);
-  const [images, setImages]             = useState<(File | null)[]>([null, null, null]);
-  const [imageErrors, setImageErrors]   = useState<(string | null)[]>([null, null, null]);
+  const [attachedImages, setAttached]   = useState<File[]>([]);
+  const [previews, setPreviews]         = useState<string[]>([]);
   const [price, setPrice]               = useState("");
   const [copysText, setCopysText]       = useState("");
   const [inputFocused, setInputFocused] = useState(false);
   const [listening, setListening]       = useState(false);
+  const [chatDragOver, setDragOver]     = useState(false);
+
   const scrollRef   = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const recRef      = useRef<any>(null);
 
+  // ── scroll ────────────────────────────────────────────────────────────────
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, loading]);
 
+  // ── reset on agent switch ─────────────────────────────────────────────────
   useEffect(() => {
-    resetUpload();
-    setInput("");
+    previews.forEach(u => URL.revokeObjectURL(u));
+    setAttached([]); setPreviews([]);
+    setInput(""); setPrice(""); setCopysText("");
   }, [agent.id]);
 
-  function resetUpload() {
-    setImages([null, null, null]);
-    setImageErrors([null, null, null]);
-    setPrice("");
-    setCopysText("");
+  // ── revoke previews on unmount ────────────────────────────────────────────
+  useEffect(() => () => { previews.forEach(u => URL.revokeObjectURL(u)); }, []);
+
+  // ── image management ──────────────────────────────────────────────────────
+  function addImages(files: File[]) {
+    const max   = maxImages(agent.id);
+    const valid = files.filter(f => validateImage(f) === null);
+    setAttached(prev => [...prev, ...valid].slice(0, max));
+    setPreviews(prev => {
+      const urls = valid.map(f => URL.createObjectURL(f));
+      return [...prev, ...urls].slice(0, max);
+    });
   }
 
-  function handleImageAt(index: number, file: File, error: string | null) {
-    setImages((p) => { const n = [...p]; n[index] = file; return n; });
-    setImageErrors((p) => { const n = [...p]; n[index] = error; return n; });
+  function removeImage(i: number) {
+    URL.revokeObjectURL(previews[i]);
+    setAttached(prev => prev.filter((_, idx) => idx !== i));
+    setPreviews(prev => prev.filter((_, idx) => idx !== i));
   }
 
-  // ── upload mode ───────────────────────────────────────────────────────────
-
-  function detectUploadMode(): UploadMode {
-    if (agent.id === "videos") return "3images+copys";
-    if (messages.length === 0) {
-      if (agent.id === "imagens") return "single-image";
-      if (agent.id === "copys")   return "single-image+price";
-    }
-    return "none";
+  // ── drag to anywhere ──────────────────────────────────────────────────────
+  function onChatDragOver(e: React.DragEvent) { e.preventDefault(); setDragOver(true); }
+  function onChatDragLeave(e: React.DragEvent) {
+    if ((e.currentTarget as HTMLElement).contains(e.relatedTarget as Node)) return;
+    setDragOver(false);
+  }
+  function onChatDrop(e: React.DragEvent) {
+    e.preventDefault(); setDragOver(false);
+    addImages(Array.from(e.dataTransfer.files));
   }
 
-  const uploadMode = detectUploadMode();
-  const validImages = images.filter((f, i) => f !== null && imageErrors[i] === null) as File[];
+  // ── voice ─────────────────────────────────────────────────────────────────
+  function toggleMic() {
+    if (listening) { recRef.current?.stop(); setListening(false); return; }
+    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SR) { alert("Seu navegador não suporta reconhecimento de voz."); return; }
+    const rec = new SR();
+    rec.lang = "pt-BR"; rec.continuous = true; rec.interimResults = true;
+    rec.onresult = (ev: any) => {
+      let t = "";
+      for (let i = ev.resultIndex; i < ev.results.length; i++) t += ev.results[i][0].transcript;
+      setInput(t);
+    };
+    rec.onerror = rec.onend = () => setListening(false);
+    rec.start(); recRef.current = rec; setListening(true);
+  }
 
-  // ── can send ─────────────────────────────────────────────────────────────
-
+  // ── can send ──────────────────────────────────────────────────────────────
   function canSend(): boolean {
     if (loading) return false;
-    if (uploadMode === "single-image")       return validImages.length >= 1;
-    if (uploadMode === "single-image+price") return validImages.length >= 1 && price.trim().length > 0;
-    if (uploadMode === "3images+copys")      return validImages.length === 3 && copysText.trim().length > 0;
+    if (agent.id === "videos" && (attachedImages.length > 0 || messages.length === 0)) {
+      return attachedImages.length === 3 && copysText.trim().length > 0;
+    }
+    if (attachedImages.length > 0) return true;
     return input.trim().length > 0;
   }
 
-  // ── send ─────────────────────────────────────────────────────────────────
-
+  // ── send ──────────────────────────────────────────────────────────────────
   async function sendMessage() {
     if (!canSend()) return;
 
-    const imagesToSend =
-      uploadMode === "3images+copys" ? validImages :
-      uploadMode === "single-image"  ? validImages.slice(0, 2) :
-      validImages.slice(0, 1);
-
     let imageData: ImageData[] = [];
     try {
-      imageData = imagesToSend.length > 0
-        ? await Promise.all(imagesToSend.map(fileToImageData))
-        : [];
+      if (attachedImages.length > 0) {
+        imageData = await Promise.all(attachedImages.map(fileToImageData));
+      }
     } catch {
-      onMessagesChange([...messages, { role: "assistant", content: "⚠️ Erro ao processar a imagem." }]);
+      onMessagesChange([...messages, { role: "assistant", content: "⚠️ Erro ao processar imagem." }]);
       return;
     }
 
     let displayContent = input.trim();
     let apiText: string | undefined;
 
-    if (uploadMode === "single-image") {
-      const hasRef = imagesToSend.length >= 2;
-      if (hasRef) {
-        displayContent = `[Produto: ${imagesToSend[0].name}] + [Cenário: ${imagesToSend[1].name}]`;
-        apiText = "Aqui está a imagem do produto (IMAGEM 1) e a referência do cenário (IMAGEM 2). Use o cenário da imagem 2 e substitua apenas o produto.";
+    if (imageData.length > 0) {
+      if (agent.id === "imagens") {
+        if (imageData.length >= 2) {
+          displayContent = `[Produto: ${attachedImages[0].name}] + [Cenário: ${attachedImages[1].name}]`;
+          apiText = `Aqui estão as imagens: produto (IMAGEM 1) e referência do cenário (IMAGEM 2).${input.trim() ? " " + input.trim() : ""}`;
+        } else {
+          displayContent = `[Imagem: ${attachedImages[0].name} · ${formatSize(attachedImages[0].size)}]${input.trim() ? "\n\n" + input.trim() : ""}`;
+          apiText = `Aqui está a imagem do produto.${input.trim() ? " " + input.trim() : ""}`;
+        }
+      } else if (agent.id === "copys") {
+        displayContent = `[Imagem: ${attachedImages[0].name}]${price.trim() ? " · Preço: " + price.trim() : ""}`;
+        apiText = `Aqui está a imagem do produto.${price.trim() ? " O preço é: " + price.trim() + "." : ""}${input.trim() ? " " + input.trim() : ""}`;
+      } else if (agent.id === "videos") {
+        displayContent = `[3 imagens enviadas]\n\n${copysText}`;
+        apiText = `Aqui estão as 3 imagens e os copies/roteiros:\n\n${copysText}`;
       } else {
-        displayContent = `[Imagem: ${imagesToSend[0].name} · ${formatSize(imagesToSend[0].size)}]`;
-        apiText = "Aqui está a imagem do produto.";
+        displayContent = `[${imageData.length} imagem${imageData.length > 1 ? "ns" : ""}]${input.trim() ? "\n\n" + input.trim() : ""}`;
       }
-    } else if (uploadMode === "single-image+price") {
-      displayContent = `[Imagem: ${imagesToSend[0].name}] · Preço: ${price}`;
-      apiText = `Aqui está a imagem do produto. O preço é: ${price}.`;
-    } else if (uploadMode === "3images+copys") {
-      displayContent = `[${imagesToSend.length} imagens enviadas]\n\n${copysText}`;
-      apiText = `Aqui estão as 3 imagens e os copies/roteiros:\n\n${copysText}`;
     }
 
     const userMessage: ChatMessage = {
       role: "user",
-      content: displayContent,
+      content: displayContent || input.trim(),
       images: imageData.length > 0 ? imageData : undefined,
       apiText,
     };
@@ -304,7 +176,9 @@ export default function ChatView({ agent, messages, onMessagesChange }: ChatView
     const history = [...messages, userMessage];
     onMessagesChange(history);
     setInput("");
-    resetUpload();
+    previews.forEach(u => URL.revokeObjectURL(u));
+    setAttached([]); setPreviews([]);
+    if (agent.id !== "videos") { setPrice(""); setCopysText(""); }
     setLoading(true);
     onMessagesChange([...history, { role: "assistant", content: "" }]);
 
@@ -314,22 +188,18 @@ export default function ChatView({ agent, messages, onMessagesChange }: ChatView
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ agentId: agent.id, messages: history }),
       });
-
       if (!res.ok || !res.body) {
         const err = await res.json().catch(() => ({ error: "Erro na requisição." }));
-        onMessagesChange([...history, { role: "assistant", content: `⚠️ ${err.error ?? "Erro desconhecido."}` }]);
-        setLoading(false);
-        return;
+        onMessagesChange([...history, { role: "assistant", content: `⚠️ ${err.error ?? "Erro."}` }]);
+        setLoading(false); return;
       }
-
       const reader = res.body.getReader();
-      const decoder = new TextDecoder();
+      const dec = new TextDecoder();
       let acc = "";
-
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-        acc += decoder.decode(value, { stream: true });
+        acc += dec.decode(value, { stream: true });
         onMessagesChange([...history, { role: "assistant", content: acc }]);
       }
     } catch (err) {
@@ -344,97 +214,107 @@ export default function ChatView({ agent, messages, onMessagesChange }: ChatView
     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); }
   }
 
-  // ── voice recognition ─────────────────────────────────────────────────────
-
-  function toggleMic() {
-    if (listening) {
-      recRef.current?.stop();
-      setListening(false);
-      return;
-    }
-    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SR) { alert("Seu navegador não suporta reconhecimento de voz."); return; }
-
-    const rec = new SR();
-    rec.lang = "pt-BR";
-    rec.continuous = true;
-    rec.interimResults = true;
-
-    rec.onresult = (event: any) => {
-      let transcript = "";
-      for (let i = event.resultIndex; i < event.results.length; i++) {
-        transcript += event.results[i][0].transcript;
-      }
-      setInput(transcript);
-    };
-    rec.onerror = () => setListening(false);
-    rec.onend   = () => setListening(false);
-
-    rec.start();
-    recRef.current = rec;
-    setListening(true);
-  }
-
   const isEmpty = messages.length === 0;
-  const lastIsEmptyAssistant =
+  const lastIsEmpty =
     messages.length > 0 &&
     messages[messages.length - 1].role === "assistant" &&
     messages[messages.length - 1].content === "";
 
-  const theme  = HEADER_THEMES[agent.id];
-  const tips   = AGENT_TIPS[agent.id];
+  const canAttachMore = attachedImages.length < maxImages(agent.id);
 
   // ── render ────────────────────────────────────────────────────────────────
-
   return (
-    <div className="flex h-full flex-1 flex-col bg-[#0a0a0a]">
+    <div className="flex h-full flex-1 flex-col" style={{ background: "#000814" }}>
 
       {/* Header */}
-      <header className="glass flex items-center gap-3 border-b border-[#141414] px-6 py-4">
+      <header
+        className="flex items-center gap-3 px-6 py-4"
+        style={{
+          background: "rgba(0,8,20,0.9)",
+          backdropFilter: "blur(20px)",
+          WebkitBackdropFilter: "blur(20px)",
+          borderBottom: "1px solid rgba(0,212,255,0.15)",
+        }}
+      >
         <div
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-xl"
-          style={{ background: theme.bg, boxShadow: `0 0 16px ${theme.glow}` }}
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-xl glow-pulse-anim"
+          style={{
+            background: "rgba(0,212,255,0.1)",
+            border: "1px solid rgba(0,212,255,0.3)",
+          }}
         >
           {agent.icon}
         </div>
         <div>
-          <h2 className="text-[14px] font-semibold tracking-tight text-[#efefef]">{agent.name}</h2>
-          <p className="text-[11px] text-[#333]">{agent.description}</p>
+          <h2
+            className="text-[14px] font-semibold tracking-tight gradient-text"
+          >
+            {agent.name}
+          </h2>
+          <p className="text-[11px]" style={{ color: "#4a9ebb" }}>{agent.description}</p>
         </div>
       </header>
 
-      {/* Messages */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto">
+      {/* Chat area — drag target */}
+      <div
+        ref={scrollRef}
+        className="relative flex-1 overflow-y-auto dot-grid"
+        onDragOver={onChatDragOver}
+        onDragLeave={onChatDragLeave}
+        onDrop={onChatDrop}
+      >
+        {/* Drag overlay */}
+        {chatDragOver && (
+          <div
+            className="pointer-events-none absolute inset-4 z-50 flex items-center justify-center rounded-xl"
+            style={{
+              border: "1px dashed rgba(0,212,255,0.5)",
+              background: "rgba(0,212,255,0.04)",
+            }}
+          >
+            <p className="text-sm font-medium" style={{ color: "#00d4ff" }}>
+              Solte as imagens aqui
+            </p>
+          </div>
+        )}
+
         <div className="mx-auto w-full max-w-2xl px-5 py-8">
-
           {isEmpty ? (
-            <div className="space-y-6">
-              {/* Initial agent message as assistant bubble */}
-              <MessageBubble message={{ role: "assistant", content: agent.greeting }} />
-
-              {/* Quick tip cards */}
-              <div className="grid grid-cols-3 gap-2 pt-2">
-                {tips.map((tip, i) => (
-                  <div
-                    key={i}
-                    className="glass rounded-xl p-3 text-center transition-all duration-200 hover:border-[#2a2a2a]"
-                  >
-                    <div className="mb-1 text-lg">{tip.icon}</div>
-                    <p className="text-[11px] leading-snug text-[#444]">{tip.text}</p>
-                  </div>
-                ))}
+            /* ── Empty state ── */
+            <div className="mt-10 text-center">
+              <div
+                className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl text-4xl glow-pulse-anim"
+                style={{
+                  background: "rgba(0,212,255,0.08)",
+                  border: "1px solid rgba(0,212,255,0.3)",
+                  boxShadow: "0 0 40px rgba(0,212,255,0.15)",
+                }}
+              >
+                {agent.icon}
               </div>
+              <h3
+                className="mb-3 text-2xl font-bold tracking-tight gradient-text"
+              >
+                {agent.name}
+              </h3>
+              <p
+                className="mx-auto max-w-sm text-[13px] leading-relaxed"
+                style={{ color: "#4a9ebb" }}
+              >
+                {agent.description} — use o botão 📎 para enviar imagens ou arraste para a tela
+              </p>
             </div>
           ) : (
-            <div className="space-y-6">
+            /* ── Messages ── */
+            <div className="space-y-5">
               {messages.map((m, i) => (
                 <MessageBubble key={i} message={m} />
               ))}
-              {lastIsEmptyAssistant && (
+              {lastIsEmpty && (
                 <div className="flex items-end gap-1.5 px-1 pb-1">
-                  <span className="typing-dot h-1.5 w-1.5 rounded-full bg-[#444]" />
-                  <span className="typing-dot h-1.5 w-1.5 rounded-full bg-[#444]" />
-                  <span className="typing-dot h-1.5 w-1.5 rounded-full bg-[#444]" />
+                  <span className="typing-dot h-1.5 w-1.5 rounded-full" style={{ background: "#00d4ff" }} />
+                  <span className="typing-dot h-1.5 w-1.5 rounded-full" style={{ background: "#00d4ff" }} />
+                  <span className="typing-dot h-1.5 w-1.5 rounded-full" style={{ background: "#00d4ff" }} />
                 </div>
               )}
             </div>
@@ -446,165 +326,191 @@ export default function ChatView({ agent, messages, onMessagesChange }: ChatView
       <div className="px-5 pb-6 pt-2">
         <div className="mx-auto w-full max-w-2xl space-y-2">
 
-          {/* ── single image (imagens) ── */}
-          {uploadMode === "single-image" && (
-            <div className="glass rounded-2xl p-4 space-y-4">
-              <DropZone label="Imagem do produto" file={images[0]} error={imageErrors[0]} onFile={(f, e) => handleImageAt(0, f, e)} />
-              <div>
-                <p className="mb-2 text-[11px] leading-relaxed text-[#2f2f2f]">
-                  Referência de cenário — envie para manter o ambiente e só trocar o produto
-                </p>
-                <DropZone label="Cenário de referência (opcional)" file={images[1]} error={imageErrors[1]} onFile={(f, e) => handleImageAt(1, f, e)} />
-              </div>
-            </div>
-          )}
-
-          {/* ── single image + price (copys) ── */}
-          {uploadMode === "single-image+price" && (
-            <div className="glass rounded-2xl p-4 space-y-4">
-              <DropZone label="Imagem do produto" file={images[0]} error={imageErrors[0]} onFile={(f, e) => handleImageAt(0, f, e)} />
-              <div>
-                <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-[#333]">Preço</p>
-                <input
-                  type="text"
-                  value={price}
-                  onChange={(e) => setPrice(e.target.value)}
-                  placeholder="Ex: R$ 89,90"
-                  className="w-full rounded-xl border border-[#1e1e1e] bg-[#0a0a0a] px-3.5 py-2.5 text-[13px] text-[#e0e0e0] placeholder-[#2a2a2a] outline-none transition-colors focus:border-violet-600/40 focus:ring-1 focus:ring-violet-600/15"
-                />
-              </div>
-            </div>
-          )}
-
-          {/* ── 3 images + copys (videos) ── */}
-          {uploadMode === "3images+copys" && (
-            <div className="glass rounded-2xl p-4 space-y-4">
-              <div className="grid grid-cols-3 gap-2">
-                {([0, 1, 2] as const).map((i) => (
-                  <DropZone key={i} label={`Cena ${i + 1}`} file={images[i]} error={imageErrors[i]} onFile={(f, e) => handleImageAt(i, f, e)} />
-                ))}
-              </div>
-              <div>
-                <p className="mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-[#333]">Copies / Roteiros</p>
-                <textarea
-                  value={copysText}
-                  onChange={(e) => setCopysText(e.target.value)}
-                  placeholder="Cole aqui os 3 copies ou roteiros..."
-                  rows={5}
-                  className="w-full resize-none rounded-xl border border-[#1e1e1e] bg-[#0a0a0a] px-3.5 py-3 text-[13px] leading-relaxed text-[#e0e0e0] placeholder-[#2a2a2a] outline-none transition-colors focus:border-violet-600/40 focus:ring-1 focus:ring-violet-600/15"
-                />
-              </div>
-            </div>
-          )}
-
-          {/* ── text input ── */}
-          {uploadMode === "none" && (
-            <div
-              className={["flex items-end gap-2 rounded-2xl p-2 transition-all duration-200", listening ? "input-listening" : ""].join(" ")}
+          {/* Videos: copys textarea (always shown) */}
+          {agent.id === "videos" && (
+            <textarea
+              value={copysText}
+              onChange={(e) => setCopysText(e.target.value)}
+              placeholder="Cole aqui os 3 copies ou roteiros..."
+              rows={4}
+              className="w-full resize-none rounded-xl px-3.5 py-3 text-[13px] leading-relaxed outline-none transition-all"
               style={{
-                background: "rgba(255,255,255,0.025)",
-                backdropFilter: "blur(12px)",
-                WebkitBackdropFilter: "blur(12px)",
-                border: listening
-                  ? "1px solid rgba(239,68,68,0.35)"
-                  : inputFocused
-                  ? "1px solid rgba(124,58,237,0.35)"
-                  : "1px solid rgba(255,255,255,0.07)",
-                boxShadow: listening
-                  ? "0 0 0 1px rgba(239,68,68,0.12)"
-                  : inputFocused
-                  ? "0 0 0 1px rgba(124,58,237,0.12)"
-                  : undefined,
+                background: "rgba(0,212,255,0.03)",
+                border: "1px solid rgba(0,212,255,0.15)",
+                color: "#e0f4ff",
+              }}
+              onFocus={(e) => { e.currentTarget.style.borderColor = "rgba(0,212,255,0.4)"; }}
+              onBlur={(e) => { e.currentTarget.style.borderColor = "rgba(0,212,255,0.15)"; }}
+            />
+          )}
+
+          {/* Copys: price input (shown when image attached) */}
+          {agent.id === "copys" && attachedImages.length > 0 && (
+            <input
+              type="text"
+              value={price}
+              onChange={(e) => setPrice(e.target.value)}
+              placeholder="Preço do produto (ex: R$ 89,90)"
+              className="w-full rounded-xl px-3.5 py-2.5 text-[13px] outline-none transition-all"
+              style={{
+                background: "rgba(0,212,255,0.03)",
+                border: "1px solid rgba(0,212,255,0.15)",
+                color: "#e0f4ff",
+              }}
+              onFocus={(e) => { e.currentTarget.style.borderColor = "rgba(0,212,255,0.4)"; }}
+              onBlur={(e) => { e.currentTarget.style.borderColor = "rgba(0,212,255,0.15)"; }}
+            />
+          )}
+
+          {/* Thumbnail row */}
+          {attachedImages.length > 0 && (
+            <div className="flex items-center gap-2">
+              {attachedImages.map((img, i) => (
+                <div key={i} className="group relative h-12 w-12 shrink-0">
+                  <img
+                    src={previews[i]}
+                    alt={img.name}
+                    className="h-12 w-12 rounded-lg object-cover"
+                    style={{ border: "1px solid rgba(0,212,255,0.3)" }}
+                  />
+                  <button
+                    onClick={() => removeImage(i)}
+                    className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-bold"
+                    style={{ background: "#000814", border: "1px solid rgba(0,212,255,0.4)", color: "#00d4ff" }}
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+              {/* + add more button */}
+              {canAttachMore && (
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg text-lg transition-all"
+                  style={{
+                    border: "1px dashed rgba(0,212,255,0.3)",
+                    color: "#4a9ebb",
+                    background: "rgba(0,212,255,0.03)",
+                  }}
+                  title="Adicionar imagem"
+                >
+                  +
+                </button>
+              )}
+              <span className="text-[11px]" style={{ color: "#4a9ebb" }}>
+                {attachedImages.length}/{maxImages(agent.id)} imagem{maxImages(agent.id) > 1 ? "ns" : ""}
+              </span>
+            </div>
+          )}
+
+          {/* Main input bar */}
+          <div
+            className={["flex items-end gap-1.5 rounded-2xl p-2 transition-all duration-200", listening ? "input-listening" : ""].join(" ")}
+            style={{
+              background: "rgba(0,8,20,0.9)",
+              backdropFilter: "blur(16px)",
+              WebkitBackdropFilter: "blur(16px)",
+              border: listening
+                ? "1px solid rgba(239,68,68,0.4)"
+                : inputFocused
+                ? "1px solid rgba(0,212,255,0.5)"
+                : "1px solid rgba(0,212,255,0.2)",
+              boxShadow: inputFocused && !listening
+                ? "0 0 0 1px rgba(0,212,255,0.1), 0 0 16px rgba(0,212,255,0.08)"
+                : undefined,
+            }}
+          >
+            {/* Clip button */}
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={!canAttachMore}
+              title="Anexar imagem"
+              className="mb-0.5 flex h-8 w-8 items-center justify-center rounded-xl text-sm transition-all duration-200"
+              style={{
+                color: canAttachMore ? "#00d4ff" : "rgba(0,212,255,0.2)",
+                background: "transparent",
+              }}
+              onMouseEnter={(e) => {
+                if (canAttachMore) (e.currentTarget as HTMLElement).style.background = "rgba(0,212,255,0.1)";
+              }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}
+            >
+              📎
+            </button>
+
+            {/* Hidden file input */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept={ACCEPTED_EXT}
+              multiple={maxImages(agent.id) > 1}
+              className="hidden"
+              onChange={(e) => {
+                addImages(Array.from(e.target.files ?? []));
+                e.target.value = "";
+              }}
+            />
+
+            {/* Textarea */}
+            <textarea
+              ref={textareaRef}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              onFocus={() => setInputFocused(true)}
+              onBlur={() => setInputFocused(false)}
+              rows={1}
+              placeholder={listening ? "Ouvindo..." : agent.placeholder}
+              className="max-h-40 flex-1 resize-none bg-transparent px-2 py-2 text-[14px] leading-relaxed focus:outline-none"
+              style={{
+                color: "#e0f4ff",
+              }}
+            />
+
+            {/* Mic button */}
+            <button
+              onClick={toggleMic}
+              title={listening ? "Parar gravação" : "Gravar voz (pt-BR)"}
+              className={["mb-0.5 flex h-8 w-8 items-center justify-center rounded-xl text-sm transition-all duration-200", listening ? "mic-listening" : ""].join(" ")}
+              style={
+                listening
+                  ? { background: "rgba(239,68,68,0.15)", color: "#f87171" }
+                  : { background: "transparent", color: "rgba(0,212,255,0.4)" }
+              }
+              onMouseEnter={(e) => {
+                if (!listening) Object.assign((e.currentTarget as HTMLElement).style, { background: "rgba(0,212,255,0.1)", color: "#00d4ff" });
+              }}
+              onMouseLeave={(e) => {
+                if (!listening) Object.assign((e.currentTarget as HTMLElement).style, { background: "transparent", color: "rgba(0,212,255,0.4)" });
               }}
             >
-              <textarea
-                ref={textareaRef}
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-                onFocus={() => setInputFocused(true)}
-                onBlur={() => setInputFocused(false)}
-                rows={1}
-                placeholder={listening ? "Ouvindo..." : agent.placeholder}
-                className="max-h-40 flex-1 resize-none bg-transparent px-3 py-2 text-[14px] leading-relaxed text-[#e0e0e0] placeholder-[#2a2a2a] focus:outline-none"
-              />
+              🎤
+            </button>
 
-              {/* Mic button */}
-              <button
-                onClick={toggleMic}
-                title={listening ? "Parar gravação" : "Gravar por voz (pt-BR)"}
-                className={[
-                  "mb-0.5 flex h-8 w-8 items-center justify-center rounded-xl text-sm transition-all duration-200",
-                  listening ? "mic-listening" : "",
-                ].join(" ")}
-                style={
-                  listening
-                    ? { background: "rgba(239,68,68,0.15)", color: "#f87171" }
-                    : { background: "#141414", color: "#3a3a3a" }
-                }
-                onMouseEnter={(e) => {
-                  if (!listening) {
-                    (e.currentTarget as HTMLElement).style.background = "rgba(124,58,237,0.12)";
-                    (e.currentTarget as HTMLElement).style.color = "#a78bfa";
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!listening) {
-                    (e.currentTarget as HTMLElement).style.background = "#141414";
-                    (e.currentTarget as HTMLElement).style.color = "#3a3a3a";
-                  }
-                }}
-                aria-label={listening ? "Parar gravação" : "Gravar voz"}
-              >
-                🎤
-              </button>
-
-              {/* Send button */}
-              <button
-                onClick={sendMessage}
-                disabled={!canSend()}
-                className="mb-0.5 mr-0.5 flex h-8 w-8 items-center justify-center rounded-xl transition-all duration-200"
-                style={
-                  canSend()
-                    ? {
-                        background: "linear-gradient(135deg, #5b21b6, #7c3aed)",
-                        boxShadow: "0 0 12px rgba(124,58,237,0.3)",
-                        color: "white",
-                      }
-                    : { background: "#141414", color: "#2a2a2a" }
-                }
-                aria-label="Enviar"
-              >
-                ↑
-              </button>
-            </div>
-          )}
-
-          {/* ── send button for upload modes ── */}
-          {uploadMode !== "none" && (
+            {/* Send button */}
             <button
               onClick={sendMessage}
               disabled={!canSend()}
-              className="w-full rounded-xl py-3 text-[13px] font-semibold tracking-wide transition-all duration-200"
+              className="mb-0.5 mr-0.5 flex h-8 w-8 items-center justify-center rounded-xl transition-all duration-200"
               style={
                 canSend()
                   ? {
-                      background: "linear-gradient(135deg, #5b21b6, #7c3aed)",
-                      boxShadow: "0 0 18px rgba(124,58,237,0.25)",
-                      color: "white",
+                      background: "linear-gradient(135deg, #0066ff, #00d4ff)",
+                      boxShadow: "0 0 14px rgba(0,212,255,0.35)",
+                      color: "#000814",
+                      fontWeight: 700,
                     }
-                  : { background: "#111", color: "#2a2a2a", cursor: "not-allowed" }
+                  : { background: "rgba(0,212,255,0.05)", color: "rgba(0,212,255,0.15)" }
               }
+              aria-label="Enviar"
             >
-              Enviar
+              ↑
             </button>
-          )}
+          </div>
         </div>
 
-        <p className="mt-2.5 text-center text-[10px] text-[#1e1e1e]">
-          {uploadMode === "none"
-            ? "Enter envia · Shift+Enter quebra linha"
-            : "Preencha todos os campos para enviar"}
+        <p className="mt-2.5 text-center text-[10px]" style={{ color: "rgba(0,212,255,0.2)" }}>
+          Enter envia · Shift+Enter quebra linha · 📎 anexa imagens · arraste para a tela
         </p>
       </div>
     </div>
