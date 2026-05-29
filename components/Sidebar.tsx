@@ -80,24 +80,25 @@ export default function Sidebar({ activeAgent, onSelect, onNewChat }: SidebarPro
             <img
               src="/logo.jpg"
               alt="BEXT"
-              width={32}
-              height={32}
               onError={() => setLogoError(true)}
-              className="glow-pulse-anim h-8 w-8 shrink-0 rounded-lg object-contain"
-              style={{ filter: "invert(1)" }}
+              style={{
+                width: 36,
+                height: 36,
+                objectFit: "contain",
+                filter: "brightness(0) invert(1) drop-shadow(0 0 6px rgba(0, 212, 255, 0.6))",
+              }}
             />
           ) : (
-            <div
-              className="glow-pulse-anim flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-sm font-bold"
+            <span
               style={{
                 color: "#00d4ff",
-                border: "1px solid rgba(0,212,255,0.4)",
-                background: "rgba(0,212,255,0.08)",
+                fontWeight: 700,
+                fontSize: 20,
                 textShadow: "0 0 10px rgba(0,212,255,0.8)",
               }}
             >
               B
-            </div>
+            </span>
           )}
           <p
             className="text-sm font-bold"
