@@ -46,6 +46,32 @@ function PlusIcon() {
 }
 
 
+function JarvisLogo() {
+  return (
+    <svg width="100" height="32" viewBox="0 0 100 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <text
+        x="0"
+        y="24"
+        fontFamily="Georgia, serif"
+        fontSize="20"
+        fontWeight="400"
+        letterSpacing="6"
+        fill="url(#jarvis-grad)"
+        style={{ filter: "drop-shadow(0 0 8px rgba(0,212,255,0.9))" }}
+      >
+        JARVIS
+      </text>
+      <defs>
+        <linearGradient id="jarvis-grad" x1="0" y1="0" x2="100" y2="0" gradientUnits="userSpaceOnUse">
+          <stop offset="0%"   stopColor="#ffffff" />
+          <stop offset="60%"  stopColor="#00d4ff" />
+          <stop offset="100%" stopColor="#0066ff" />
+        </linearGradient>
+      </defs>
+    </svg>
+  );
+}
+
 function AgentIcon({ id, size = 20, style }: { id: string; size?: number; style?: React.CSSProperties }) {
   if (id === "imagens") return <CameraIcon size={size} style={style} />;
   if (id === "copys")   return <CopyIcon   size={size} style={style} />;
@@ -74,29 +100,7 @@ export default function Sidebar({ activeAgent, onSelect, onNewChat }: SidebarPro
     >
       {/* Brand */}
       <div className="px-5 py-5">
-        <div className="flex items-center gap-3">
-          <img
-            src="/logo.png"
-            alt="BEXT"
-            width={36}
-            height={36}
-            style={{
-              objectFit: "contain",
-              filter: "brightness(0) saturate(100%) invert(72%) sepia(98%) saturate(400%) hue-rotate(155deg) brightness(100%)",
-            }}
-            onError={(e) => { e.currentTarget.style.display = "none"; }}
-          />
-          <p
-            className="text-sm font-bold"
-            style={{
-              color: "#00d4ff",
-              letterSpacing: "3px",
-              textShadow: "0 0 10px rgba(0,212,255,0.8)",
-            }}
-          >
-            BEXT
-          </p>
-        </div>
+        <JarvisLogo />
       </div>
 
       <div
