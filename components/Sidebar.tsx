@@ -56,18 +56,11 @@ function JarvisLogo() {
         fontSize="20"
         fontWeight="400"
         letterSpacing="6"
-        fill="url(#jarvis-grad)"
-        style={{ filter: "drop-shadow(0 0 8px rgba(0,212,255,0.9))" }}
+        fill="#00d4ff"
+        style={{ filter: "drop-shadow(0 0 10px rgba(0,212,255,1))" }}
       >
         JARVIS
       </text>
-      <defs>
-        <linearGradient id="jarvis-grad" x1="0" y1="0" x2="100" y2="0" gradientUnits="userSpaceOnUse">
-          <stop offset="0%"   stopColor="#ffffff" />
-          <stop offset="60%"  stopColor="#00d4ff" />
-          <stop offset="100%" stopColor="#0066ff" />
-        </linearGradient>
-      </defs>
     </svg>
   );
 }

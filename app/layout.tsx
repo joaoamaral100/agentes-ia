@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import VoiceAssistant from "@/components/VoiceAssistant";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
 
@@ -27,6 +28,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <div className="relative h-full" style={{ zIndex: 1 }}>
           {children}
         </div>
+
+        {/* JARVIS voice assistant — fixed overlay */}
+        <VoiceAssistant />
       </body>
     </html>
   );
