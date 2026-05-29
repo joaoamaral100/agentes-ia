@@ -204,8 +204,10 @@ export default function ChatView({ agent, messages, onMessagesChange }: ChatView
   const [price, setPrice]               = useState("");
   const [copysText, setCopysText]       = useState("");
   const [inputFocused, setInputFocused] = useState(false);
-  const scrollRef  = useRef<HTMLDivElement>(null);
+  const [listening, setListening]       = useState(false);
+  const scrollRef   = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const recRef      = useRef<any>(null);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
@@ -342,6 +344,37 @@ export default function ChatView({ agent, messages, onMessagesChange }: ChatView
     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); }
   }
 
+  // ── voice recognition ─────────────────────────────────────────────────────
+
+  function toggleMic() {
+    if (listening) {
+      recRef.current?.stop();
+      setListening(false);
+      return;
+    }
+    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SR) { alert("Seu navegador não suporta reconhecimento de voz."); return; }
+
+    const rec = new SR();
+    rec.lang = "pt-BR";
+    rec.continuous = true;
+    rec.interimResults = true;
+
+    rec.onresult = (event: any) => {
+      let transcript = "";
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        transcript += event.results[i][0].transcript;
+      }
+      setInput(transcript);
+    };
+    rec.onerror = () => setListening(false);
+    rec.onend   = () => setListening(false);
+
+    rec.start();
+    recRef.current = rec;
+    setListening(true);
+  }
+
   const isEmpty = messages.length === 0;
   const lastIsEmptyAssistant =
     messages.length > 0 &&
@@ -467,14 +500,21 @@ export default function ChatView({ agent, messages, onMessagesChange }: ChatView
           {/* ── text input ── */}
           {uploadMode === "none" && (
             <div
-              className="flex items-end gap-2 rounded-2xl p-2 transition-all duration-200"
+              className={["flex items-end gap-2 rounded-2xl p-2 transition-all duration-200", listening ? "input-listening" : ""].join(" ")}
               style={{
                 background: "rgba(255,255,255,0.025)",
                 backdropFilter: "blur(12px)",
-                border: inputFocused
+                WebkitBackdropFilter: "blur(12px)",
+                border: listening
+                  ? "1px solid rgba(239,68,68,0.35)"
+                  : inputFocused
                   ? "1px solid rgba(124,58,237,0.35)"
                   : "1px solid rgba(255,255,255,0.07)",
-                boxShadow: inputFocused ? "0 0 0 1px rgba(124,58,237,0.12)" : undefined,
+                boxShadow: listening
+                  ? "0 0 0 1px rgba(239,68,68,0.12)"
+                  : inputFocused
+                  ? "0 0 0 1px rgba(124,58,237,0.12)"
+                  : undefined,
               }}
             >
               <textarea
@@ -485,9 +525,41 @@ export default function ChatView({ agent, messages, onMessagesChange }: ChatView
                 onFocus={() => setInputFocused(true)}
                 onBlur={() => setInputFocused(false)}
                 rows={1}
-                placeholder={agent.placeholder}
+                placeholder={listening ? "Ouvindo..." : agent.placeholder}
                 className="max-h-40 flex-1 resize-none bg-transparent px-3 py-2 text-[14px] leading-relaxed text-[#e0e0e0] placeholder-[#2a2a2a] focus:outline-none"
               />
+
+              {/* Mic button */}
+              <button
+                onClick={toggleMic}
+                title={listening ? "Parar gravação" : "Gravar por voz (pt-BR)"}
+                className={[
+                  "mb-0.5 flex h-8 w-8 items-center justify-center rounded-xl text-sm transition-all duration-200",
+                  listening ? "mic-listening" : "",
+                ].join(" ")}
+                style={
+                  listening
+                    ? { background: "rgba(239,68,68,0.15)", color: "#f87171" }
+                    : { background: "#141414", color: "#3a3a3a" }
+                }
+                onMouseEnter={(e) => {
+                  if (!listening) {
+                    (e.currentTarget as HTMLElement).style.background = "rgba(124,58,237,0.12)";
+                    (e.currentTarget as HTMLElement).style.color = "#a78bfa";
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!listening) {
+                    (e.currentTarget as HTMLElement).style.background = "#141414";
+                    (e.currentTarget as HTMLElement).style.color = "#3a3a3a";
+                  }
+                }}
+                aria-label={listening ? "Parar gravação" : "Gravar voz"}
+              >
+                🎤
+              </button>
+
+              {/* Send button */}
               <button
                 onClick={sendMessage}
                 disabled={!canSend()}
