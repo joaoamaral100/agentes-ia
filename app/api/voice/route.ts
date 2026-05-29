@@ -43,7 +43,11 @@ export async function POST(req: Request) {
     });
   }
 
-  // Default: text generation with Claude
+  // type === 'chat': text generation with Claude
+  if (type !== "chat") {
+    return Response.json({ error: "Tipo inválido." }, { status: 400 });
+  }
+
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
     return Response.json({ error: "API key não configurada." }, { status: 500 });

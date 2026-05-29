@@ -114,7 +114,7 @@ export default function VoiceAssistant() {
         const res = await fetch("/api/voice", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text }),
+          body: JSON.stringify({ text, type: "chat" }),
         });
         const data   = await res.json();
         const answer = data.response || "Desculpe, não consegui processar.";
