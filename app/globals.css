@@ -2,46 +2,109 @@
 @tailwind components;
 @tailwind utilities;
 
-html,
-body {
-  height: 100%;
+/* ── CSS variables ──────────────────────────────────────────────────────────── */
+:root {
+  --accent-purple: #7c3aed;
+  --accent-cyan:   #06b6d4;
+  --accent-pink:   #ec4899;
+  --accent-orange: #f97316;
+  --glass-bg:      rgba(255, 255, 255, 0.025);
+  --glass-border:  rgba(255, 255, 255, 0.07);
+  --glow-purple:   0 0 24px rgba(124, 58, 237, 0.28);
+  --glow-cyan:     0 0 24px rgba(6, 182, 212, 0.28);
 }
 
+html, body { height: 100%; }
+
 body {
-  background-color: #0a0a0a;
-  color: #f2f2f2;
+  background-color: #080808;
+  color: #f0f0f0;
   font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
-/* ── Premium thin scrollbar ─────────────────────────────────────────────────── */
+/* ── Dot grid background ────────────────────────────────────────────────────── */
+.dot-grid {
+  background-image: radial-gradient(circle, rgba(255,255,255,0.055) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+/* ── Thin premium scrollbar ─────────────────────────────────────────────────── */
 ::-webkit-scrollbar          { width: 3px; height: 3px; }
-::-webkit-scrollbar-thumb    { background: #2a2a2a; border-radius: 99px; }
-::-webkit-scrollbar-thumb:hover { background: #3a3a3a; }
+::-webkit-scrollbar-thumb    { background: #222; border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: #2f2f2f; }
 ::-webkit-scrollbar-track    { background: transparent; }
 
 /* ── Typing dots ─────────────────────────────────────────────────────────────── */
-@keyframes blink {
-  0%, 100% { opacity: 0.15; transform: scale(0.85); }
-  50%       { opacity: 0.75; transform: scale(1); }
+@keyframes bounce-dot {
+  0%, 100% { opacity: 0.15; transform: translateY(0); }
+  50%       { opacity: 0.8;  transform: translateY(-3px); }
 }
-.typing-dot {
-  animation: blink 1.4s ease-in-out infinite;
-}
+.typing-dot { animation: bounce-dot 1.4s ease-in-out infinite; }
 .typing-dot:nth-child(2) { animation-delay: 0.18s; }
 .typing-dot:nth-child(3) { animation-delay: 0.36s; }
 
-/* ── Accent glow pulse (used on active icons) ────────────────────────────────── */
-@keyframes glow-pulse {
-  0%, 100% { box-shadow: 0 0 8px  rgba(124,58,237,0.18); }
-  50%       { box-shadow: 0 0 18px rgba(124,58,237,0.32); }
+/* ── Animated gradient text ─────────────────────────────────────────────────── */
+.gradient-text {
+  background: linear-gradient(90deg, #a78bfa, #06b6d4, #ec4899, #a78bfa);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradient-shift 5s ease infinite;
 }
-.accent-glow-pulse { animation: glow-pulse 3s ease-in-out infinite; }
+@keyframes gradient-shift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
 
-/* ── Gradient border utility ─────────────────────────────────────────────────── */
-.gradient-border {
-  background:
-    linear-gradient(#141414, #141414) padding-box,
-    linear-gradient(135deg, rgba(124,58,237,0.35), #242424 50%, rgba(124,58,237,0.15)) border-box;
-  border: 1px solid transparent;
+/* ── Message fade-in ─────────────────────────────────────────────────────────── */
+@keyframes message-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.message-in { animation: message-in 0.22s ease; }
+
+/* ── Glass utility ───────────────────────────────────────────────────────────── */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+}
+
+/* ── Glow pulse (brand icon) ─────────────────────────────────────────────────── */
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(124,58,237,0.2); }
+  50%       { box-shadow: 0 0 18px rgba(124,58,237,0.45); }
+}
+.glow-pulse-anim { animation: glow-pulse 3s ease-in-out infinite; }
+
+/* ── Rotating gradient border (DropZone drag state) ─────────────────────────── */
+.dropzone-spin-wrapper {
+  position: relative;
+  border-radius: 14px;
+  overflow: hidden;
+  padding: 1px;
+}
+.dropzone-spin-wrapper::before {
+  content: '';
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  top: -50%;
+  left: -50%;
+  background: conic-gradient(from 0deg, #7c3aed, #06b6d4, #ec4899, #7c3aed 360deg);
+  animation: spin 2.5s linear infinite;
+  z-index: 0;
+}
+.dropzone-spin-inner {
+  position: relative;
+  z-index: 1;
+  border-radius: 13px;
+  background: #0d0d0d;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
