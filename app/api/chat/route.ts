@@ -4,9 +4,16 @@ import { getAgent } from "@/lib/agents";
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
+interface ImageData {
+  base64: string;
+  mediaType: string;
+}
+
 interface IncomingMessage {
   role: "user" | "assistant";
   content: string;
+  images?: ImageData[];
+  apiText?: string;
 }
 
 export async function POST(req: Request) {
@@ -60,10 +67,25 @@ export async function POST(req: Request) {
           model: "claude-opus-4-8",
           max_tokens: 2048,
           system: agent.systemPrompt,
-          messages: messages.map((m) => ({
-            role: m.role,
-            content: m.content,
-          })),
+          messages: messages.map((m) => {
+            if (m.images && m.images.length > 0) {
+              return {
+                role: m.role,
+                content: [
+                  ...m.images.map((img) => ({
+                    type: "image" as const,
+                    source: {
+                      type: "base64" as const,
+                      media_type: img.mediaType as "image/jpeg" | "image/png" | "image/gif" | "image/webp",
+                      data: img.base64,
+                    },
+                  })),
+                  { type: "text" as const, text: m.apiText ?? m.content },
+                ],
+              };
+            }
+            return { role: m.role, content: m.apiText ?? m.content };
+          }),
         });
 
         messageStream.on("text", (text) => {

@@ -4,7 +4,10 @@
       "Bash(npm install *)",
       "Bash(npm view *)",
       "Bash(npm audit *)",
-      "Bash(npm run *)"
+      "Bash(npm run *)",
+      "Bash(git remote *)",
+      "Bash(git branch *)",
+      "Bash(git push *)"
     ]
   }
 }

@@ -2,9 +2,17 @@
 
 import { Fragment } from "react";
 
+export interface ImageData {
+  base64: string;
+  mediaType: string;
+  name: string;
+}
+
 export interface ChatMessage {
   role: "user" | "assistant";
   content: string;
+  images?: ImageData[];
+  apiText?: string;
 }
 
 /**
