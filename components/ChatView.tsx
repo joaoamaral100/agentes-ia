@@ -174,32 +174,16 @@ export default function ChatView({ agent, messages, onMessagesChange }: ChatView
   // ── upload mode detection ──────────────────────────────────────────────────
 
   function detectUploadMode(): UploadMode {
+    // Videos: upload always visible
     if (agent.id === "videos") return "3images+copys";
 
-    const assistantMsgs = messages.filter((m) => m.role === "assistant");
-    if (assistantMsgs.length === 0) return "none";
+    // imagens / copys: show upload only before the first message is sent
+    if (messages.length === 0) {
+      if (agent.id === "imagens") return "single-image";
+      if (agent.id === "copys") return "single-image+price";
+    }
 
-    const last = assistantMsgs[assistantMsgs.length - 1].content.toLowerCase();
-
-    const askingForImage =
-      last.includes("manda a imagem do produto") ||
-      last.includes("agora manda a imagem") ||
-      last.includes("envie a imagem do produto") ||
-      last.includes("pode mandar a imagem") ||
-      last.includes("mande a imagem do produto") ||
-      last.includes("agora envie a imagem");
-
-    const doneAskingFormats =
-      assistantMsgs.length >= 4 &&
-      !last.includes("cena 1") &&
-      !last.includes("cena 2") &&
-      !last.includes("cena 3") &&
-      !last.includes("qual formato");
-
-    const showUpload = askingForImage || doneAskingFormats;
-
-    if (agent.id === "imagens" && showUpload) return "single-image";
-    if (agent.id === "copys" && showUpload) return "single-image+price";
+    // After first send, switch to text input for format Q&A
     return "none";
   }
 
