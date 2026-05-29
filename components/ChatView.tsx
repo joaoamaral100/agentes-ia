@@ -51,17 +51,33 @@ export default function ChatView({ agent, messages, onMessagesChange }: ChatView
   function detectUploadMode(): UploadMode {
     if (agent.id === "videos") return "3images+copys";
 
-    const lastAssistant = [...messages].reverse().find((m) => m.role === "assistant");
-    if (!lastAssistant) return "none";
+    const assistantMsgs = messages.filter((m) => m.role === "assistant");
+    if (assistantMsgs.length === 0) return "none";
 
-    const text = lastAssistant.content.toLowerCase();
+    const last = assistantMsgs[assistantMsgs.length - 1].content.toLowerCase();
 
-    if (agent.id === "imagens" && text.includes("agora manda a imagem do produto")) {
-      return "single-image";
-    }
-    if (agent.id === "copys" && text.includes("agora manda a imagem do produto")) {
-      return "single-image+price";
-    }
+    // Primary: several possible phrasings Claude might use
+    const askingForImage =
+      last.includes("manda a imagem do produto") ||
+      last.includes("agora manda a imagem") ||
+      last.includes("envie a imagem do produto") ||
+      last.includes("pode mandar a imagem") ||
+      last.includes("mande a imagem do produto") ||
+      last.includes("agora envie a imagem");
+
+    // Fallback: after 4 assistant messages (3 format questions + trigger)
+    // and the last message is NOT still asking for a scene format
+    const doneAskingFormats =
+      assistantMsgs.length >= 4 &&
+      !last.includes("cena 1") &&
+      !last.includes("cena 2") &&
+      !last.includes("cena 3") &&
+      !last.includes("qual formato");
+
+    const showUpload = askingForImage || doneAskingFormats;
+
+    if (agent.id === "imagens" && showUpload) return "single-image";
+    if (agent.id === "copys" && showUpload) return "single-image+price";
 
     return "none";
   }
