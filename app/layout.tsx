@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import VoiceAssistantWrapper from "@/components/VoiceAssistantWrapper";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
 
@@ -29,8 +28,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           {children}
         </div>
 
-        {/* JARVIS voice assistant — só aparece após login */}
-        <VoiceAssistantWrapper />
       </body>
     </html>
   );
