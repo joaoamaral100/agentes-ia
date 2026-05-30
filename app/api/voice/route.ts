@@ -6,20 +6,30 @@ export const maxDuration = 30;
 const SYSTEM_PROMPT = `Você é JARVIS, um assistente de IA especializado em ajudar criadores de conteúdo do TikTok Shopping a usar a plataforma JARVIS. Responda em português brasileiro, sem emojis, sem markdown, texto limpo e natural. Máximo 2 frases por resposta.`;
 
 export async function POST(req: Request) {
+  console.log("=== VOICE API CHAMADA ===");
+  console.log("Content-Type:", req.headers.get("content-type"));
+
   const contentType = req.headers.get("content-type") || "";
 
   // type === 'whisper': transcrição de áudio com OpenAI Whisper
   if (contentType.includes("multipart/form-data")) {
+    console.log("=== WHISPER ===");
+    console.log("OPENAI_API_KEY existe:", !!process.env.OPENAI_API_KEY);
+
     const openaiKey = process.env.OPENAI_API_KEY;
     if (!openaiKey) {
       return Response.json({ error: "OpenAI API key não configurada." }, { status: 500 });
     }
 
-    const formData = await req.formData();
+    const formData  = await req.formData();
     const audioFile = formData.get("audio") as File | null;
     if (!audioFile) {
       return Response.json({ error: "Nenhum áudio enviado." }, { status: 400 });
     }
+
+    console.log("Audio recebido, tamanho:", audioFile.size);
+    console.log("MimeType:", audioFile.type);
+    console.log("Enviando para OpenAI...");
 
     const whisperForm = new FormData();
     whisperForm.append("file", audioFile);
@@ -32,10 +42,14 @@ export async function POST(req: Request) {
       body: whisperForm,
     });
 
+    console.log("Status OpenAI:", whisperRes.status);
+    const responseText = await whisperRes.text();
+    console.log("Resposta OpenAI:", responseText);
+
     if (!whisperRes.ok) {
       return Response.json({ error: "Erro na transcrição." }, { status: 500 });
     }
-    const data = await whisperRes.json();
+    const data = JSON.parse(responseText);
     return Response.json({ transcript: data.text ?? "" });
   }
 
@@ -51,6 +65,10 @@ export async function POST(req: Request) {
 
   // type === 'tts': síntese de voz com OpenAI TTS
   if (type === "tts") {
+    console.log("=== TTS ===");
+    console.log("Texto:", text);
+    console.log("OPENAI_API_KEY existe:", !!process.env.OPENAI_API_KEY);
+
     const openaiKey = process.env.OPENAI_API_KEY;
     if (!openaiKey) {
       return Response.json({ error: "OpenAI API key não configurada." }, { status: 500 });
@@ -67,6 +85,8 @@ export async function POST(req: Request) {
       },
       body: JSON.stringify({ model: "tts-1", voice: "onyx", speed: 0.9, input: text }),
     });
+
+    console.log("Status TTS:", ttsRes.status);
 
     if (!ttsRes.ok) {
       return Response.json({ error: "Erro ao gerar áudio." }, { status: 500 });
