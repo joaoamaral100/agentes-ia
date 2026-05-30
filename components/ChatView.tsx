@@ -104,6 +104,27 @@ async function fileToImageData(file: File): Promise<ImageData> {
   });
 }
 
+function compressImage(base64: string): Promise<string> {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      const MAX = 1024;
+      let w = img.width;
+      let h = img.height;
+      if (w > MAX || h > MAX) {
+        if (w > h) { h = Math.round(h * MAX / w); w = MAX; }
+        else        { w = Math.round(w * MAX / h); h = MAX; }
+      }
+      const canvas = document.createElement("canvas");
+      canvas.width  = w;
+      canvas.height = h;
+      canvas.getContext("2d")!.drawImage(img, 0, 0, w, h);
+      resolve(canvas.toDataURL("image/jpeg", 0.8).split(",")[1]);
+    };
+    img.src = "data:image/jpeg;base64," + base64;
+  });
+}
+
 // ─── max images per agent ─────────────────────────────────────────────────────
 function maxImages(agentId: string) {
   if (agentId === "videos")  return 3;
@@ -211,7 +232,11 @@ export default function ChatView({ agent, messages, onMessagesChange, onMenuClic
     let imageData: ImageData[] = [];
     try {
       if (attachedImages.length > 0) {
-        imageData = await Promise.all(attachedImages.map(fileToImageData));
+        imageData = await Promise.all(attachedImages.map(async (file) => {
+          const raw = await fileToImageData(file);
+          const compressed = await compressImage(raw.base64);
+          return { base64: compressed, mediaType: "image/jpeg" as const, name: file.name };
+        }));
       }
     } catch {
       onMessagesChange([...messages, { role: "assistant", content: "⚠️ Erro ao processar imagem." }]);
