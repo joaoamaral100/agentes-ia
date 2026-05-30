@@ -111,28 +111,39 @@ export default function VoiceAssistant() {
 
     const rec = new SR();
     rec.lang           = "pt-BR";
-    rec.continuous     = false;
-    rec.interimResults = false;
+    rec.continuous     = true;
+    rec.interimResults = true;
     recRef.current     = rec;
 
-    let gotResult = false;
+    let silenceTimer: ReturnType<typeof setTimeout>;
 
     rec.onresult = (event: any) => {
-      gotResult = true;
-      const text = event.results[0][0].transcript;
-      handleTranscript(text);
+      clearTimeout(silenceTimer);
+      const text = Array.from(event.results as any[])
+        .map((r: any) => r[0].transcript)
+        .join('');
+
+      if (event.results[event.results.length - 1].isFinal) {
+        rec.stop();
+        handleTranscript(text);
+      } else {
+        setTranscript(text);
+        silenceTimer = setTimeout(() => {
+          rec.stop();
+          handleTranscript(text);
+        }, 2000);
+      }
     };
 
     rec.onerror = (event: any) => {
       console.error("Erro reconhecimento:", event.error);
-      setVoiceState("idle");
+      if (event.error === 'no-speech') {
+        setVoiceState("idle");
+      }
     };
 
     rec.onend = () => {
-      if (!gotResult) {
-        console.log("Nenhum resultado de voz.");
-        setVoiceState("idle");
-      }
+      clearTimeout(silenceTimer);
     };
 
     rec.start();
