@@ -59,8 +59,8 @@ export async function POST(req: Request) {
   const anthropic = new Anthropic({ apiKey });
 
   const message = await anthropic.messages.create({
-    model: "claude-haiku-4-5-20251001",
-    max_tokens: 256,
+    model: "claude-haiku-20240307",
+    max_tokens: 150,
     system: SYSTEM_PROMPT,
     messages: [{ role: "user", content: text }],
   });

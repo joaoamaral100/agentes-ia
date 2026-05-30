@@ -152,6 +152,8 @@ export default function VoiceAssistant() {
       setResponseText("");
       return;
     }
+    const audio = new Audio();
+    audio.play().catch(() => {});
     startListening();
   }
 
