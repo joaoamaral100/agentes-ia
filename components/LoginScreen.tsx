@@ -71,7 +71,6 @@ export default function LoginScreen({ onSuccess }: LoginScreenProps) {
     setLoading(true);
     setError("");
 
-    // Small delay for UX
     await new Promise((r) => setTimeout(r, 400));
 
     const correctPassword = process.env.NEXT_PUBLIC_APP_PASSWORD ?? "bext2024";
@@ -140,35 +139,54 @@ export default function LoginScreen({ onSuccess }: LoginScreenProps) {
           {/* Password input */}
           <div className="mb-4">
             <div
-              className="flex items-center rounded-xl transition-all duration-200"
+              className="flex items-center rounded-xl"
               style={{
                 background: "rgba(0,212,255,0.05)",
                 border: "1px solid rgba(0,212,255,0.2)",
+                height: "52px",
               }}
-              onFocus={() => {}}
             >
               <input
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => { setPassword(e.target.value); setError(""); }}
-                placeholder="Senha de acesso"
-                autoFocus
-                className="flex-1 bg-transparent px-4 py-3 text-[14px] outline-none"
-                style={{ color: "#e0f4ff" }}
                 onFocus={(e) => {
-                  (e.currentTarget.closest("div") as HTMLElement).style.border = "1px solid rgba(0,212,255,0.5)";
-                  (e.currentTarget.closest("div") as HTMLElement).style.boxShadow = "0 0 0 1px rgba(0,212,255,0.12), 0 0 16px rgba(0,212,255,0.08)";
+                  const wrap = e.currentTarget.closest("div") as HTMLElement;
+                  wrap.style.border = "1px solid rgba(0,212,255,0.5)";
+                  wrap.style.boxShadow = "0 0 0 1px rgba(0,212,255,0.12), 0 0 16px rgba(0,212,255,0.08)";
+                  e.currentTarget.scrollIntoView({ behavior: "smooth", block: "center" });
                 }}
                 onBlur={(e) => {
-                  (e.currentTarget.closest("div") as HTMLElement).style.border = "1px solid rgba(0,212,255,0.2)";
-                  (e.currentTarget.closest("div") as HTMLElement).style.boxShadow = "";
+                  const wrap = e.currentTarget.closest("div") as HTMLElement;
+                  wrap.style.border = "1px solid rgba(0,212,255,0.2)";
+                  wrap.style.boxShadow = "";
+                }}
+                placeholder="Senha de acesso"
+                autoComplete="current-password"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
+                className="flex-1 bg-transparent outline-none"
+                style={{
+                  color: "#e0f4ff",
+                  fontSize: "16px",
+                  padding: "0 16px",
+                  height: "100%",
+                  WebkitAppearance: "none",
+                  borderRadius: "12px",
                 }}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword((v) => !v)}
-                className="px-3 transition-colors"
-                style={{ color: showPassword ? "#00d4ff" : "#4a9ebb" }}
+                style={{
+                  color: showPassword ? "#00d4ff" : "#4a9ebb",
+                  padding: "0 14px",
+                  height: "100%",
+                  WebkitTapHighlightColor: "transparent",
+                  touchAction: "manipulation",
+                  flexShrink: 0,
+                }}
               >
                 <EyeIcon open={showPassword} />
               </button>
@@ -176,10 +194,7 @@ export default function LoginScreen({ onSuccess }: LoginScreenProps) {
 
             {/* Error message */}
             {error && (
-              <p
-                className="mt-2 text-[12px]"
-                style={{ color: "#f87171" }}
-              >
+              <p className="mt-2 text-[12px]" style={{ color: "#f87171" }}>
                 {error}
               </p>
             )}
@@ -189,25 +204,19 @@ export default function LoginScreen({ onSuccess }: LoginScreenProps) {
           <button
             type="submit"
             disabled={loading || !password.trim()}
-            className="flex w-full items-center justify-center gap-2 rounded-xl py-3 text-[14px] font-semibold tracking-wide transition-all duration-200"
-            style={
-              loading || !password.trim()
+            className="flex w-full items-center justify-center gap-2 rounded-xl font-semibold tracking-wide"
+            style={{
+              height: "52px",
+              fontSize: "16px",
+              touchAction: "manipulation",
+              WebkitTapHighlightColor: "transparent",
+              ...(loading || !password.trim()
                 ? { background: "rgba(0,212,255,0.08)", color: "rgba(0,212,255,0.3)", cursor: "not-allowed" }
                 : {
                     background: "linear-gradient(135deg, #0066ff, #00d4ff)",
                     color: "#000814",
                     boxShadow: "0 0 20px rgba(0,212,255,0.3)",
-                  }
-            }
-            onMouseEnter={(e) => {
-              if (!loading && password.trim()) {
-                (e.currentTarget as HTMLElement).style.boxShadow = "0 0 30px rgba(0,212,255,0.5)";
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (!loading && password.trim()) {
-                (e.currentTarget as HTMLElement).style.boxShadow = "0 0 20px rgba(0,212,255,0.3)";
-              }
+                  }),
             }}
           >
             {loading ? <Spinner /> : "ENTRAR"}
