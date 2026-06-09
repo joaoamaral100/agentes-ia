@@ -15,20 +15,10 @@ export interface ChatMessage {
   apiText?: string;
 }
 
-// ─── CodeBlock ────────────────────────────────────────────────────────────────
+// ─── CenaBox — caixa visual para CENA N — [tipo] ─────────────────────────────
 
-function CodeBlock({ content, hint = "" }: { content: string; hint?: string }) {
+function CenaBox({ title, body }: { title: string; body: string }) {
   const [copied, setCopied] = useState(false);
-
-  const lines     = content.trim().split("\n");
-  const firstLine = lines[0]?.trim() ?? "";
-
-  // CENA label can appear in the first content line OR as the opening fence "language hint"
-  const cenaInLine = /^CENA\s+\d/i.test(firstLine);
-  const cenaInHint = /^CENA\s+\d/i.test(hint);
-  const isCena     = cenaInLine || cenaInHint;
-  const label      = cenaInLine ? firstLine : cenaInHint ? hint : "output";
-  const body       = cenaInLine ? lines.slice(1).join("\n").trim() : content.trim();
 
   function copy() {
     navigator.clipboard.writeText(body).then(() => {
@@ -48,27 +38,23 @@ function CodeBlock({ content, hint = "" }: { content: string; hint?: string }) {
 
   return (
     <div
-      className="message-in my-3 overflow-hidden"
+      className="my-3 overflow-hidden"
       style={{
         borderRadius: "10px",
-        border: isCena ? "1px solid rgba(0,212,255,0.3)" : "1px solid rgba(0,212,255,0.15)",
+        border: "1px solid rgba(0,212,255,0.3)",
         background: "#000d1a",
-        boxShadow: isCena ? "0 0 20px rgba(0,212,255,0.06)" : undefined,
+        boxShadow: "0 0 20px rgba(0,212,255,0.06)",
       }}
     >
-      {/* Header */}
       <div
         className="flex items-center justify-between px-4 py-2.5"
         style={{
-          background: isCena ? "rgba(0,212,255,0.07)" : "rgba(0,212,255,0.04)",
+          background: "rgba(0,212,255,0.07)",
           borderBottom: "1px solid rgba(0,212,255,0.15)",
         }}
       >
-        <span
-          className={isCena ? "text-[13px] font-bold tracking-wide" : "text-[11px] font-semibold uppercase tracking-widest"}
-          style={{ color: "#00d4ff" }}
-        >
-          {label}
+        <span className="text-[13px] font-bold tracking-wide" style={{ color: "#00d4ff" }}>
+          {title}
         </span>
         <button
           onClick={copy}
@@ -88,21 +74,92 @@ function CodeBlock({ content, hint = "" }: { content: string; hint?: string }) {
           {copied ? "Copiado ✓" : "Copiar"}
         </button>
       </div>
-
-      {/* Body */}
-      <pre className="overflow-x-auto p-4 text-[13px] leading-relaxed" style={{ color: "#e0f4ff", fontFamily: "inherit", whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
+      <pre
+        className="p-4 text-[13px] leading-relaxed"
+        style={{ color: "#e0f4ff", fontFamily: "inherit", whiteSpace: "pre-wrap", wordBreak: "break-word" }}
+      >
         {body}
       </pre>
     </div>
   );
 }
 
-// ─── Markdown renderer ────────────────────────────────────────────────────────
+// ─── CodeBlock — para blocos ``` genéricos (outros agentes) ──────────────────
 
-function renderText(text: string, keyPrefix: string) {
+function CodeBlock({ content }: { content: string }) {
+  const [copied, setCopied] = useState(false);
+
+  function copy() {
+    navigator.clipboard.writeText(content).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }).catch(() => {
+      const el = document.createElement("textarea");
+      el.value = content;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand("copy");
+      document.body.removeChild(el);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }
+
+  return (
+    <div
+      className="my-3 overflow-hidden"
+      style={{ borderRadius: "10px", border: "1px solid rgba(0,212,255,0.15)", background: "#000d1a" }}
+    >
+      <div
+        className="flex items-center justify-between px-4 py-2"
+        style={{ background: "rgba(0,212,255,0.04)", borderBottom: "1px solid rgba(0,212,255,0.15)" }}
+      >
+        <span className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: "#00d4ff" }}>
+          output
+        </span>
+        <button
+          onClick={copy}
+          className="rounded-md px-3 py-1 text-[12px] font-semibold transition-all duration-150"
+          style={
+            copied
+              ? { background: "#00d4ff", color: "#000814" }
+              : { border: "1px solid rgba(0,212,255,0.35)", color: "#00d4ff", background: "transparent" }
+          }
+          onMouseEnter={(e) => {
+            if (!copied) Object.assign((e.currentTarget as HTMLElement).style, { background: "#00d4ff", color: "#000814" });
+          }}
+          onMouseLeave={(e) => {
+            if (!copied) Object.assign((e.currentTarget as HTMLElement).style, { background: "transparent", color: "#00d4ff", border: "1px solid rgba(0,212,255,0.35)" });
+          }}
+        >
+          {copied ? "Copiado ✓" : "Copiar"}
+        </button>
+      </div>
+      <pre
+        className="p-4 text-[13px] leading-relaxed"
+        style={{ color: "#e0f4ff", fontFamily: "inherit", whiteSpace: "pre-wrap", wordBreak: "break-word" }}
+      >
+        {content}
+      </pre>
+    </div>
+  );
+}
+
+// ─── Renderers ────────────────────────────────────────────────────────────────
+
+function renderInline(text: string) {
+  return text.split(/(\*\*[^*]+\*\*)/g).map((seg, i) => {
+    if (seg.startsWith("**") && seg.endsWith("**")) {
+      return <strong key={i} style={{ color: "#e0f4ff", fontWeight: 600 }}>{seg.slice(2, -2)}</strong>;
+    }
+    return <Fragment key={i}>{seg}</Fragment>;
+  });
+}
+
+function renderPlainText(text: string, key: string) {
   const lines = text.split("\n");
   return (
-    <Fragment key={keyPrefix}>
+    <Fragment key={key}>
       {lines.map((line, j) => (
         <Fragment key={j}>
           {renderInline(line)}
@@ -113,83 +170,37 @@ function renderText(text: string, keyPrefix: string) {
   );
 }
 
-// Extract content + hint from a raw code fence block
-function parseBlock(raw: string): { content: string; hint: string } {
-  const hint = (raw.match(/^```([^\n]*)/) ?? [])[1]?.trim() ?? "";
-  const content = raw
-    .replace(/^```[^\n]*\n?/, "")  // strip opening fence line
-    .replace(/\n?```\s*$/, "");    // strip closing fence
-  return { content, hint };
-}
-
-// Render bare CENA sections that appear as plain text (no ``` fences)
-function renderBareCenas(text: string, keyPrefix: string): React.ReactNode[] {
-  const result: React.ReactNode[] = [];
-  const lines = text.split("\n");
-  let cenaLines: string[] = [];
-  let textLines: string[] = [];
-
-  function flushText() {
-    if (textLines.length === 0) return;
-    result.push(renderText(textLines.join("\n"), `${keyPrefix}-t${result.length}`));
-    textLines = [];
-  }
-  function flushCena() {
-    if (cenaLines.length === 0) return;
-    result.push(<CodeBlock key={`${keyPrefix}-c${result.length}`} content={cenaLines.join("\n").trim()} />);
-    cenaLines = [];
-  }
-
-  for (const line of lines) {
-    if (/^CENA\s+\d/i.test(line.trim())) {
-      flushText(); flushCena();
-      cenaLines.push(line);
-    } else if (cenaLines.length > 0) {
-      cenaLines.push(line);
-    } else {
-      textLines.push(line);
-    }
-  }
-  flushText(); flushCena();
-  return result;
-}
-
 function renderContent(raw: string) {
-  const parts = raw.split(/(```[\s\S]*?```)/g);
-  const elements: React.ReactNode[] = [];
+  // ── CENA detection: split by "CENA N —" and render each as a styled box ──
+  if (/CENA\s+\d+\s*—/i.test(raw)) {
+    // Split keeping the "CENA N —" delimiter at the start of each section
+    const parts = raw.split(/(?=CENA\s+\d+\s*—)/i);
 
-  for (let i = 0; i < parts.length; i++) {
-    const part = parts[i];
+    return parts.map((part, i) => {
+      const trimmed = part.trim();
+      if (!trimmed) return null;
 
-    if (part.startsWith("```")) {
-      // Complete, closed code block
-      const { content, hint } = parseBlock(part);
-      elements.push(<CodeBlock key={i} content={content} hint={hint} />);
-    } else {
-      const fenceIdx = part.indexOf("```");
-      if (fenceIdx !== -1) {
-        // Unclosed code block (streaming or model forgot closing fence)
-        const before = part.slice(0, fenceIdx);
-        const unclosed = part.slice(fenceIdx);
-        if (before.trim()) elements.push(...renderBareCenas(before, `${i}-b`));
-        const { content, hint } = parseBlock(unclosed);
-        elements.push(<CodeBlock key={`${i}-open`} content={content} hint={hint} />);
-      } else {
-        // Plain text — may contain bare CENA sections without fences
-        if (part.trim()) elements.push(...renderBareCenas(part, String(i)));
+      if (/^CENA\s+\d+\s*—/i.test(trimmed)) {
+        const lines = trimmed.split("\n");
+        const title = lines[0].trim();
+        // Strip any ``` markers the model may have included, then trim
+        const body = lines.slice(1).join("\n").replace(/```[^\n]*/g, "").trim();
+        return <CenaBox key={i} title={title} body={body} />;
       }
-    }
+
+      // Intro text before the first CENA (e.g. "Entendi! Gerando...")
+      return renderPlainText(trimmed, String(i));
+    });
   }
 
-  return elements;
-}
-
-function renderInline(text: string) {
-  return text.split(/(\*\*[^*]+\*\*)/g).map((seg, i) => {
-    if (seg.startsWith("**") && seg.endsWith("**")) {
-      return <strong key={i} style={{ color: "#e0f4ff", fontWeight: 600 }}>{seg.slice(2, -2)}</strong>;
+  // ── Fallback: standard ``` code block rendering (for other agents) ──
+  const parts = raw.split(/(```[\s\S]*?```)/g);
+  return parts.map((part, i) => {
+    if (part.startsWith("```")) {
+      const inner = part.replace(/^```[^\n]*\n?/, "").replace(/\n?```\s*$/, "");
+      return <CodeBlock key={i} content={inner} />;
     }
-    return <Fragment key={i}>{seg}</Fragment>;
+    return renderPlainText(part, String(i));
   });
 }
 
