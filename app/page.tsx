@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Sidebar from "@/components/Sidebar";
 import ChatView from "@/components/ChatView";
 import LoginScreen from "@/components/LoginScreen";
@@ -52,14 +52,21 @@ export default function Home() {
   const [chats, setChats] = useState<ChatState>(emptyState);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  // Guard: only save AFTER initial load — prevents overwriting stored data
+  // with emptyState if React doesn't batch the two setState calls in mount effect
+  const chatsLoadedRef = useRef(false);
+
   useEffect(() => {
     const stored = localStorage.getItem("jarvis_auth");
     setAuthenticated(stored === "true");
     setChats(loadChats());
+    chatsLoadedRef.current = true; // set synchronously, before any re-render
   }, []);
 
   useEffect(() => {
-    if (authenticated) saveChats(chats);
+    if (authenticated === true && chatsLoadedRef.current) {
+      saveChats(chats);
+    }
   }, [chats, authenticated]);
 
   if (authenticated === null) {

@@ -17,14 +17,18 @@ export interface ChatMessage {
 
 // ─── CodeBlock ────────────────────────────────────────────────────────────────
 
-function CodeBlock({ content }: { content: string }) {
+function CodeBlock({ content, hint = "" }: { content: string; hint?: string }) {
   const [copied, setCopied] = useState(false);
 
-  const lines    = content.trim().split("\n");
-  const firstLine = lines[0] ?? "";
-  const isCena   = /^CENA\s+\d/i.test(firstLine);
-  const label    = isCena ? firstLine.trim() : "output";
-  const body     = isCena ? lines.slice(1).join("\n").trim() : content.trim();
+  const lines     = content.trim().split("\n");
+  const firstLine = lines[0]?.trim() ?? "";
+
+  // CENA label can appear in the first content line OR as the opening fence "language hint"
+  const cenaInLine = /^CENA\s+\d/i.test(firstLine);
+  const cenaInHint = /^CENA\s+\d/i.test(hint);
+  const isCena     = cenaInLine || cenaInHint;
+  const label      = cenaInLine ? firstLine : cenaInHint ? hint : "output";
+  const body       = cenaInLine ? lines.slice(1).join("\n").trim() : content.trim();
 
   function copy() {
     navigator.clipboard.writeText(body).then(() => {
@@ -109,14 +113,48 @@ function renderText(text: string, keyPrefix: string) {
   );
 }
 
-function extractInner(raw: string) {
-  return raw
-    .replace(/^```[^\n]*\n?/, "")   // remove opening fence + optional language hint
-    .replace(/\n?```\s*$/, "");      // remove closing fence (tolerates trailing whitespace/newline)
+// Extract content + hint from a raw code fence block
+function parseBlock(raw: string): { content: string; hint: string } {
+  const hint = (raw.match(/^```([^\n]*)/) ?? [])[1]?.trim() ?? "";
+  const content = raw
+    .replace(/^```[^\n]*\n?/, "")  // strip opening fence line
+    .replace(/\n?```\s*$/, "");    // strip closing fence
+  return { content, hint };
+}
+
+// Render bare CENA sections that appear as plain text (no ``` fences)
+function renderBareCenas(text: string, keyPrefix: string): React.ReactNode[] {
+  const result: React.ReactNode[] = [];
+  const lines = text.split("\n");
+  let cenaLines: string[] = [];
+  let textLines: string[] = [];
+
+  function flushText() {
+    if (textLines.length === 0) return;
+    result.push(renderText(textLines.join("\n"), `${keyPrefix}-t${result.length}`));
+    textLines = [];
+  }
+  function flushCena() {
+    if (cenaLines.length === 0) return;
+    result.push(<CodeBlock key={`${keyPrefix}-c${result.length}`} content={cenaLines.join("\n").trim()} />);
+    cenaLines = [];
+  }
+
+  for (const line of lines) {
+    if (/^CENA\s+\d/i.test(line.trim())) {
+      flushText(); flushCena();
+      cenaLines.push(line);
+    } else if (cenaLines.length > 0) {
+      cenaLines.push(line);
+    } else {
+      textLines.push(line);
+    }
+  }
+  flushText(); flushCena();
+  return result;
 }
 
 function renderContent(raw: string) {
-  // Split on complete code blocks first
   const parts = raw.split(/(```[\s\S]*?```)/g);
   const elements: React.ReactNode[] = [];
 
@@ -125,18 +163,20 @@ function renderContent(raw: string) {
 
     if (part.startsWith("```")) {
       // Complete, closed code block
-      elements.push(<CodeBlock key={i} content={extractInner(part)} />);
+      const { content, hint } = parseBlock(part);
+      elements.push(<CodeBlock key={i} content={content} hint={hint} />);
     } else {
-      // Check for an unclosed code block within this segment
-      // (happens when streaming hasn't finished or model omits closing ```)
       const fenceIdx = part.indexOf("```");
       if (fenceIdx !== -1) {
+        // Unclosed code block (streaming or model forgot closing fence)
         const before = part.slice(0, fenceIdx);
         const unclosed = part.slice(fenceIdx);
-        if (before.trim()) elements.push(renderText(before, `${i}-before`));
-        elements.push(<CodeBlock key={`${i}-open`} content={extractInner(unclosed)} />);
+        if (before.trim()) elements.push(...renderBareCenas(before, `${i}-b`));
+        const { content, hint } = parseBlock(unclosed);
+        elements.push(<CodeBlock key={`${i}-open`} content={content} hint={hint} />);
       } else {
-        if (part) elements.push(renderText(part, String(i)));
+        // Plain text — may contain bare CENA sections without fences
+        if (part.trim()) elements.push(...renderBareCenas(part, String(i)));
       }
     }
   }
