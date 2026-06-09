@@ -146,7 +146,6 @@ export default function ChatView({ agent, messages, onMessagesChange, onMenuClic
   const [attachedImages, setAttached]   = useState<File[]>([]);
   const [previews, setPreviews]         = useState<string[]>([]);
   const [price, setPrice]               = useState("");
-  const [copysText, setCopysText]       = useState("");
   const [inputFocused, setInputFocused] = useState(false);
   const [listening, setListening]       = useState(false);
   const [chatDragOver, setDragOver]     = useState(false);
@@ -165,7 +164,7 @@ export default function ChatView({ agent, messages, onMessagesChange, onMenuClic
   useEffect(() => {
     previews.forEach(u => URL.revokeObjectURL(u));
     setAttached([]); setPreviews([]);
-    setInput(""); setPrice(""); setCopysText("");
+    setInput(""); setPrice("");
   }, [agent.id]);
 
   // ── revoke previews on unmount ────────────────────────────────────────────
@@ -218,9 +217,6 @@ export default function ChatView({ agent, messages, onMessagesChange, onMenuClic
   // ── can send ──────────────────────────────────────────────────────────────
   function canSend(): boolean {
     if (loading) return false;
-    if (agent.id === "videos" && (attachedImages.length > 0 || messages.length === 0)) {
-      return attachedImages.length === 3 && copysText.trim().length > 0;
-    }
     if (attachedImages.length > 0) return true;
     return input.trim().length > 0;
   }
@@ -258,9 +254,6 @@ export default function ChatView({ agent, messages, onMessagesChange, onMenuClic
       } else if (agent.id === "copys") {
         displayContent = `[Imagem: ${attachedImages[0].name}]${price.trim() ? " · Preço: " + price.trim() : ""}`;
         apiText = `Aqui está a imagem do produto.${price.trim() ? " O preço é: " + price.trim() + "." : ""}${input.trim() ? " " + input.trim() : ""}`;
-      } else if (agent.id === "videos") {
-        displayContent = `[3 imagens enviadas]\n\n${copysText}`;
-        apiText = `Aqui estão as 3 imagens e os copies/roteiros:\n\n${copysText}`;
       } else {
         displayContent = `[${imageData.length} imagem${imageData.length > 1 ? "ns" : ""}]${input.trim() ? "\n\n" + input.trim() : ""}`;
       }
@@ -278,7 +271,7 @@ export default function ChatView({ agent, messages, onMessagesChange, onMenuClic
     setInput("");
     previews.forEach(u => URL.revokeObjectURL(u));
     setAttached([]); setPreviews([]);
-    if (agent.id !== "videos") { setPrice(""); setCopysText(""); }
+    setPrice("");
     setLoading(true);
     onMessagesChange([...history, { role: "assistant", content: "" }]);
 
@@ -438,24 +431,6 @@ export default function ChatView({ agent, messages, onMessagesChange, onMenuClic
       {/* Input area */}
       <div className="px-5 pb-6 pt-2">
         <div className="mx-auto w-full max-w-2xl space-y-2">
-
-          {/* Videos: copys textarea (always shown) */}
-          {agent.id === "videos" && (
-            <textarea
-              value={copysText}
-              onChange={(e) => setCopysText(e.target.value)}
-              placeholder="Cole aqui os 3 copies ou roteiros..."
-              rows={4}
-              className="w-full resize-none rounded-xl px-3.5 py-3 text-[13px] leading-relaxed outline-none transition-all"
-              style={{
-                background: "rgba(0,212,255,0.03)",
-                border: "1px solid rgba(0,212,255,0.15)",
-                color: "#e0f4ff",
-              }}
-              onFocus={(e) => { e.currentTarget.style.borderColor = "rgba(0,212,255,0.4)"; }}
-              onBlur={(e) => { e.currentTarget.style.borderColor = "rgba(0,212,255,0.15)"; }}
-            />
-          )}
 
           {/* Copys: price input (shown when image attached) */}
           {agent.id === "copys" && attachedImages.length > 0 && (
