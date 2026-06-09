@@ -95,25 +95,53 @@ function CodeBlock({ content }: { content: string }) {
 
 // ─── Markdown renderer ────────────────────────────────────────────────────────
 
+function renderText(text: string, keyPrefix: string) {
+  const lines = text.split("\n");
+  return (
+    <Fragment key={keyPrefix}>
+      {lines.map((line, j) => (
+        <Fragment key={j}>
+          {renderInline(line)}
+          {j < lines.length - 1 && <br />}
+        </Fragment>
+      ))}
+    </Fragment>
+  );
+}
+
+function extractInner(raw: string) {
+  return raw
+    .replace(/^```[^\n]*\n?/, "")   // remove opening fence + optional language hint
+    .replace(/\n?```\s*$/, "");      // remove closing fence (tolerates trailing whitespace/newline)
+}
+
 function renderContent(raw: string) {
+  // Split on complete code blocks first
   const parts = raw.split(/(```[\s\S]*?```)/g);
-  return parts.map((part, i) => {
+  const elements: React.ReactNode[] = [];
+
+  for (let i = 0; i < parts.length; i++) {
+    const part = parts[i];
+
     if (part.startsWith("```")) {
-      const inner = part.replace(/^```[a-zA-Z]*\n?/, "").replace(/```$/, "");
-      return <CodeBlock key={i} content={inner} />;
+      // Complete, closed code block
+      elements.push(<CodeBlock key={i} content={extractInner(part)} />);
+    } else {
+      // Check for an unclosed code block within this segment
+      // (happens when streaming hasn't finished or model omits closing ```)
+      const fenceIdx = part.indexOf("```");
+      if (fenceIdx !== -1) {
+        const before = part.slice(0, fenceIdx);
+        const unclosed = part.slice(fenceIdx);
+        if (before.trim()) elements.push(renderText(before, `${i}-before`));
+        elements.push(<CodeBlock key={`${i}-open`} content={extractInner(unclosed)} />);
+      } else {
+        if (part) elements.push(renderText(part, String(i)));
+      }
     }
-    const lines = part.split("\n");
-    return (
-      <Fragment key={i}>
-        {lines.map((line, j) => (
-          <Fragment key={j}>
-            {renderInline(line)}
-            {j < lines.length - 1 && <br />}
-          </Fragment>
-        ))}
-      </Fragment>
-    );
-  });
+  }
+
+  return elements;
 }
 
 function renderInline(text: string) {

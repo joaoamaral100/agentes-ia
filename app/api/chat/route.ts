@@ -65,7 +65,7 @@ export async function POST(req: Request) {
       try {
         const messageStream = anthropic.messages.stream({
           model: "claude-opus-4-8",
-          max_tokens: 2048,
+          max_tokens: 4096,
           system: agent.systemPrompt,
           messages: messages.map((m) => {
             if (m.images && m.images.length > 0) {
