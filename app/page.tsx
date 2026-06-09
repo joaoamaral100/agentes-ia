@@ -9,10 +9,41 @@ import { AGENTS, AgentId, getAgent } from "@/lib/agents";
 
 type ChatState = Record<AgentId, ChatMessage[]>;
 
+const STORAGE_KEY = "jarvis_chats";
+
 const emptyState: ChatState = AGENTS.reduce((acc, a) => {
   acc[a.id] = [];
   return acc;
 }, {} as ChatState);
+
+function loadChats(): ChatState {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return emptyState;
+    const parsed = JSON.parse(raw) as Partial<Record<AgentId, ChatMessage[]>>;
+    return AGENTS.reduce((acc, a) => {
+      acc[a.id] = parsed[a.id] ?? [];
+      return acc;
+    }, {} as ChatState);
+  } catch {
+    return emptyState;
+  }
+}
+
+function saveChats(chats: ChatState) {
+  try {
+    // Strip base64 images before saving — too large for localStorage (5 MB limit)
+    const stripped = AGENTS.reduce((acc, a) => {
+      acc[a.id] = chats[a.id]
+        .filter((m) => !(m.role === "assistant" && m.content === "")) // skip empty streaming placeholder
+        .map((m) => ({ role: m.role, content: m.content, ...(m.apiText ? { apiText: m.apiText } : {}) }));
+      return acc;
+    }, {} as ChatState);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(stripped));
+  } catch {
+    // localStorage full or unavailable — fail silently
+  }
+}
 
 export default function Home() {
   // null = checking, false = not authenticated, true = authenticated
@@ -24,7 +55,12 @@ export default function Home() {
   useEffect(() => {
     const stored = localStorage.getItem("jarvis_auth");
     setAuthenticated(stored === "true");
+    setChats(loadChats());
   }, []);
+
+  useEffect(() => {
+    if (authenticated) saveChats(chats);
+  }, [chats, authenticated]);
 
   if (authenticated === null) {
     // Prevent flash — render nothing until localStorage is checked
