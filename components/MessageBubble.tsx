@@ -15,25 +15,24 @@ export interface ChatMessage {
   apiText?: string;
 }
 
-// ─── Jarvis CodeBlock ─────────────────────────────────────────────────────────
+// ─── CodeBlock ────────────────────────────────────────────────────────────────
 
 function CodeBlock({ content }: { content: string }) {
   const [copied, setCopied] = useState(false);
 
-  const firstLine = content.trim().split("\n")[0] ?? "";
-  const hasLabel  = /^CENA\s+\d/i.test(firstLine);
-  const label     = hasLabel ? firstLine : "output";
-  const body      = hasLabel
-    ? content.trim().split("\n").slice(1).join("\n").trim()
-    : content.trim();
+  const lines    = content.trim().split("\n");
+  const firstLine = lines[0] ?? "";
+  const isCena   = /^CENA\s+\d/i.test(firstLine);
+  const label    = isCena ? firstLine.trim() : "output";
+  const body     = isCena ? lines.slice(1).join("\n").trim() : content.trim();
 
   function copy() {
-    navigator.clipboard.writeText(body || content.trim()).then(() => {
+    navigator.clipboard.writeText(body).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }).catch(() => {
       const el = document.createElement("textarea");
-      el.value = body || content.trim();
+      el.value = body;
       document.body.appendChild(el);
       el.select();
       document.execCommand("copy");
@@ -45,63 +44,50 @@ function CodeBlock({ content }: { content: string }) {
 
   return (
     <div
-      className="message-in relative my-3 overflow-hidden"
+      className="message-in my-3 overflow-hidden"
       style={{
-        borderRadius: "8px",
-        border: "1px solid rgba(0,212,255,0.2)",
+        borderRadius: "10px",
+        border: isCena ? "1px solid rgba(0,212,255,0.3)" : "1px solid rgba(0,212,255,0.15)",
         background: "#000d1a",
+        boxShadow: isCena ? "0 0 20px rgba(0,212,255,0.06)" : undefined,
       }}
     >
       {/* Header */}
       <div
-        className="flex items-center justify-between px-4 py-2"
+        className="flex items-center justify-between px-4 py-2.5"
         style={{
-          background: "rgba(0,212,255,0.05)",
+          background: isCena ? "rgba(0,212,255,0.07)" : "rgba(0,212,255,0.04)",
           borderBottom: "1px solid rgba(0,212,255,0.15)",
         }}
       >
         <span
-          className="text-[11px] font-semibold uppercase tracking-widest"
+          className={isCena ? "text-[13px] font-bold tracking-wide" : "text-[11px] font-semibold uppercase tracking-widest"}
           style={{ color: "#00d4ff" }}
         >
           {label}
         </span>
         <button
           onClick={copy}
-          className="rounded px-2.5 py-1 text-[11px] font-medium transition-all duration-150"
+          className="rounded-md px-3 py-1 text-[12px] font-semibold transition-all duration-150"
           style={
             copied
               ? { background: "#00d4ff", color: "#000814" }
-              : {
-                  border: "1px solid rgba(0,212,255,0.4)",
-                  color: "#00d4ff",
-                  background: "transparent",
-                }
+              : { border: "1px solid rgba(0,212,255,0.35)", color: "#00d4ff", background: "transparent" }
           }
           onMouseEnter={(e) => {
-            if (!copied) {
-              Object.assign((e.currentTarget as HTMLElement).style, {
-                background: "#00d4ff",
-                color: "#000814",
-              });
-            }
+            if (!copied) Object.assign((e.currentTarget as HTMLElement).style, { background: "#00d4ff", color: "#000814" });
           }}
           onMouseLeave={(e) => {
-            if (!copied) {
-              Object.assign((e.currentTarget as HTMLElement).style, {
-                background: "transparent",
-                color: "#00d4ff",
-              });
-            }
+            if (!copied) Object.assign((e.currentTarget as HTMLElement).style, { background: "transparent", color: "#00d4ff", border: "1px solid rgba(0,212,255,0.35)" });
           }}
         >
           {copied ? "Copiado ✓" : "Copiar"}
         </button>
       </div>
 
-      {/* Code */}
-      <pre className="overflow-x-auto p-4 font-mono text-[13px] leading-relaxed" style={{ color: "#e0f4ff" }}>
-        <code className="whitespace-pre-wrap break-words">{body || content.trim()}</code>
+      {/* Body */}
+      <pre className="overflow-x-auto p-4 text-[13px] leading-relaxed" style={{ color: "#e0f4ff", fontFamily: "inherit", whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
+        {body}
       </pre>
     </div>
   );
