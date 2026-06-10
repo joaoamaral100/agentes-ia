@@ -171,26 +171,40 @@ function renderPlainText(text: string, key: string) {
 }
 
 function renderContent(raw: string) {
-  // ── CENA detection: split by "CENA N —" and render each as a styled box ──
-  if (/CENA\s+\d+\s*—/i.test(raw)) {
-    // Split keeping the "CENA N —" delimiter at the start of each section
-    const parts = raw.split(/(?=CENA\s+\d+\s*—)/i);
-
-    return parts.map((part, i) => {
-      const trimmed = part.trim();
-      if (!trimmed) return null;
-
-      if (/^CENA\s+\d+\s*—/i.test(trimmed)) {
-        const lines = trimmed.split("\n");
-        const title = lines[0].trim();
-        // Strip any ``` markers the model may have included, then trim
-        const body = lines.slice(1).join("\n").replace(/```[^\n]*/g, "").trim();
-        return <CenaBox key={i} title={title} body={body} />;
-      }
-
-      // Intro text before the first CENA (e.g. "Entendi! Gerando...")
-      return renderPlainText(trimmed, String(i));
-    });
+  // ── CENA detection: split and render each scene as a styled box ──
+  if (raw.includes("CENA")) {
+    const cenas = raw.split(/(?=CENA \d+)/);
+    return (
+      <>
+        {cenas.map((cena, i) => {
+          const firstLine = cena.split("\n")[0];
+          const rest = cena.substring(cena.indexOf("\n") + 1).replace(/```[^\n]*/g, "").trim();
+          // Non-CENA intro text (e.g. "Entendi! Gerando...")
+          if (!firstLine.startsWith("CENA")) {
+            return <Fragment key={i}>{renderPlainText(cena, String(i))}</Fragment>;
+          }
+          return (
+            <div
+              key={i}
+              style={{ background: "#0a2e3a", border: "1px solid #00bcd4", borderRadius: "8px", padding: "16px", marginBottom: "16px" }}
+            >
+              <div style={{ color: "#00bcd4", fontSize: "16px", fontWeight: "bold", marginBottom: "12px" }}>
+                {firstLine}
+              </div>
+              <div style={{ color: "#fff", fontSize: "14px", whiteSpace: "pre-wrap" }}>
+                {rest}
+              </div>
+              <button
+                onClick={() => navigator.clipboard.writeText(rest)}
+                style={{ marginTop: "12px", padding: "8px 16px", background: "#00bcd4", color: "#000", border: "none", borderRadius: "4px", cursor: "pointer" }}
+              >
+                Copiar
+              </button>
+            </div>
+          );
+        })}
+      </>
+    );
   }
 
   // ── Fallback: standard ``` code block rendering (for other agents) ──
