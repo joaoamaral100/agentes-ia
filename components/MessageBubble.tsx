@@ -171,31 +171,47 @@ function renderPlainText(text: string, key: string) {
 }
 
 function renderContent(raw: string) {
-  // ── CENA detection: split and render each scene as a styled box ──
+  // ── CENA detection: line-by-line accumulation into scene buckets ──
   if (raw.includes("CENA")) {
-    const cenas = raw.split(/(?=CENA \d+)/);
+    const lines = raw.split("\n");
+    const scenes: string[] = [];
+    let current = "";
+
+    for (const line of lines) {
+      if (/CENA \d+/.test(line)) {
+        if (current) scenes.push(current); // flush previous bucket
+        current = line + "\n";             // start new scene bucket
+      } else {
+        current += line + "\n";
+      }
+    }
+    if (current) scenes.push(current); // flush last bucket
+
     return (
       <>
-        {cenas.map((cena, i) => {
-          const firstLine = cena.split("\n")[0];
-          const rest = cena.substring(cena.indexOf("\n") + 1).replace(/```[^\n]*/g, "").trim();
-          // Non-CENA intro text (e.g. "Entendi! Gerando...")
-          if (!firstLine.startsWith("CENA")) {
-            return <Fragment key={i}>{renderPlainText(cena, String(i))}</Fragment>;
+        {scenes.map((scene, i) => {
+          const sceneLines = scene.split("\n");
+          const title = sceneLines[0].trim();
+          const body  = sceneLines.slice(1).join("\n").replace(/```[^\n]*/g, "").trim();
+
+          // Intro text before first CENA (e.g. "Entendi! Gerando...")
+          if (!/^CENA \d+/.test(title)) {
+            return <Fragment key={i}>{renderPlainText(scene, String(i))}</Fragment>;
           }
+
           return (
             <div
               key={i}
               style={{ background: "#0a2e3a", border: "1px solid #00bcd4", borderRadius: "8px", padding: "16px", marginBottom: "16px" }}
             >
               <div style={{ color: "#00bcd4", fontSize: "16px", fontWeight: "bold", marginBottom: "12px" }}>
-                {firstLine}
+                {title}
               </div>
               <div style={{ color: "#fff", fontSize: "14px", whiteSpace: "pre-wrap" }}>
-                {rest}
+                {body}
               </div>
               <button
-                onClick={() => navigator.clipboard.writeText(rest)}
+                onClick={() => navigator.clipboard.writeText(body)}
                 style={{ marginTop: "12px", padding: "8px 16px", background: "#00bcd4", color: "#000", border: "none", borderRadius: "4px", cursor: "pointer" }}
               >
                 Copiar
