@@ -171,59 +171,70 @@ function renderPlainText(text: string, key: string) {
 }
 
 function renderContent(raw: string) {
-  // ── CENA detection: line-by-line accumulation into scene buckets ──
-  if (raw.includes("CENA")) {
-    const lines = raw.split("\n");
-    const scenes: string[] = [];
-    let current = "";
+  // ── CENA / FORMATO detection ──────────────────────────────────────────────
+  if (raw.includes("CENA") || raw.includes("FORMATO")) {
+    type Seg =
+      | { type: "text";    content: string }
+      | { type: "formato"; title: string }
+      | { type: "cena";    title: string; body: string };
 
-    for (const line of lines) {
-      if (/CENA \d+/.test(line)) {
-        if (current) scenes.push(current); // flush previous bucket
-        current = line + "\n";             // start new scene bucket
+    const segments: Seg[] = [];
+    let mode: "text" | "cena" = "text";
+    let buffer = "";
+    let cenaTitle = "";
+
+    function flush() {
+      if (mode === "cena" && cenaTitle) {
+        const body = buffer.replace(/```[^\n]*/g, "").trim();
+        segments.push({ type: "cena", title: cenaTitle, body });
       } else {
-        current += line + "\n";
+        const cleaned = buffer.replace(/```[^\n]*/g, "").trim();
+        if (cleaned) segments.push({ type: "text", content: cleaned });
+      }
+      buffer = "";
+      cenaTitle = "";
+      mode = "text";
+    }
+
+    for (const line of raw.split("\n")) {
+      const t = line.trim();
+      if (/^FORMATO [A-Z]/.test(t)) {
+        flush();
+        segments.push({ type: "formato", title: t });
+      } else if (/^CENA \d+/.test(t)) {
+        flush();
+        mode = "cena";
+        cenaTitle = t;
+      } else {
+        buffer += line + "\n";
       }
     }
-    if (current) scenes.push(current); // flush last bucket
+    flush();
 
     return (
       <>
-        {scenes.map((scene, i) => {
-          const sceneLines = scene.split("\n");
-          const title = sceneLines[0].trim();
-          const body  = sceneLines.slice(1).join("\n").replace(/```[^\n]*/g, "").trim();
-
-          // Intro text before first CENA (e.g. "Entendi! Gerando...")
-          if (!/^CENA \d+/.test(title)) {
-            return <Fragment key={i}>{renderPlainText(scene, String(i))}</Fragment>;
-          }
-
-          return (
-            <div
-              key={i}
-              style={{ background: "#0a2e3a", border: "1px solid #00bcd4", borderRadius: "8px", padding: "16px", marginBottom: "16px" }}
-            >
-              <div style={{ color: "#00bcd4", fontSize: "16px", fontWeight: "bold", marginBottom: "12px" }}>
-                {title}
-              </div>
-              <div style={{ color: "#fff", fontSize: "14px", whiteSpace: "pre-wrap" }}>
-                {body}
-              </div>
-              <button
-                onClick={() => navigator.clipboard.writeText(body)}
-                style={{ marginTop: "12px", padding: "8px 16px", background: "#00bcd4", color: "#000", border: "none", borderRadius: "4px", cursor: "pointer" }}
+        {segments.map((seg, i) => {
+          if (seg.type === "formato") {
+            return (
+              <div
+                key={i}
+                className="mt-5 mb-1 text-[12px] font-bold tracking-widest uppercase"
+                style={{ color: "#00d4ff", borderBottom: "1px solid rgba(0,212,255,0.2)", paddingBottom: "6px" }}
               >
-                Copiar
-              </button>
-            </div>
-          );
+                {seg.title}
+              </div>
+            );
+          }
+          if (seg.type === "cena") {
+            return <CenaBox key={i} title={seg.title} body={seg.body} />;
+          }
+          return <Fragment key={i}>{renderPlainText(seg.content, String(i))}</Fragment>;
         })}
       </>
     );
   }
 
-  // ── Fallback: standard ``` code block rendering (for other agents) ──
+  // ── Fallback: standard ``` code block rendering ──────────────────────────
   const parts = raw.split(/(```[\s\S]*?```)/g);
   return parts.map((part, i) => {
     if (part.startsWith("```")) {

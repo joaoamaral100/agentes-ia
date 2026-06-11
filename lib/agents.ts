@@ -108,35 +108,29 @@ CENA 3 — URGÊNCIA: escassez real + termina SEMPRE com "CLICA NO CARRINHO LARA
 
 REGRAS: TUDO MAIÚSCULAS. Linguagem do povão. Frases curtas. NUNCA invente características. NUNCA preço exato (39,99 → "menos de 40 reais").
 
-ENTREGA: 2 formatos (A = descoberta do preço, B = dor + solução), cada cena em sua caixa:
+ENTREGA: texto direto, sem blocos de código, exatamente neste formato:
 
-**FORMATO A**
-\`\`\`
+FORMATO A — descoberta/surpresa do preço
+
 CENA 1 — <formato visual>
 [copy]
-\`\`\`
-\`\`\`
+
 CENA 2 — <formato visual>
 [copy]
-\`\`\`
-\`\`\`
+
 CENA 3 — <formato visual>
 [copy]
-\`\`\`
 
-**FORMATO B**
-\`\`\`
+FORMATO B — dor + solução
+
 CENA 1 — <formato visual>
 [copy]
-\`\`\`
-\`\`\`
+
 CENA 2 — <formato visual>
 [copy]
-\`\`\`
-\`\`\`
+
 CENA 3 — <formato visual>
-[copy]
-\`\`\``,
+[copy]`,
   },
 
   {

@@ -52,22 +52,19 @@ export default function Home() {
   const [chats, setChats] = useState<ChatState>(emptyState);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // Guard: only save AFTER initial load — prevents overwriting stored data
-  // with emptyState if React doesn't batch the two setState calls in mount effect
+  // Guard: only save AFTER initial load — prevents overwriting stored data with emptyState
   const chatsLoadedRef = useRef(false);
+  // Mirror of chats in a ref so updateMessages can save synchronously without stale closures
+  const chatsRef = useRef<ChatState>(emptyState);
 
   useEffect(() => {
     const stored = localStorage.getItem("jarvis_auth");
     setAuthenticated(stored === "true");
-    setChats(loadChats());
-    chatsLoadedRef.current = true; // set synchronously, before any re-render
+    const loaded = loadChats();
+    chatsRef.current = loaded;
+    setChats(loaded);
+    chatsLoadedRef.current = true;
   }, []);
-
-  useEffect(() => {
-    if (authenticated === true && chatsLoadedRef.current) {
-      saveChats(chats);
-    }
-  }, [chats, authenticated]);
 
   if (authenticated === null) {
     // Prevent flash — render nothing until localStorage is checked
@@ -81,7 +78,12 @@ export default function Home() {
   const agent = getAgent(activeAgent)!;
 
   function updateMessages(id: AgentId, messages: ChatMessage[]) {
-    setChats((prev) => ({ ...prev, [id]: messages }));
+    const next = { ...chatsRef.current, [id]: messages };
+    chatsRef.current = next;
+    setChats(next);
+    if (chatsLoadedRef.current && authenticated === true) {
+      saveChats(next);
+    }
   }
 
   function handleNewChat(id: AgentId) {
