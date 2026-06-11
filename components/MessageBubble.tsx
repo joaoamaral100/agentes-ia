@@ -183,7 +183,7 @@ function renderContent(raw: string) {
     let buffer = "";
     let cenaTitle = "";
 
-    function flush() {
+    const flush = () => {
       if (mode === "cena" && cenaTitle) {
         const body = buffer.replace(/```[^\n]*/g, "").trim();
         segments.push({ type: "cena", title: cenaTitle, body });
@@ -194,7 +194,7 @@ function renderContent(raw: string) {
       buffer = "";
       cenaTitle = "";
       mode = "text";
-    }
+    };
 
     for (const line of raw.split("\n")) {
       const t = line.trim();
