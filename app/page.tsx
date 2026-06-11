@@ -52,19 +52,29 @@ export default function Home() {
   const [chats, setChats] = useState<ChatState>(emptyState);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // Guard: only save AFTER initial load — prevents overwriting stored data with emptyState
+  // Refs to avoid stale closures in async streaming callbacks
   const chatsLoadedRef = useRef(false);
-  // Mirror of chats in a ref so updateMessages can save synchronously without stale closures
   const chatsRef = useRef<ChatState>(emptyState);
+  const authRef = useRef(false);
 
+  // Load on mount
   useEffect(() => {
     const stored = localStorage.getItem("jarvis_auth");
-    setAuthenticated(stored === "true");
+    const isAuth = stored === "true";
+    authRef.current = isAuth;
+    setAuthenticated(isAuth);
     const loaded = loadChats();
     chatsRef.current = loaded;
     setChats(loaded);
     chatsLoadedRef.current = true;
   }, []);
+
+  // Belt-and-suspenders: save whenever chats state changes
+  useEffect(() => {
+    if (chatsLoadedRef.current && authRef.current) {
+      saveChats(chats);
+    }
+  }, [chats]);
 
   if (authenticated === null) {
     // Prevent flash — render nothing until localStorage is checked
@@ -81,7 +91,8 @@ export default function Home() {
     const next = { ...chatsRef.current, [id]: messages };
     chatsRef.current = next;
     setChats(next);
-    if (chatsLoadedRef.current && authenticated === true) {
+    // Save directly (no stale closure — uses refs, not captured state values)
+    if (chatsLoadedRef.current && authRef.current) {
       saveChats(next);
     }
   }
@@ -94,7 +105,12 @@ export default function Home() {
     <main className="flex h-screen w-screen overflow-hidden">
       <Sidebar
         activeAgent={activeAgent}
-        onSelect={(id) => { setActiveAgent(id); setSidebarOpen(false); }}
+        onSelect={(id) => {
+          // Flush save before switching so in-progress streaming is persisted
+          if (chatsLoadedRef.current && authRef.current) saveChats(chatsRef.current);
+          setActiveAgent(id);
+          setSidebarOpen(false);
+        }}
         onNewChat={(id) => { handleNewChat(id); setSidebarOpen(false); }}
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
