@@ -4,6 +4,14 @@ import { useEffect, useRef, useState } from "react";
 import { Agent } from "@/lib/agents";
 import MessageBubble, { ChatMessage, ImageData } from "./MessageBubble";
 
+interface AttachedImage {
+  name: string;
+  originalSize: number;
+  base64: string;
+  mediaType: "image/jpeg";
+  previewUrl: string; // data URL — no blob URL revocation needed
+}
+
 // ─── SVG icons ────────────────────────────────────────────────────────────────
 
 function CameraIcon({ size = 20, style }: { size?: number; style?: React.CSSProperties }) {
@@ -143,9 +151,10 @@ interface ChatViewProps {
 export default function ChatView({ agent, messages, onMessagesChange, onMenuClick }: ChatViewProps) {
   const [input, setInput]               = useState("");
   const [loading, setLoading]           = useState(false);
-  const [attachedImages, setAttached]   = useState<File[]>([]);
-  const [previews, setPreviews]         = useState<string[]>([]);
+  const [attachedImages, setAttached]   = useState<AttachedImage[]>([]);
   const [price, setPrice]               = useState("");
+
+  const draftKey = `jarvis_draft_${agent.id}`;
   const [inputFocused, setInputFocused] = useState(false);
   const [listening, setListening]       = useState(false);
   const [chatDragOver, setDragOver]     = useState(false);
@@ -160,31 +169,44 @@ export default function ChatView({ agent, messages, onMessagesChange, onMenuClic
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, loading]);
 
-  // ── reset on agent switch ─────────────────────────────────────────────────
+  // ── load draft on mount ───────────────────────────────────────────────────
   useEffect(() => {
-    previews.forEach(u => URL.revokeObjectURL(u));
-    setAttached([]); setPreviews([]);
-    setInput(""); setPrice("");
-  }, [agent.id]);
+    try {
+      const raw = localStorage.getItem(draftKey);
+      if (!raw) return;
+      const draft = JSON.parse(raw) as { text?: string; price?: string; images?: AttachedImage[] };
+      if (draft.text)          setInput(draft.text);
+      if (draft.price)         setPrice(draft.price);
+      if (draft.images?.length) setAttached(draft.images);
+    } catch {}
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── revoke previews on unmount ────────────────────────────────────────────
-  useEffect(() => () => { previews.forEach(u => URL.revokeObjectURL(u)); }, []);
+  // ── save draft whenever input / price / images change ────────────────────
+  useEffect(() => {
+    if (!input && !price && attachedImages.length === 0) {
+      localStorage.removeItem(draftKey);
+      return;
+    }
+    try {
+      localStorage.setItem(draftKey, JSON.stringify({ text: input, price, images: attachedImages }));
+    } catch {}
+  }, [input, price, attachedImages, draftKey]);
 
   // ── image management ──────────────────────────────────────────────────────
-  function addImages(files: File[]) {
+  async function addImages(files: File[]) {
     const max   = maxImages(agent.id);
     const valid = files.filter(f => validateImage(f) === null);
-    setAttached(prev => [...prev, ...valid].slice(0, max));
-    setPreviews(prev => {
-      const urls = valid.map(f => URL.createObjectURL(f));
-      return [...prev, ...urls].slice(0, max);
-    });
+    if (!valid.length) return;
+    const newImgs = await Promise.all(valid.map(async (file) => {
+      const raw        = await fileToImageData(file);
+      const compressed = await compressImage(raw.base64);
+      return { name: file.name, originalSize: file.size, base64: compressed, mediaType: "image/jpeg" as const, previewUrl: `data:image/jpeg;base64,${compressed}` };
+    }));
+    setAttached(prev => [...prev, ...newImgs].slice(0, max));
   }
 
   function removeImage(i: number) {
-    URL.revokeObjectURL(previews[i]);
     setAttached(prev => prev.filter((_, idx) => idx !== i));
-    setPreviews(prev => prev.filter((_, idx) => idx !== i));
   }
 
   // ── drag to anywhere ──────────────────────────────────────────────────────
@@ -225,19 +247,11 @@ export default function ChatView({ agent, messages, onMessagesChange, onMenuClic
   async function sendMessage() {
     if (!canSend()) return;
 
-    let imageData: ImageData[] = [];
-    try {
-      if (attachedImages.length > 0) {
-        imageData = await Promise.all(attachedImages.map(async (file) => {
-          const raw = await fileToImageData(file);
-          const compressed = await compressImage(raw.base64);
-          return { base64: compressed, mediaType: "image/jpeg" as const, name: file.name };
-        }));
-      }
-    } catch {
-      onMessagesChange([...messages, { role: "assistant", content: "⚠️ Erro ao processar imagem." }]);
-      return;
-    }
+    const imageData: ImageData[] = attachedImages.map(img => ({
+      base64: img.base64,
+      mediaType: img.mediaType,
+      name: img.name,
+    }));
 
     let displayContent = input.trim();
     let apiText: string | undefined;
@@ -248,7 +262,7 @@ export default function ChatView({ agent, messages, onMessagesChange, onMenuClic
           displayContent = `[Produto: ${attachedImages[0].name}] + [Cenário: ${attachedImages[1].name}]`;
           apiText = `Aqui estão as imagens: produto (IMAGEM 1) e referência do cenário (IMAGEM 2).${input.trim() ? " " + input.trim() : ""}`;
         } else {
-          displayContent = `[Imagem: ${attachedImages[0].name} · ${formatSize(attachedImages[0].size)}]${input.trim() ? "\n\n" + input.trim() : ""}`;
+          displayContent = `[Imagem: ${attachedImages[0].name} · ${formatSize(attachedImages[0].originalSize)}]${input.trim() ? "\n\n" + input.trim() : ""}`;
           apiText = `Aqui está a imagem do produto.${input.trim() ? " " + input.trim() : ""}`;
         }
       } else if (agent.id === "copys") {
@@ -269,8 +283,7 @@ export default function ChatView({ agent, messages, onMessagesChange, onMenuClic
     const history = [...messages, userMessage];
     onMessagesChange(history);
     setInput("");
-    previews.forEach(u => URL.revokeObjectURL(u));
-    setAttached([]); setPreviews([]);
+    setAttached([]);
     setPrice("");
     setLoading(true);
     onMessagesChange([...history, { role: "assistant", content: "" }]);
@@ -456,7 +469,7 @@ export default function ChatView({ agent, messages, onMessagesChange, onMenuClic
               {attachedImages.map((img, i) => (
                 <div key={i} className="group relative h-12 w-12 shrink-0">
                   <img
-                    src={previews[i]}
+                    src={img.previewUrl}
                     alt={img.name}
                     className="h-12 w-12 rounded-lg object-cover"
                     style={{ border: "1px solid rgba(0,212,255,0.3)" }}
