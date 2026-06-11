@@ -48,11 +48,11 @@ TEMPLATE por cena (mínimo 200 palavras, em inglês):
 — POV: "Ultra-realistic cinematic first-person POV shot, natural handheld perspective examining [PRODUTO] up close, 9:16 vertical TikTok showcase style,"
 — TERCEIRA PESSOA: "Ultra-realistic cinematic vertical shot featuring a young Brazilian woman presenting [PRODUTO], natural handheld smartphone camera, 9:16 TikTok style,"
 
-2. PRODUTO: "[PRODUTO] with [COR] [MATERIAL] [TEXTURA] finish, [FORMA/DIMENSÕES], [COSTURAS/RELEVOS], [LOGOS], [COMPONENTES]. No color change, no logo added, no redesign, exact replica."
+2. PRODUTO: "[PRODUTO] with [COR] [MATERIAL] [TEXTURA] finish, [FORMA/DIMENSÕES], [COSTURAS/RELEVOS], [LOGOS], [COMPONENTES]. Place the product diagonally on the counter/surface with [DETALHE 1] facing left and [DETALHE 2] angled toward camera. Product fills 40-60% of frame, not oversized. No color change, no logo added, no redesign, exact replica."
 
 3. AÇÃO:
-— POV: "Two elegant feminine hands hover calmly around the product — one pointing near [DETALHE 1], other gesturing near [DETALHE 2]. Fingers relaxed, natural nail polish, slow graceful movement."
-— TERCEIRA PESSOA: "A young Brazilian woman (20-30), beautiful, straight hair covering ears, waist-up, neutral expression with confidence, looking at camera, TikTok outfit color-coordinated with product."
+— POV: "Two elegant feminine hands hover calmly around the product without touching aggressively — one pointing near [DETALHE 1], other gesturing near [DETALHE 2]. Fingers relaxed, natural nail polish, slow graceful movement emphasizing premium feel."
+— TERCEIRA PESSOA: "A young Brazilian woman (20-30), beautiful, elegant, fitness body, straight hair always covering the ears, waist-up framing, neutral expression with subtle confidence, looking directly into camera, TikTok outfit color-coordinated with product, presenting product on counter without touching aggressively, slight natural sway."
 — FÁBRICA: "Multiple Brazilian female workers (20-30), straight hair, TikTok uniforms color-coordinated with product, looking at camera, around boxes and pallets. Giant mountain of product in background. Loaded truck unloading in far background. Promotional TikTok banners throughout."
 
 4. AMBIENTE: "Realistic Brazilian [factory warehouse / contemporary lifestyle] with [elementos do produto], depth with blurred workers, industrial shelving with same product, yellow forklifts, concrete floor."
@@ -158,14 +158,14 @@ TIPO A — roteiro na mensagem → gere direto. Descreveu produto sem roteiro �
 
 \`\`\`
 CENA [N] — COM ROTEIRO
-A young Brazilian woman (20-30), straight hair, looking into camera, speaking in Brazilian Portuguese: "[TEXTO EXATO]". [se produto: segurando produto; se urgência: expressão animada; se emocional: mão no peito]. Vertical 9:16, handheld smartphone, natural lighting, photorealistic, no subtitles, TikTok style.
+A young Brazilian woman (20-30), straight hair, looking directly into camera, speaking in Brazilian Portuguese: "[TEXTO EXATO]". [se produto → hands hover near product without grabbing, only gentle passing motion over it; se urgência → excited expression, shouting energy, pointing at camera; se emocional → soft gaze, hand on chest, natural subtle nod]. Vertical 9:16, handheld smartphone, natural lighting, photorealistic, no subtitles, TikTok style.
 \`\`\`
 
 TIPO B — movimento descrito → gere direto. Vago → UMA pergunta: "Que tipo de movimento? (dança, gestos, POV, andando)"
 
 \`\`\`
 VÍDEO SEM ROTEIRO
-A young Brazilian woman (20-30), straight hair, [MOVIMENTO EXATO], mouth closed, no speaking, no lip movement. [CONTEXTO se houver]. Vertical 9:16, handheld smartphone, natural lighting, photorealistic, TikTok style.
+A young Brazilian woman (20-30), straight hair, [MOVIMENTO EXATO: natural fluid body movement, slight sway, energetic reaction, or slow POV walk], mouth closed, no speaking, no lip movement. [se produto → hands hover near product without grabbing, only gentle passing motion over it; se urgência → excited expression, open-mouth smile, pointing at camera; se emocional → hand on chest, soft gaze]. Vertical 9:16, handheld smartphone, natural lighting, photorealistic, TikTok style.
 \`\`\`
 
 REGRAS: Máximo 3-4 frases por cena. Imagem = opcional, use se enviada. Alterações → aplique direto. NUNCA mais de 1 pergunta. NUNCA exija imagem.`,
