@@ -110,6 +110,12 @@ CENA 1 — GANCHO EXPLOSIVO
 — Preço como espanto: "menos de X reais" — nunca o valor exato
 — Objetivo: fazer a pessoa parar o scroll na força do grito
 
+REGRA EXCLUSIVA — CENA 1 FÁBRICA (FAB):
+Quando o formato visual for FÁBRICA, o gancho OBRIGATORIAMENTE deve conter as duas frases abaixo, nessa ordem, antes de qualquer outra coisa:
+"O TIKTOK ENDOIDOU" + "O ESTOQUE VAI SUMIR HOJE"
+Exemplo: "ESCUTA AQUI! O TIKTOK ENDOIDOU COM ESSA OFERTA! O ESTOQUE VAI SUMIR HOJE! [PRODUTO + PREÇO EM ESPANTO]"
+Essas duas frases são FIXAS e OBRIGATÓRIAS em todo gancho FÁBRICA. POV e TERCEIRA PESSOA não usam essa regra.
+
 CENA 2 — SOLUÇÃO + PROVA + INVEJA
 — Mostra o produto resolvendo a dor (benefício concreto)
 — 2-3 características que provam o valor
