@@ -65,10 +65,19 @@ function JarvisLogo() {
   );
 }
 
+function ShirtIcon({ size = 20, style }: { size?: number; style?: React.CSSProperties }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={style}>
+      <path d="M20.38 3.46L16 2a4 4 0 01-8 0L3.62 3.46a2 2 0 00-1.34 2.23l.58 3.57a1 1 0 001 .84H6v10a1 1 0 001 1h10a1 1 0 001-1V10h2.14a1 1 0 001-.84l.58-3.57a2 2 0 00-1.34-2.23z" />
+    </svg>
+  );
+}
+
 function AgentIcon({ id, size = 20, style }: { id: string; size?: number; style?: React.CSSProperties }) {
-  if (id === "imagens") return <CameraIcon size={size} style={style} />;
-  if (id === "copys")   return <CopyIcon   size={size} style={style} />;
-  return                       <VideoIcon  size={size} style={style} />;
+  if (id === "imagens")    return <CameraIcon size={size} style={style} />;
+  if (id === "copys")      return <CopyIcon   size={size} style={style} />;
+  if (id === "mode-amaral") return <ShirtIcon  size={size} style={style} />;
+  return                          <VideoIcon  size={size} style={style} />;
 }
 
 // ─── Sidebar ──────────────────────────────────────────────────────────────────

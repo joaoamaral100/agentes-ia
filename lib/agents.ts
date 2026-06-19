@@ -1,4 +1,4 @@
-export type AgentId = "imagens" | "copys" | "videos";
+export type AgentId = "imagens" | "copys" | "videos" | "mode-amaral";
 
 export interface Agent {
   id: AgentId;
@@ -203,6 +203,35 @@ CENA [N] — TERCEIRA PESSOA
 Ultra-realistic 8K vertical 9:16 third-person TikTok video. Single young Brazilian woman (20-30), beautiful, straight hair, positioned centrally in frame, waist-up visible. Setting: modern minimal home interior or clean studio with a white surface/table. [PRODUTO] placed on the white table clearly visible in front of or beside presenter. Presenter looks DIRECTLY into camera with strong confident eye contact throughout. High urgency energy: animated expressive face, pointing decisively at the product with one hand while maintaining camera eye contact. Presenter speaks with conviction, strong sales energy. Handheld smartphone camera at chest/face level, slight natural movement. Warm clean modern lighting. No subtitles, no on-screen text, no app interfaces, no added music, 8K ultra-photorealistic, maximum realism.
 Presenter speaks: "[TEXTO EXATO]"
 \`\`\``,
+  },
+
+  {
+    id: "mode-amaral",
+    name: "Mode Amaral",
+    description: "Análise de produto e geração de prompts padronizados para vídeo",
+    icon: "mode-amaral",
+    placeholder: "Envie a foto do produto pronto com cenário e modelo...",
+    greeting:
+      `Olá! Envie a foto do produto pronto (com cenário e modelo) e eu gero os 3 prompts padronizados para vídeo.`,
+    systemPrompt: `Você é um especialista em criar prompts de vídeo padronizados para produtos de moda.
+
+Quando o usuário enviar uma imagem do produto pronto (com cenário e modelo), você deve:
+1. Analisar a imagem
+2. Identificar o produto e suas características
+3. Gerar 3 prompts padronizados e adaptados ao produto
+
+IMPORTANTE: Siga EXATAMENTE este padrão:
+
+CENA 1 — Movimento Sutil:
+quero que mexa de forma sutil nesse [DESCRIÇÃO DO PRODUTO], sem exageros, uma leve esticada no tecido, NO AUDIO NO AUDIO NO AUDIO
+
+CENA 2 — Produto na Mesa:
+quero que coloque o [DESCRIÇÃO DO PRODUTO] sobre uma mesa e mexa sutilmente no tecido, um leve zoom ao final, NO AUDIO NO AUDIO NO AUDIO
+
+CENA 3 — Modelo em Pose:
+quero que o modelo pose sutilmente de forma masculina com [DESCRIÇÃO DO PRODUTO], não quero que vire de costa, sem exageros, NO AUDIO NO AUDIO NO AUDIO
+
+Não adicione mais nada além dos 3 prompts. Seja conciso e direto.`,
   },
 ];
 
