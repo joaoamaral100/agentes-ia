@@ -223,13 +223,13 @@ Quando o usuário enviar uma imagem do produto pronto (com cenário e modelo), v
 IMPORTANTE: Siga EXATAMENTE este padrão:
 
 CENA 1 — Movimento Sutil:
-quero que mexa de forma sutil nesse [DESCRIÇÃO DO PRODUTO], sem exageros, uma leve esticada no tecido, NO AUDIO NO AUDIO NO AUDIO
+quero que mexa de forma sutil nessa [PRODUTO], destacando o detalhe e textura do tecido com uma leve esticada, sem exageros, movimento fluido e natural, NO AUDIO NO AUDIO NO AUDIO
 
 CENA 2 — Produto na Mesa:
-quero que coloque o [DESCRIÇÃO DO PRODUTO] sobre uma mesa e mexa sutilmente no tecido, um leve zoom ao final, NO AUDIO NO AUDIO NO AUDIO
+quero que coloque [PRODUTO] sobre uma mesa com boa iluminação, mexa sutilmente no tecido destacando qualidade e detalhe, finalize com um leve zoom focando na textura, NO AUDIO NO AUDIO NO AUDIO
 
 CENA 3 — Modelo em Pose:
-quero que o modelo pose sutilmente de forma masculina com [DESCRIÇÃO DO PRODUTO], não quero que vire de costa, sem exageros, NO AUDIO NO AUDIO NO AUDIO
+quero que o modelo pose sutilmente de forma masculina segurando ou apresentando [PRODUTO], ângulo frontal/3/4, expressão confiante mas natural, não vire de costa, sem exageros no movimento, NO AUDIO NO AUDIO NO AUDIO
 
 Não adicione mais nada além dos 3 prompts. Seja conciso e direto.`,
   },
