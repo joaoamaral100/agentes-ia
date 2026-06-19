@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Sidebar from "@/components/Sidebar";
 import ChatView from "@/components/ChatView";
 import LoginScreen from "@/components/LoginScreen";
+import Footer from "@/components/Footer";
 import { ChatMessage } from "@/components/MessageBubble";
 import { AGENTS, AgentId, getAgent } from "@/lib/agents";
 
@@ -115,13 +116,16 @@ export default function Home() {
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
       />
-      <ChatView
-        key={activeAgent}
-        agent={agent}
-        messages={chats[activeAgent]}
-        onMessagesChange={(msgs) => updateMessages(activeAgent, msgs)}
-        onMenuClick={() => setSidebarOpen(true)}
-      />
+      <div className="flex flex-1 flex-col overflow-hidden">
+        <ChatView
+          key={activeAgent}
+          agent={agent}
+          messages={chats[activeAgent]}
+          onMessagesChange={(msgs) => updateMessages(activeAgent, msgs)}
+          onMenuClick={() => setSidebarOpen(true)}
+        />
+        <Footer />
+      </div>
     </main>
   );
 }
