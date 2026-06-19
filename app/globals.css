@@ -178,3 +178,25 @@ body {
   50%       { border-color: rgba(239,68,68,0.7); }
 }
 .input-listening { animation: border-pulse-red 1.2s ease-in-out infinite; }
+
+/* Footer Estilizado */
+.footer {
+  text-align: center;
+  padding: 12px 20px;
+  background: rgba(0, 20, 40, 0.8);
+  border-top: 1px solid rgba(0, 200, 255, 0.3);
+  font-size: 12px;
+  color: #999;
+  margin-top: auto;
+  font-family: 'Courier New', monospace;
+  letter-spacing: 0.5px;
+}
+
+.footer p {
+  margin: 0;
+}
+
+.footer p:hover {
+  color: #00c8ff;
+  transition: 0.3s ease;
+}
