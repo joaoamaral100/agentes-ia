@@ -586,3 +586,103 @@ button:hover:not(.copy-button):not(:disabled) {
   text-shadow: 0 0 25px rgba(0, 255, 255, 0.9);
   color: #00ffff;
 }
+
+/* PREMIUM SALES PAGE CTA BUTTONS */
+
+@keyframes premium-glow-pulse {
+  0% {
+    box-shadow: 0 0 20px rgba(0, 200, 255, 0.5),
+                0 0 40px rgba(0, 200, 255, 0.3),
+                0 0 60px rgba(0, 200, 255, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(0, 200, 255, 0.8),
+                0 0 80px rgba(0, 200, 255, 0.6),
+                0 0 120px rgba(0, 200, 255, 0.4),
+                inset 0 0 30px rgba(0, 200, 255, 0.5);
+  }
+  100% {
+    box-shadow: 0 0 20px rgba(0, 200, 255, 0.5),
+                0 0 40px rgba(0, 200, 255, 0.3),
+                0 0 60px rgba(0, 200, 255, 0.2);
+  }
+}
+
+@keyframes float-lift {
+  0%, 100% { transform: translateY(0px) scale(1); }
+  50% { transform: translateY(-8px) scale(1.05); }
+}
+
+/* COPY BUTTON - PREMIUM CTA */
+.copy-button {
+  position: relative;
+  background: linear-gradient(135deg, #0066ff 0%, #00ccff 100%);
+  border: 2px solid #00ffff;
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  white-space: nowrap;
+  text-transform: uppercase;
+  box-shadow: 0 0 30px rgba(0, 200, 255, 0.6),
+              0 0 60px rgba(0, 200, 255, 0.3),
+              inset 0 0 20px rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+  will-change: transform, box-shadow;
+}
+
+.copy-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.8), transparent);
+  animation: shine 0.7s;
+}
+
+.copy-button:hover {
+  animation: premium-glow-pulse 1.2s ease-in-out infinite, float-lift 1.5s ease-in-out infinite;
+  background: linear-gradient(135deg, #0088ff 0%, #00ffff 100%);
+  border-color: #00ffff;
+  color: #fff;
+  transform: translateY(-4px) scale(1.02);
+  text-shadow: 0 0 20px rgba(0, 255, 255, 0.9);
+  box-shadow: 0 0 50px rgba(0, 200, 255, 0.9),
+              0 0 100px rgba(0, 200, 255, 0.7),
+              0 0 150px rgba(0, 200, 255, 0.4),
+              inset 0 0 30px rgba(255, 255, 255, 0.2);
+}
+
+.copy-button.copied {
+  animation: premium-glow-pulse 1.2s ease-in-out infinite;
+  background: linear-gradient(135deg, #00cc00 0%, #00ff88 100%);
+  border-color: #00ff88;
+  color: #fff;
+  text-shadow: 0 0 20px rgba(0, 255, 136, 0.9);
+  box-shadow: 0 0 50px rgba(0, 200, 100, 0.9),
+              0 0 100px rgba(0, 200, 100, 0.7),
+              0 0 150px rgba(0, 200, 100, 0.4),
+              inset 0 0 30px rgba(255, 255, 255, 0.2);
+}
+
+/* Scene boxes - FINAL */
+.copy-scene-box {
+  border: 2px solid rgba(0, 200, 255, 0.5);
+  background: linear-gradient(135deg, rgba(0, 30, 70, 0.95), rgba(0, 50, 100, 0.8));
+  box-shadow: 0 0 25px rgba(0, 200, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+.copy-scene-box:hover {
+  animation: premium-glow-pulse 1.5s ease-in-out infinite;
+  border-color: #00ffff;
+  box-shadow: 0 0 40px rgba(0, 200, 255, 0.6),
+              0 0 80px rgba(0, 200, 255, 0.3),
+              inset 0 0 25px rgba(0, 200, 255, 0.1);
+}
