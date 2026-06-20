@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Agent } from "@/lib/agents";
 import MessageBubble, { ChatMessage, ImageData } from "./MessageBubble";
+import CopyDisplay from "./CopyDisplay";
 
 interface AttachedImage {
   name: string;
