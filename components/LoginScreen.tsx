@@ -4,26 +4,20 @@ import { useState } from "react";
 
 function JarvisWordmark() {
   return (
-    <svg width="120" height="36" viewBox="0 0 120 36" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <text
-        x="0" y="28"
-        fontFamily="Georgia, serif"
-        fontSize="24"
-        fontWeight="400"
-        letterSpacing="8"
-        fill="url(#login-grad)"
-        style={{ filter: "drop-shadow(0 0 10px rgba(0,212,255,0.9))" }}
+    <div>
+      <span
+        className="block text-center text-[28px] font-bold tracking-[14px]"
+        style={{
+          background: "linear-gradient(135deg, #ffffff 0%, #80ccee 40%, #00d4ff 100%)",
+          WebkitBackgroundClip: "text",
+          WebkitTextFillColor: "transparent",
+          backgroundClip: "text",
+          filter: "drop-shadow(0 0 20px rgba(0,212,255,0.3))",
+        }}
       >
         JARVIS
-      </text>
-      <defs>
-        <linearGradient id="login-grad" x1="0" y1="0" x2="120" y2="0" gradientUnits="userSpaceOnUse">
-          <stop offset="0%"   stopColor="#ffffff" />
-          <stop offset="60%"  stopColor="#00d4ff" />
-          <stop offset="100%" stopColor="#0066ff" />
-        </linearGradient>
-      </defs>
-    </svg>
+      </span>
+    </div>
   );
 }
 
@@ -106,11 +100,11 @@ export default function LoginScreen({ onSuccess }: LoginScreenProps) {
         <div
           className="rounded-2xl p-8"
           style={{
-            background: "rgba(0, 212, 255, 0.04)",
-            backdropFilter: "blur(20px)",
-            WebkitBackdropFilter: "blur(20px)",
-            border: "1px solid rgba(0, 212, 255, 0.18)",
-            boxShadow: "0 0 60px rgba(0,212,255,0.08), inset 0 1px 0 rgba(0,212,255,0.1)",
+            background: "rgba(0,12,30,0.7)",
+            backdropFilter: "blur(40px)",
+            WebkitBackdropFilter: "blur(40px)",
+            border: "1px solid rgba(255,255,255,0.08)",
+            boxShadow: "0 24px 64px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06)",
           }}
         >
           {/* Logo */}
@@ -120,18 +114,10 @@ export default function LoginScreen({ onSuccess }: LoginScreenProps) {
 
           {/* Title */}
           <div className="mb-6 text-center">
-            <h1
-              className="mb-1 text-xl font-semibold tracking-wide"
-              style={{
-                background: "linear-gradient(135deg, #ffffff, #00d4ff)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                backgroundClip: "text",
-              }}
-            >
+            <h1 className="mb-1 text-[15px] font-semibold" style={{ color: "rgba(255,255,255,0.85)" }}>
               Acesso Restrito
             </h1>
-            <p className="text-[13px]" style={{ color: "#4a9ebb" }}>
+            <p className="text-[13px]" style={{ color: "rgba(74,158,187,0.65)" }}>
               Digite a senha para continuar
             </p>
           </div>
@@ -204,19 +190,32 @@ export default function LoginScreen({ onSuccess }: LoginScreenProps) {
           <button
             type="submit"
             disabled={loading || !password.trim()}
-            className="flex w-full items-center justify-center gap-2 rounded-xl font-semibold tracking-wide"
+            className="flex w-full items-center justify-center gap-2 rounded-xl font-semibold tracking-widest"
             style={{
               height: "52px",
-              fontSize: "16px",
+              fontSize: "14px",
               touchAction: "manipulation",
               WebkitTapHighlightColor: "transparent",
+              transition: "all 0.2s ease",
               ...(loading || !password.trim()
-                ? { background: "rgba(0,212,255,0.08)", color: "rgba(0,212,255,0.3)", cursor: "not-allowed" }
+                ? { background: "rgba(255,255,255,0.04)", color: "rgba(255,255,255,0.2)", cursor: "not-allowed" }
                 : {
-                    background: "linear-gradient(135deg, #0066ff, #00d4ff)",
-                    color: "#000814",
-                    boxShadow: "0 0 20px rgba(0,212,255,0.3)",
+                    background: "linear-gradient(135deg, #1a44ff 0%, #0088cc 100%)",
+                    color: "#fff",
+                    boxShadow: "0 4px 20px rgba(0,100,255,0.35)",
                   }),
+            }}
+            onMouseEnter={(e) => {
+              if (!loading && password.trim()) Object.assign((e.currentTarget as HTMLElement).style, {
+                boxShadow: "0 6px 28px rgba(0,100,255,0.5)",
+                transform: "translateY(-1px)",
+              });
+            }}
+            onMouseLeave={(e) => {
+              if (!loading && password.trim()) Object.assign((e.currentTarget as HTMLElement).style, {
+                boxShadow: "0 4px 20px rgba(0,100,255,0.35)",
+                transform: "translateY(0)",
+              });
             }}
           >
             {loading ? <Spinner /> : "ENTRAR"}

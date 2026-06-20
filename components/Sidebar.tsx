@@ -14,7 +14,6 @@ function CameraIcon({ size = 20, style }: { size?: number; style?: React.CSSProp
     </svg>
   );
 }
-
 function CopyIcon({ size = 20, style }: { size?: number; style?: React.CSSProperties }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={style}>
@@ -25,7 +24,6 @@ function CopyIcon({ size = 20, style }: { size?: number; style?: React.CSSProper
     </svg>
   );
 }
-
 function VideoIcon({ size = 20, style }: { size?: number; style?: React.CSSProperties }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={style}>
@@ -35,36 +33,6 @@ function VideoIcon({ size = 20, style }: { size?: number; style?: React.CSSPrope
     </svg>
   );
 }
-
-function PlusIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <line x1="12" y1="5" x2="12" y2="19" />
-      <line x1="5" y1="12" x2="19" y2="12" />
-    </svg>
-  );
-}
-
-
-function JarvisLogo() {
-  return (
-    <svg width="100" height="32" viewBox="0 0 100 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <text
-        x="0"
-        y="24"
-        fontFamily="Georgia, serif"
-        fontSize="20"
-        fontWeight="400"
-        letterSpacing="6"
-        fill="#00d4ff"
-        style={{ filter: "drop-shadow(0 0 10px rgba(0,212,255,1))" }}
-      >
-        JARVIS
-      </text>
-    </svg>
-  );
-}
-
 function ShirtIcon({ size = 20, style }: { size?: number; style?: React.CSSProperties }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={style}>
@@ -72,16 +40,14 @@ function ShirtIcon({ size = 20, style }: { size?: number; style?: React.CSSPrope
     </svg>
   );
 }
-
-function AgentIcon({ id, size = 20, style }: { id: string; size?: number; style?: React.CSSProperties }) {
-  if (id === "imagens")    return <CameraIcon size={size} style={style} />;
-  if (id === "copys")      return <CopyIcon   size={size} style={style} />;
-  if (id === "mode-amaral") return <ShirtIcon  size={size} style={style} />;
-  return                          <VideoIcon  size={size} style={style} />;
+function PlusIcon() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+      <line x1="12" y1="5" x2="12" y2="19" />
+      <line x1="5" y1="12" x2="19" y2="12" />
+    </svg>
+  );
 }
-
-// ─── Sidebar ──────────────────────────────────────────────────────────────────
-
 function CloseIcon() {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -90,6 +56,15 @@ function CloseIcon() {
     </svg>
   );
 }
+
+function AgentIcon({ id, size = 20, style }: { id: string; size?: number; style?: React.CSSProperties }) {
+  if (id === "imagens")     return <CameraIcon size={size} style={style} />;
+  if (id === "copys")       return <CopyIcon   size={size} style={style} />;
+  if (id === "mode-amaral") return <ShirtIcon  size={size} style={style} />;
+  return                           <VideoIcon  size={size} style={style} />;
+}
+
+// ─── Sidebar ──────────────────────────────────────────────────────────────────
 
 interface SidebarProps {
   activeAgent: AgentId;
@@ -100,188 +75,167 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ activeAgent, onSelect, onNewChat, isOpen = false, onClose }: SidebarProps) {
-
   return (
     <>
-      {/* Mobile backdrop */}
       {isOpen && (
-        <div
-          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm md:hidden"
-          onClick={onClose}
-        />
+        <div className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm md:hidden" onClick={onClose} />
       )}
 
-    <aside
-      className={[
-        "dot-grid flex h-full flex-col",
-        "fixed inset-y-0 left-0 z-50 w-[280px] transition-transform duration-300 ease-in-out",
-        isOpen ? "translate-x-0" : "-translate-x-full",
-        "md:relative md:w-60 md:shrink-0 md:translate-x-0",
-      ].join(" ")}
-      style={{
-        background: "rgba(0, 8, 20, 0.95)",
-        backdropFilter: "blur(20px)",
-        WebkitBackdropFilter: "blur(20px)",
-        borderRight: "1px solid rgba(0, 212, 255, 0.2)",
-      }}
-    >
-      {/* Brand */}
-      <div className="flex items-center justify-between px-5 py-5">
-        <JarvisLogo />
-        {/* X button — mobile only */}
-        <button
-          onClick={onClose}
-          className="flex h-8 w-8 items-center justify-center rounded-lg md:hidden"
-          style={{ color: "#4a9ebb" }}
-        >
-          <CloseIcon />
-        </button>
-      </div>
+      <aside
+        className={[
+          "flex h-full flex-col",
+          "fixed inset-y-0 left-0 z-50 w-[280px] transition-transform duration-300 ease-in-out",
+          isOpen ? "translate-x-0" : "-translate-x-full",
+          "md:relative md:w-60 md:shrink-0 md:translate-x-0",
+        ].join(" ")}
+        style={{
+          background: "#00080f",
+          borderRight: "1px solid rgba(255,255,255,0.06)",
+        }}
+      >
+        {/* Brand header */}
+        <div className="flex items-center justify-between px-5 py-5">
+          <span
+            className="text-[18px] font-bold tracking-[10px]"
+            style={{
+              background: "linear-gradient(135deg, #ffffff 0%, #70c8f0 50%, #00d4ff 100%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+            }}
+          >
+            JARVIS
+          </span>
+          <button
+            onClick={onClose}
+            className="flex h-8 w-8 items-center justify-center rounded-lg md:hidden"
+            style={{ color: "rgba(74,158,187,0.6)" }}
+          >
+            <CloseIcon />
+          </button>
+        </div>
 
-      <div
-        className="mx-4 h-px"
-        style={{ background: "linear-gradient(90deg, transparent, rgba(0,212,255,0.3), transparent)" }}
-      />
+        {/* Separator */}
+        <div className="mx-5 h-px" style={{ background: "rgba(255,255,255,0.06)" }} />
 
-      {/* Navigation */}
-      <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
-        <p
-          className="mb-3 px-2 text-[9px] font-semibold"
-          style={{ color: "#00d4ff", letterSpacing: "4px", opacity: 0.6 }}
-        >
-          AGENTES
-        </p>
+        {/* Navigation */}
+        <nav className="flex-1 overflow-y-auto px-3 py-4">
+          <p
+            className="mb-2 px-2 text-[10px] font-semibold tracking-[3px]"
+            style={{ color: "rgba(74,158,187,0.4)" }}
+          >
+            AGENTES
+          </p>
 
-        {AGENTS.map((agent) => {
-          const active = agent.id === activeAgent;
-          const iconStyle: React.CSSProperties = active
-            ? { color: "#00d4ff", filter: "drop-shadow(0 0 4px #00d4ff)" }
-            : { color: "#4a9ebb" };
+          <div className="space-y-0.5">
+            {AGENTS.map((agent) => {
+              const active = agent.id === activeAgent;
 
-          return (
-            <button
-              key={agent.id}
-              onClick={() => onSelect(agent.id)}
-              className="group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left"
-              style={
-                active
-                  ? {
-                      background: "linear-gradient(135deg, rgba(0,212,255,0.12), rgba(0,102,255,0.08))",
-                      border: "1px solid rgba(0,212,255,0.45)",
-                      boxShadow: "0 0 20px rgba(0,212,255,0.18), inset 0 0 20px rgba(0,212,255,0.04)",
-                      transform: "translateX(5px)",
-                      transition: "all 0.25s cubic-bezier(0.34,1.56,0.64,1)",
-                    }
-                  : {
-                      background: "rgba(0,212,255,0.02)",
-                      border: "1px solid rgba(0,212,255,0.08)",
-                      transform: "translateX(0)",
-                      transition: "all 0.25s cubic-bezier(0.34,1.56,0.64,1)",
-                    }
-              }
-              onMouseEnter={(e) => {
-                if (!active) {
-                  Object.assign((e.currentTarget as HTMLElement).style, {
-                    background: "rgba(0,212,255,0.07)",
-                    border: "1px solid rgba(0,212,255,0.3)",
-                    boxShadow: "0 0 12px rgba(0,212,255,0.12)",
-                    transform: "translateX(5px)",
-                    transition: "all 0.25s cubic-bezier(0.34,1.56,0.64,1)",
-                  });
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!active) {
-                  Object.assign((e.currentTarget as HTMLElement).style, {
-                    background: "rgba(0,212,255,0.02)",
-                    border: "1px solid rgba(0,212,255,0.08)",
-                    boxShadow: "",
-                    transform: "translateX(0)",
-                    transition: "all 0.25s cubic-bezier(0.34,1.56,0.64,1)",
-                  });
-                }
-              }}
-            >
-              {/* Icon container */}
-              <span
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-all"
-                style={
-                  active
-                    ? {
-                        background: "linear-gradient(135deg, rgba(0,212,255,0.2), rgba(0,102,255,0.2))",
-                        boxShadow: "0 0 12px rgba(0,212,255,0.3)",
-                      }
-                    : { background: "rgba(0,212,255,0.06)" }
-                }
-              >
-                <AgentIcon id={agent.id} size={18} style={iconStyle} />
-              </span>
-
-              {/* Label */}
-              <span className="min-w-0 flex-1">
-                <span
-                  className="block truncate text-[13px] font-medium"
-                  style={{ color: active ? "#e0f4ff" : "#4a9ebb" }}
+              return (
+                <button
+                  key={agent.id}
+                  onClick={() => onSelect(agent.id)}
+                  className="relative flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left"
+                  style={
+                    active
+                      ? {
+                          background: "rgba(0,212,255,0.07)",
+                          borderLeft: "2px solid #00d4ff",
+                          paddingLeft: "10px",
+                          transition: "all 0.15s ease",
+                        }
+                      : {
+                          background: "transparent",
+                          borderLeft: "2px solid transparent",
+                          paddingLeft: "10px",
+                          transition: "all 0.15s ease",
+                        }
+                  }
+                  onMouseEnter={(e) => {
+                    if (!active) Object.assign((e.currentTarget as HTMLElement).style, {
+                      background: "rgba(255,255,255,0.04)",
+                      borderLeft: "2px solid rgba(0,212,255,0.3)",
+                      paddingLeft: "10px",
+                    });
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!active) Object.assign((e.currentTarget as HTMLElement).style, {
+                      background: "transparent",
+                      borderLeft: "2px solid transparent",
+                      paddingLeft: "10px",
+                    });
+                  }}
                 >
-                  {agent.name}
-                </span>
-                <span className="block truncate text-[11px]" style={{ color: "rgba(74,158,187,0.5)" }}>
-                  {agent.description}
-                </span>
-              </span>
+                  {/* Icon */}
+                  <span
+                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg"
+                    style={
+                      active
+                        ? {
+                            background: "rgba(0,212,255,0.12)",
+                            border: "1px solid rgba(0,212,255,0.2)",
+                          }
+                        : { background: "rgba(255,255,255,0.04)" }
+                    }
+                  >
+                    <AgentIcon
+                      id={agent.id}
+                      size={17}
+                      style={{ color: active ? "#00d4ff" : "rgba(74,158,187,0.6)" }}
+                    />
+                  </span>
 
-              {/* Active dot */}
-              {active && (
-                <div
-                  className="h-1.5 w-1.5 shrink-0 rounded-full glow-pulse-anim"
-                  style={{ background: "#00d4ff", boxShadow: "0 0 6px rgba(0,212,255,0.9)" }}
-                />
-              )}
-            </button>
-          );
-        })}
-      </nav>
+                  {/* Label */}
+                  <span className="min-w-0 flex-1">
+                    <span
+                      className="block truncate text-[13px] font-semibold"
+                      style={{ color: active ? "#e8f4ff" : "rgba(180,210,230,0.6)" }}
+                    >
+                      {agent.name}
+                    </span>
+                    <span
+                      className="block truncate text-[11px]"
+                      style={{ color: "rgba(74,158,187,0.4)" }}
+                    >
+                      {agent.description}
+                    </span>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </nav>
 
-      {/* New chat */}
-      <div className="p-3">
-        <div
-          className="mx-1 mb-3 h-px"
-          style={{ background: "linear-gradient(90deg, transparent, rgba(0,212,255,0.3), transparent)" }}
-        />
-        <button
-          onClick={() => onNewChat(activeAgent)}
-          className="flex w-full items-center justify-center gap-2 rounded-xl px-3 py-3 text-[12px] font-semibold"
-          style={{
-            border: "1px solid rgba(0,212,255,0.35)",
-            color: "#00d4ff",
-            background: "rgba(0,212,255,0.03)",
-            letterSpacing: "1px",
-            transition: "all 0.2s ease",
-          }}
-          onMouseEnter={(e) => {
-            Object.assign((e.currentTarget as HTMLElement).style, {
-              background: "linear-gradient(135deg, #0055ee, #00d4ff)",
+        {/* Separator + New chat */}
+        <div className="p-3 pb-4">
+          <div className="mx-2 mb-3 h-px" style={{ background: "rgba(255,255,255,0.06)" }} />
+          <button
+            onClick={() => onNewChat(activeAgent)}
+            className="flex w-full items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-[12px] font-semibold tracking-wide"
+            style={{
+              border: "1px solid rgba(0,212,255,0.25)",
+              color: "rgba(0,212,255,0.8)",
+              background: "transparent",
+              transition: "all 0.15s ease",
+            }}
+            onMouseEnter={(e) => Object.assign((e.currentTarget as HTMLElement).style, {
+              background: "linear-gradient(135deg, #1a44ff, #0088cc)",
               border: "1px solid transparent",
               color: "#fff",
-              boxShadow: "0 0 24px rgba(0,212,255,0.45)",
-              transform: "translateY(-1px)",
-            });
-          }}
-          onMouseLeave={(e) => {
-            Object.assign((e.currentTarget as HTMLElement).style, {
-              background: "rgba(0,212,255,0.03)",
-              border: "1px solid rgba(0,212,255,0.35)",
-              color: "#00d4ff",
+              boxShadow: "0 2px 12px rgba(0,100,255,0.3)",
+            })}
+            onMouseLeave={(e) => Object.assign((e.currentTarget as HTMLElement).style, {
+              background: "transparent",
+              border: "1px solid rgba(0,212,255,0.25)",
+              color: "rgba(0,212,255,0.8)",
               boxShadow: "",
-              transform: "translateY(0)",
-            });
-          }}
-        >
-          <PlusIcon />
-          Nova conversa
-        </button>
-      </div>
-    </aside>
+            })}
+          >
+            <PlusIcon />
+            Nova conversa
+          </button>
+        </div>
+      </aside>
     </>
   );
 }

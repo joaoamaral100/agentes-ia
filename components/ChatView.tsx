@@ -10,7 +10,7 @@ interface AttachedImage {
   originalSize: number;
   base64: string;
   mediaType: "image/jpeg";
-  previewUrl: string; // data URL — no blob URL revocation needed
+  previewUrl: string;
 }
 
 // ─── SVG icons ────────────────────────────────────────────────────────────────
@@ -44,10 +44,18 @@ function VideoPlayIcon({ size = 20, style }: { size?: number; style?: React.CSSP
     </svg>
   );
 }
+function ShirtIcon({ size = 20, style }: { size?: number; style?: React.CSSProperties }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={style}>
+      <path d="M20.38 3.46L16 2a4 4 0 01-8 0L3.62 3.46a2 2 0 00-1.34 2.23l.58 3.57a1 1 0 001 .84H6v10a1 1 0 001 1h10a1 1 0 001-1V10h2.14a1 1 0 001-.84l.58-3.57a2 2 0 00-1.34-2.23z" />
+    </svg>
+  );
+}
 function AgentIcon({ id, size = 20, style }: { id: string; size?: number; style?: React.CSSProperties }) {
-  if (id === "imagens") return <CameraIcon    size={size} style={style} />;
-  if (id === "copys")   return <CopyTextIcon  size={size} style={style} />;
-  return                       <VideoPlayIcon size={size} style={style} />;
+  if (id === "imagens")     return <CameraIcon    size={size} style={style} />;
+  if (id === "copys")       return <CopyTextIcon  size={size} style={style} />;
+  if (id === "mode-amaral") return <ShirtIcon     size={size} style={style} />;
+  return                           <VideoPlayIcon size={size} style={style} />;
 }
 function MicIcon({ size = 18, style }: { size?: number; style?: React.CSSProperties }) {
   return (
@@ -77,12 +85,20 @@ function HamburgerIcon() {
     </svg>
   );
 }
-
-function SendIcon({ size = 18, style }: { size?: number; style?: React.CSSProperties }) {
+function SendIcon({ size = 14 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+    </svg>
+  );
+}
+function TrashIcon({ size = 15, style }: { size?: number; style?: React.CSSProperties }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={style}>
-      <line x1="22" y1="2" x2="11" y2="13" />
-      <polygon points="22 2 15 22 11 13 2 9 22 2" fill="currentColor" stroke="none" />
+      <polyline points="3 6 5 6 21 6" />
+      <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
+      <path d="M10 11v6M14 11v6" />
+      <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2" />
     </svg>
   );
 }
@@ -91,6 +107,33 @@ function SendIcon({ size = 18, style }: { size?: number; style?: React.CSSProper
 const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"];
 const ACCEPTED_EXT   = ".jpg,.jpeg,.png,.gif,.webp";
 const MAX_MB         = 10;
+
+const EXAMPLES: Record<string, string[]> = {
+  imagens: [
+    "C1 POV · C2 Fábrica · C3 TP",
+    "Close na textura do produto",
+    "Editorial com modelo feminina",
+    "Produto fundo neutro, luz de estúdio",
+  ],
+  copys: [
+    "Relógio masculino R$ 149,90",
+    "Kit cílios Volume Russo R$ 49",
+    "Mochila feminina R$ 79,90",
+    "Tênis casual masculino R$ 129",
+  ],
+  videos: [
+    "FAB · roteiro: OLHA O DESCONTO!",
+    "POV mostrando bolsa de couro",
+    "TP apresentando relógio masculino",
+    "FAB uniforme azul, eletrônico",
+  ],
+  "mode-amaral": [
+    "Camiseta branca masculina",
+    "Vestido floral longo feminino",
+    "Jaqueta jeans unissex vintage",
+    "Conjunto fitness feminino preto",
+  ],
+};
 
 function formatSize(bytes: number) {
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
@@ -112,7 +155,6 @@ async function fileToImageData(file: File): Promise<ImageData> {
     reader.readAsDataURL(file);
   });
 }
-
 function compressImage(base64: string): Promise<string> {
   return new Promise((resolve) => {
     const img = new Image();
@@ -133,8 +175,6 @@ function compressImage(base64: string): Promise<string> {
     img.src = "data:image/jpeg;base64," + base64;
   });
 }
-
-// ─── max images per agent ─────────────────────────────────────────────────────
 function maxImages(agentId: string) {
   if (agentId === "videos")  return 3;
   if (agentId === "imagens") return 2;
@@ -150,39 +190,35 @@ interface ChatViewProps {
 }
 
 export default function ChatView({ agent, messages, onMessagesChange, onMenuClick }: ChatViewProps) {
-  const [input, setInput]               = useState("");
-  const [loading, setLoading]           = useState(false);
-  const [attachedImages, setAttached]   = useState<AttachedImage[]>([]);
-  const [price, setPrice]               = useState("");
-
-  const draftKey = `jarvis_draft_${agent.id}`;
+  const [input, setInput]             = useState("");
+  const [loading, setLoading]         = useState(false);
+  const [attachedImages, setAttached] = useState<AttachedImage[]>([]);
+  const [price, setPrice]             = useState("");
   const [inputFocused, setInputFocused] = useState(false);
-  const [listening, setListening]       = useState(false);
-  const [chatDragOver, setDragOver]     = useState(false);
+  const [listening, setListening]     = useState(false);
+  const [chatDragOver, setDragOver]   = useState(false);
 
-  const scrollRef   = useRef<HTMLDivElement>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const draftKey     = `jarvis_draft_${agent.id}`;
+  const scrollRef    = useRef<HTMLDivElement>(null);
+  const textareaRef  = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const recRef      = useRef<any>(null);
+  const recRef       = useRef<any>(null);
 
-  // ── scroll ────────────────────────────────────────────────────────────────
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, loading]);
 
-  // ── load draft on mount ───────────────────────────────────────────────────
   useEffect(() => {
     try {
       const raw = localStorage.getItem(draftKey);
       if (!raw) return;
       const draft = JSON.parse(raw) as { text?: string; price?: string; images?: AttachedImage[] };
-      if (draft.text)          setInput(draft.text);
-      if (draft.price)         setPrice(draft.price);
+      if (draft.text)           setInput(draft.text);
+      if (draft.price)          setPrice(draft.price);
       if (draft.images?.length) setAttached(draft.images);
     } catch {}
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── save draft whenever input / price / images change ────────────────────
   useEffect(() => {
     if (!input && !price && attachedImages.length === 0) {
       localStorage.removeItem(draftKey);
@@ -193,7 +229,6 @@ export default function ChatView({ agent, messages, onMessagesChange, onMenuClic
     } catch {}
   }, [input, price, attachedImages, draftKey]);
 
-  // ── image management ──────────────────────────────────────────────────────
   async function addImages(files: File[]) {
     const max   = maxImages(agent.id);
     const valid = files.filter(f => validateImage(f) === null);
@@ -210,7 +245,6 @@ export default function ChatView({ agent, messages, onMessagesChange, onMenuClic
     setAttached(prev => prev.filter((_, idx) => idx !== i));
   }
 
-  // ── drag to anywhere ──────────────────────────────────────────────────────
   function onChatDragOver(e: React.DragEvent) { e.preventDefault(); setDragOver(true); }
   function onChatDragLeave(e: React.DragEvent) {
     if ((e.currentTarget as HTMLElement).contains(e.relatedTarget as Node)) return;
@@ -221,7 +255,6 @@ export default function ChatView({ agent, messages, onMessagesChange, onMenuClic
     addImages(Array.from(e.dataTransfer.files));
   }
 
-  // ── voice ─────────────────────────────────────────────────────────────────
   function toggleMic() {
     if (listening) { recRef.current?.stop(); setListening(false); return; }
     const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -237,14 +270,12 @@ export default function ChatView({ agent, messages, onMessagesChange, onMenuClic
     rec.start(); recRef.current = rec; setListening(true);
   }
 
-  // ── can send ──────────────────────────────────────────────────────────────
   function canSend(): boolean {
     if (loading) return false;
     if (attachedImages.length > 0) return true;
     return input.trim().length > 0;
   }
 
-  // ── send ──────────────────────────────────────────────────────────────────
   async function sendMessage() {
     if (!canSend()) return;
 
@@ -328,22 +359,27 @@ export default function ChatView({ agent, messages, onMessagesChange, onMenuClic
     messages[messages.length - 1].content === "";
 
   const canAttachMore = attachedImages.length < maxImages(agent.id);
+  const examples      = EXAMPLES[agent.id] ?? [];
 
-  // ── render ────────────────────────────────────────────────────────────────
   return (
-    <div className="flex h-full flex-1 flex-col" style={{ background: "#000814" }}>
+    <div className="relative flex h-full flex-1 flex-col overflow-hidden" style={{ background: "#000814" }}>
+
+      {/* Ambient background orbs */}
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+        <div style={{ position: "absolute", top: "-200px", right: "-200px", width: "600px", height: "600px", borderRadius: "50%", background: "radial-gradient(circle, rgba(0,100,255,0.07) 0%, transparent 70%)", filter: "blur(100px)" }} />
+        <div style={{ position: "absolute", bottom: "-200px", left: "-200px", width: "500px", height: "500px", borderRadius: "50%", background: "radial-gradient(circle, rgba(0,180,255,0.05) 0%, transparent 70%)", filter: "blur(80px)" }} />
+      </div>
 
       {/* Header */}
       <header
-        className="flex items-center gap-3 px-4 py-4 md:px-6"
+        className="relative z-10 flex items-center gap-3 px-4 py-3.5 md:px-6"
         style={{
-          background: "rgba(0,8,20,0.9)",
-          backdropFilter: "blur(20px)",
-          WebkitBackdropFilter: "blur(20px)",
-          borderBottom: "1px solid rgba(0,212,255,0.15)",
+          background: "rgba(0,8,20,0.85)",
+          backdropFilter: "blur(24px)",
+          WebkitBackdropFilter: "blur(24px)",
+          borderBottom: "1px solid rgba(255,255,255,0.06)",
         }}
       >
-        {/* Hamburger — mobile only */}
         <button
           onClick={onMenuClick}
           className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg md:hidden"
@@ -352,85 +388,140 @@ export default function ChatView({ agent, messages, onMessagesChange, onMenuClic
           <HamburgerIcon />
         </button>
 
-        {/* Agent icon — desktop only */}
         <div
-          className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-xl glow-pulse-anim md:flex"
+          className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-xl md:flex"
           style={{
-            background: "linear-gradient(135deg, rgba(0,212,255,0.15), rgba(0,102,255,0.1))",
-            border: "1px solid rgba(0,212,255,0.4)",
-            boxShadow: "0 0 20px rgba(0,212,255,0.2)",
+            background: "linear-gradient(135deg, rgba(0,212,255,0.12), rgba(0,102,255,0.1))",
+            border: "1px solid rgba(0,212,255,0.22)",
           }}
         >
-          <AgentIcon id={agent.id} size={20} style={{ color: "#00d4ff", filter: "drop-shadow(0 0 5px rgba(0,212,255,0.7))" }} />
+          <AgentIcon id={agent.id} size={19} style={{ color: "#00d4ff" }} />
         </div>
 
-        <div>
-          <h2 className="text-[15px] font-bold tracking-tight gradient-text">
+        <div className="min-w-0 flex-1">
+          <h2
+            className="text-[16px] font-bold leading-tight"
+            style={{
+              background: "linear-gradient(135deg, #ffffff, #b0d8f0)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+            }}
+          >
             {agent.name}
           </h2>
-          <p className="text-[11px]" style={{ color: "rgba(74,158,187,0.7)" }}>{agent.description}</p>
+          <p className="truncate text-[11px]" style={{ color: "rgba(74,158,187,0.6)" }}>
+            {agent.description}
+          </p>
         </div>
+
+        {!isEmpty && !loading && (
+          <button
+            onClick={() => onMessagesChange([])}
+            title="Limpar conversa"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all duration-150"
+            style={{ color: "rgba(74,158,187,0.4)", background: "transparent" }}
+            onMouseEnter={(e) => Object.assign((e.currentTarget as HTMLElement).style, {
+              color: "#f87171", background: "rgba(239,68,68,0.08)",
+            })}
+            onMouseLeave={(e) => Object.assign((e.currentTarget as HTMLElement).style, {
+              color: "rgba(74,158,187,0.4)", background: "transparent",
+            })}
+          >
+            <TrashIcon size={14} />
+          </button>
+        )}
       </header>
 
-      {/* Chat area — drag target */}
+      {/* Chat area */}
       <div
         ref={scrollRef}
-        className="relative flex-1 overflow-y-auto dot-grid"
+        className="relative z-10 flex-1 overflow-y-auto dot-grid"
         onDragOver={onChatDragOver}
         onDragLeave={onChatDragLeave}
         onDrop={onChatDrop}
       >
-        {/* Drag overlay */}
         {chatDragOver && (
           <div
             className="pointer-events-none absolute inset-4 z-50 flex items-center justify-center rounded-xl"
-            style={{
-              border: "1px dashed rgba(0,212,255,0.5)",
-              background: "rgba(0,212,255,0.04)",
-            }}
+            style={{ border: "1px dashed rgba(0,212,255,0.35)", background: "rgba(0,212,255,0.02)" }}
           >
-            <p className="text-sm font-medium" style={{ color: "#00d4ff" }}>
-              Solte as imagens aqui
-            </p>
+            <p className="text-sm font-medium" style={{ color: "#00d4ff" }}>Solte as imagens aqui</p>
           </div>
         )}
 
         <div className="mx-auto w-full max-w-2xl px-5 py-8">
           {isEmpty ? (
             /* ── Empty state ── */
-            <div className="mt-10 text-center">
-              {/* Ambient glow ring */}
-              <div className="relative mx-auto mb-6 flex h-24 w-24 items-center justify-center">
+            <div className="mt-6 text-center">
+              {/* Large icon with ambient glow */}
+              <div className="relative mx-auto mb-8 flex h-32 w-32 items-center justify-center">
+                <div style={{
+                  position: "absolute",
+                  inset: 0,
+                  borderRadius: "50%",
+                  background: "radial-gradient(circle, rgba(0,212,255,0.16) 0%, transparent 70%)",
+                  filter: "blur(20px)",
+                  transform: "scale(1.6)",
+                }} />
                 <div
-                  className="absolute inset-0 rounded-full"
+                  className="relative flex h-28 w-28 items-center justify-center rounded-3xl"
                   style={{
-                    background: "radial-gradient(circle, rgba(0,212,255,0.15) 0%, transparent 70%)",
-                    filter: "blur(12px)",
-                    transform: "scale(1.6)",
-                  }}
-                />
-                <div
-                  className="relative flex h-20 w-20 items-center justify-center rounded-2xl glow-pulse-anim"
-                  style={{
-                    background: "linear-gradient(135deg, rgba(0,212,255,0.12), rgba(0,102,255,0.08))",
-                    border: "1px solid rgba(0,212,255,0.35)",
-                    boxShadow: "0 0 40px rgba(0,212,255,0.2), inset 0 0 30px rgba(0,212,255,0.04)",
+                    background: "linear-gradient(135deg, rgba(0,212,255,0.09), rgba(0,102,255,0.06))",
+                    border: "1px solid rgba(0,212,255,0.2)",
                     animation: "float-icon 4s ease-in-out infinite",
                   }}
                 >
                   <AgentIcon
                     id={agent.id}
-                    size={42}
-                    style={{ color: "#00d4ff", filter: "drop-shadow(0 0 10px rgba(0,212,255,0.8))" }}
+                    size={52}
+                    style={{ color: "#00d4ff", filter: "drop-shadow(0 0 8px rgba(0,212,255,0.5))" }}
                   />
                 </div>
               </div>
-              <h3 className="mb-3 text-2xl font-bold tracking-tight gradient-text">
+
+              <h3
+                className="mb-3 text-4xl font-bold tracking-tight"
+                style={{
+                  background: "linear-gradient(135deg, #ffffff 0%, #b0d8ef 50%, #00c8ff 100%)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  backgroundClip: "text",
+                }}
+              >
                 {agent.name}
               </h3>
-              <p className="mx-auto max-w-sm text-[13px] leading-relaxed" style={{ color: "#4a9ebb" }}>
-                {agent.description} — use o botão 📎 para enviar imagens ou arraste para a tela
+              <p className="mx-auto mb-10 max-w-xs text-[14px] leading-relaxed" style={{ color: "rgba(160,200,220,0.55)" }}>
+                {agent.description}
               </p>
+
+              {/* Example prompt cards */}
+              <div className="grid grid-cols-2 gap-2 text-left">
+                {examples.map((ex, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setInput(ex)}
+                    className="rounded-xl px-4 py-3.5 text-left text-[12px] transition-all duration-150"
+                    style={{
+                      background: "rgba(255,255,255,0.03)",
+                      border: "1px solid rgba(255,255,255,0.07)",
+                      color: "rgba(160,210,230,0.65)",
+                    }}
+                    onMouseEnter={(e) => Object.assign((e.currentTarget as HTMLElement).style, {
+                      background: "rgba(0,212,255,0.06)",
+                      border: "1px solid rgba(0,212,255,0.2)",
+                      color: "#e0f4ff",
+                    })}
+                    onMouseLeave={(e) => Object.assign((e.currentTarget as HTMLElement).style, {
+                      background: "rgba(255,255,255,0.03)",
+                      border: "1px solid rgba(255,255,255,0.07)",
+                      color: "rgba(160,210,230,0.65)",
+                    })}
+                  >
+                    <span className="block font-medium leading-snug">{ex}</span>
+                  </button>
+                ))}
+              </div>
             </div>
           ) : (
             /* ── Messages ── */
@@ -453,10 +544,9 @@ export default function ChatView({ agent, messages, onMessagesChange, onMenuClic
       </div>
 
       {/* Input area */}
-      <div className="px-5 pb-6 pt-2">
+      <div className="relative z-10 px-5 pb-6 pt-2">
         <div className="mx-auto w-full max-w-2xl space-y-2">
 
-          {/* Copys: price input (shown when image attached) */}
           {agent.id === "copys" && attachedImages.length > 0 && (
             <input
               type="text"
@@ -464,26 +554,21 @@ export default function ChatView({ agent, messages, onMessagesChange, onMenuClic
               onChange={(e) => setPrice(e.target.value)}
               placeholder="Preço do produto (ex: R$ 89,90)"
               className="w-full rounded-xl px-3.5 py-2.5 text-[13px] outline-none transition-all"
-              style={{
-                background: "rgba(0,212,255,0.03)",
-                border: "1px solid rgba(0,212,255,0.15)",
-                color: "#e0f4ff",
-              }}
-              onFocus={(e) => { e.currentTarget.style.borderColor = "rgba(0,212,255,0.4)"; }}
-              onBlur={(e) => { e.currentTarget.style.borderColor = "rgba(0,212,255,0.15)"; }}
+              style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", color: "#e0f4ff" }}
+              onFocus={(e) => { e.currentTarget.style.borderColor = "rgba(0,212,255,0.35)"; }}
+              onBlur={(e)  => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.07)"; }}
             />
           )}
 
-          {/* Thumbnail row */}
           {attachedImages.length > 0 && (
             <div className="flex items-center gap-2">
               {attachedImages.map((img, i) => (
-                <div key={i} className="group relative h-12 w-12 shrink-0">
+                <div key={i} className="relative h-12 w-12 shrink-0">
                   <img
                     src={img.previewUrl}
                     alt={img.name}
                     className="h-12 w-12 rounded-lg object-cover"
-                    style={{ border: "1px solid rgba(0,212,255,0.3)" }}
+                    style={{ border: "1px solid rgba(0,212,255,0.22)" }}
                   />
                   <button
                     onClick={() => removeImage(i)}
@@ -494,16 +579,11 @@ export default function ChatView({ agent, messages, onMessagesChange, onMenuClic
                   </button>
                 </div>
               ))}
-              {/* + add more button */}
               {canAttachMore && (
                 <button
                   onClick={() => fileInputRef.current?.click()}
                   className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg text-lg transition-all"
-                  style={{
-                    border: "1px dashed rgba(0,212,255,0.3)",
-                    color: "#4a9ebb",
-                    background: "rgba(0,212,255,0.03)",
-                  }}
+                  style={{ border: "1px dashed rgba(0,212,255,0.22)", color: "#4a9ebb", background: "rgba(0,212,255,0.03)" }}
                   title="Adicionar imagem"
                 >
                   +
@@ -519,53 +599,44 @@ export default function ChatView({ agent, messages, onMessagesChange, onMenuClic
           <div
             className={["flex items-end gap-1.5 rounded-2xl p-2 transition-all duration-200", listening ? "input-listening" : ""].join(" ")}
             style={{
-              background: "rgba(0,8,20,0.9)",
-              backdropFilter: "blur(16px)",
-              WebkitBackdropFilter: "blur(16px)",
+              background: "rgba(4,12,28,0.96)",
+              backdropFilter: "blur(24px)",
+              WebkitBackdropFilter: "blur(24px)",
               border: listening
                 ? "1px solid rgba(239,68,68,0.4)"
                 : inputFocused
-                ? "1px solid rgba(0,212,255,0.5)"
-                : "1px solid rgba(0,212,255,0.2)",
+                ? "1px solid rgba(0,212,255,0.35)"
+                : "1px solid rgba(255,255,255,0.08)",
               boxShadow: inputFocused && !listening
-                ? "0 0 0 1px rgba(0,212,255,0.1), 0 0 16px rgba(0,212,255,0.08)"
+                ? "0 0 0 3px rgba(0,212,255,0.05)"
                 : undefined,
             }}
           >
-            {/* Clip button */}
             <button
               onClick={() => fileInputRef.current?.click()}
               disabled={!canAttachMore}
               title="Anexar imagem"
-              className="mb-0.5 flex h-8 w-8 items-center justify-center rounded-xl transition-all duration-200"
-              style={{
-                color: canAttachMore ? "#4a9ebb" : "rgba(0,212,255,0.2)",
-                background: "transparent",
-              }}
+              className="mb-0.5 flex h-8 w-8 items-center justify-center rounded-lg transition-all duration-150"
+              style={{ color: canAttachMore ? "#4a9ebb" : "rgba(255,255,255,0.15)", background: "transparent" }}
               onMouseEnter={(e) => {
-                if (canAttachMore) Object.assign((e.currentTarget as HTMLElement).style, { background: "rgba(0,212,255,0.1)", color: "#00d4ff" });
+                if (canAttachMore) Object.assign((e.currentTarget as HTMLElement).style, { background: "rgba(0,212,255,0.08)", color: "#00d4ff" });
               }}
               onMouseLeave={(e) => {
                 if (canAttachMore) Object.assign((e.currentTarget as HTMLElement).style, { background: "transparent", color: "#4a9ebb" });
               }}
             >
-              <UploadIcon size={17} />
+              <UploadIcon size={16} />
             </button>
 
-            {/* Hidden file input */}
             <input
               ref={fileInputRef}
               type="file"
               accept={ACCEPTED_EXT}
               multiple={maxImages(agent.id) > 1}
               className="hidden"
-              onChange={(e) => {
-                addImages(Array.from(e.target.files ?? []));
-                e.target.value = "";
-              }}
+              onChange={(e) => { addImages(Array.from(e.target.files ?? [])); e.target.value = ""; }}
             />
 
-            {/* Textarea */}
             <textarea
               ref={textareaRef}
               value={input}
@@ -576,66 +647,47 @@ export default function ChatView({ agent, messages, onMessagesChange, onMenuClic
               rows={1}
               placeholder={listening ? "Ouvindo..." : agent.placeholder}
               className="max-h-40 flex-1 resize-none bg-transparent px-2 py-2 text-[14px] leading-relaxed focus:outline-none"
-              style={{
-                color: "#e0f4ff",
-              }}
+              style={{ color: "#e0f4ff" }}
             />
 
-            {/* Mic button */}
             <button
               onClick={toggleMic}
               title={listening ? "Parar gravação" : "Gravar voz (pt-BR)"}
-              className={["mb-0.5 flex h-8 w-8 items-center justify-center rounded-xl transition-all duration-200", listening ? "mic-listening" : ""].join(" ")}
-              style={
-                listening
-                  ? { background: "rgba(239,68,68,0.15)", color: "#f87171" }
-                  : { background: "transparent", color: "#4a9ebb" }
-              }
+              className={["mb-0.5 flex h-8 w-8 items-center justify-center rounded-lg transition-all duration-150", listening ? "mic-listening" : ""].join(" ")}
+              style={listening ? { background: "rgba(239,68,68,0.12)", color: "#f87171" } : { background: "transparent", color: "#4a9ebb" }}
               onMouseEnter={(e) => {
-                if (!listening) Object.assign((e.currentTarget as HTMLElement).style, { background: "rgba(0,212,255,0.1)", color: "#00d4ff" });
+                if (!listening) Object.assign((e.currentTarget as HTMLElement).style, { background: "rgba(0,212,255,0.08)", color: "#00d4ff" });
               }}
               onMouseLeave={(e) => {
                 if (!listening) Object.assign((e.currentTarget as HTMLElement).style, { background: "transparent", color: "#4a9ebb" });
               }}
             >
-              <MicIcon size={17} />
+              <MicIcon size={16} />
             </button>
 
-            {/* Send button */}
+            {/* Send — small, round, discrete */}
             <button
               onClick={sendMessage}
               disabled={!canSend()}
-              className="mb-0.5 mr-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-all duration-200"
+              className="mb-0.5 mr-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-all duration-150"
               style={
                 canSend()
                   ? {
-                      background: "linear-gradient(135deg, #0055ee, #00d4ff)",
-                      boxShadow: "0 0 18px rgba(0,212,255,0.45), 0 0 8px rgba(0,102,255,0.3)",
+                      background: "linear-gradient(145deg, #1a44ff, #0077cc)",
                       color: "#fff",
+                      boxShadow: "0 1px 6px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.08) inset",
                     }
-                  : { background: "rgba(0,212,255,0.05)", color: "rgba(0,212,255,0.15)" }
+                  : { background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.2)" }
               }
-              onMouseEnter={(e) => {
-                if (canSend()) Object.assign((e.currentTarget as HTMLElement).style, {
-                  boxShadow: "0 0 28px rgba(0,212,255,0.65), 0 0 12px rgba(0,102,255,0.45)",
-                  transform: "scale(1.08)",
-                });
-              }}
-              onMouseLeave={(e) => {
-                if (canSend()) Object.assign((e.currentTarget as HTMLElement).style, {
-                  boxShadow: "0 0 18px rgba(0,212,255,0.45), 0 0 8px rgba(0,102,255,0.3)",
-                  transform: "scale(1)",
-                });
-              }}
               aria-label="Enviar"
             >
-              <SendIcon size={15} />
+              <SendIcon size={14} />
             </button>
           </div>
         </div>
 
-        <p className="mt-2.5 text-center text-[10px]" style={{ color: "rgba(0,212,255,0.2)" }}>
-          Enter envia · Shift+Enter quebra linha · 📎 anexa imagens · arraste para a tela
+        <p className="mt-2.5 text-center text-[10px]" style={{ color: "rgba(255,255,255,0.12)" }}>
+          Enter envia · Shift+Enter quebra linha · 📎 anexa imagens
         </p>
       </div>
     </div>
