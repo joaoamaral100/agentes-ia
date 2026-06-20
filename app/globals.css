@@ -686,3 +686,97 @@ button:hover:not(.copy-button):not(:disabled) {
               0 0 80px rgba(0, 200, 255, 0.3),
               inset 0 0 25px rgba(0, 200, 255, 0.1);
 }
+
+/* ANIMATED BACKGROUND & GRID */
+body {
+  background: linear-gradient(-45deg, #0a0e27, #1a1a3e, #0d1f2d, #1a0a2e);
+  background-size: 400% 400%;
+  animation: gradient-shift 15s ease infinite;
+}
+
+@keyframes grid-move {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(50px); }
+}
+
+@keyframes particle-float {
+  0%, 100% { transform: translateY(0px) translateX(0px); }
+  25% { transform: translateY(-20px) translateX(10px); }
+  50% { transform: translateY(-40px) translateX(-10px); }
+  75% { transform: translateY(-20px) translateX(15px); }
+}
+
+@keyframes mega-glow {
+  0%, 100% {
+    box-shadow: 0 0 50px rgba(0, 200, 255, 1),
+                0 0 100px rgba(0, 150, 255, 0.7),
+                0 0 150px rgba(0, 100, 255, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 70px rgba(0, 200, 255, 1),
+                0 0 140px rgba(0, 150, 255, 0.9),
+                0 0 200px rgba(0, 100, 255, 0.6);
+  }
+}
+
+@keyframes float-up {
+  0%, 100% { transform: translateY(-5px) scale(1.05); }
+  50% { transform: translateY(-12px) scale(1.08); }
+}
+
+@keyframes scene-pulse {
+  0%, 100% { box-shadow: 0 0 50px rgba(0, 200, 255, 0.6), inset 0 0 30px rgba(0, 200, 255, 0.15); }
+  50% { box-shadow: 0 0 80px rgba(0, 200, 255, 0.8), inset 0 0 40px rgba(0, 200, 255, 0.25); }
+}
+
+/* COPY BUTTON - MEGA PREMIUM */
+.copy-button {
+  background: linear-gradient(135deg, #0066ff 0%, #00ccff 50%, #00ff88 100%);
+  border: 2px solid #00ffff;
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  white-space: nowrap;
+  text-transform: uppercase;
+  box-shadow: 0 0 30px rgba(0, 200, 255, 0.6),
+              0 0 60px rgba(0, 150, 255, 0.3),
+              inset 0 0 20px rgba(255, 255, 255, 0.15);
+  overflow: hidden;
+}
+
+.copy-button:hover {
+  animation: mega-glow 1s ease-in-out infinite, float-up 2s ease-in-out infinite;
+  background: linear-gradient(135deg, #0088ff 0%, #00ffff 50%, #00ffaa 100%);
+  border-color: #00ffff;
+  transform: translateY(-5px) scale(1.05);
+  box-shadow: 0 0 50px rgba(0, 200, 255, 1),
+              0 0 100px rgba(0, 150, 255, 0.7),
+              0 0 150px rgba(0, 100, 255, 0.4),
+              inset 0 0 30px rgba(255, 255, 255, 0.25);
+  text-shadow: 0 0 25px rgba(0, 255, 255, 1),
+               0 0 50px rgba(0, 150, 255, 0.7);
+}
+
+/* Scene boxes - ALIVE */
+.copy-scene-box {
+  border: 2px solid rgba(0, 200, 255, 0.5);
+  background: linear-gradient(135deg, rgba(10, 30, 70, 0.95), rgba(20, 50, 100, 0.85));
+  box-shadow: 0 0 30px rgba(0, 200, 255, 0.2),
+              inset 0 0 20px rgba(0, 200, 255, 0.05);
+  transition: all 0.3s ease;
+}
+
+.copy-scene-box:hover {
+  animation: scene-pulse 1.2s ease-in-out infinite;
+  border-color: #00ffff;
+  background: linear-gradient(135deg, rgba(20, 50, 100, 1), rgba(30, 70, 130, 0.9));
+  box-shadow: 0 0 50px rgba(0, 200, 255, 0.6),
+              0 0 100px rgba(0, 150, 255, 0.3),
+              inset 0 0 30px rgba(0, 200, 255, 0.15);
+  transform: translateY(-5px);
+}
