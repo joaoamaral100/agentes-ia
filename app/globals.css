@@ -957,3 +957,91 @@ body {
   text-shadow: 0 0 10px rgba(0, 200, 255, 0.5);
   box-shadow: inset 0 5px 20px rgba(0, 200, 255, 0.1);
 }
+
+/* MAIN CHAT - WOW REDESIGN */
+
+/* Message Bubbles - PREMIUM */
+[class*="message"], [class*="bubble"] {
+  background: linear-gradient(135deg, rgba(10, 30, 70, 0.7), rgba(20, 50, 100, 0.5)) !important;
+  border: 1px solid rgba(0, 200, 255, 0.3) !important;
+  border-radius: 16px !important;
+  padding: 18px 22px !important;
+  margin: 12px 0 !important;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 20px rgba(0, 200, 255, 0.1),
+              inset 0 0 20px rgba(0, 200, 255, 0.03) !important;
+  transition: all 0.3s ease !important;
+  position: relative;
+  overflow: hidden;
+}
+
+[class*="message"]::before, [class*="bubble"]::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3px;
+  height: 100%;
+  background: linear-gradient(180deg, #00ffff, #0088ff);
+  box-shadow: 0 0 15px rgba(0, 200, 255, 0.8);
+}
+
+[class*="message"]:hover, [class*="bubble"]:hover {
+  border-color: rgba(0, 200, 255, 0.6) !important;
+  background: linear-gradient(135deg, rgba(20, 50, 100, 0.8), rgba(30, 70, 130, 0.6)) !important;
+  box-shadow: 0 8px 40px rgba(0, 200, 255, 0.25),
+              inset 0 0 30px rgba(0, 200, 255, 0.08) !important;
+  transform: translateY(-3px) !important;
+}
+
+[class*="message"] p, [class*="bubble"] p {
+  color: #e0f7ff !important;
+  line-height: 1.8 !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+}
+
+/* AGENT ICON - GLOW */
+@keyframes icon-pulse {
+  0%, 100% { filter: drop-shadow(0 0 15px rgba(0, 200, 255, 0.8)); }
+  50% { filter: drop-shadow(0 0 30px rgba(0, 200, 255, 1)); }
+}
+
+/* SEND BUTTON */
+button[aria-label="Enviar"] {
+  background: linear-gradient(135deg, #0088ff 0%, #00ccff 50%, #00ffff 100%) !important;
+  border: 2px solid #00ffff !important;
+  box-shadow: 0 0 25px rgba(0, 200, 255, 0.6) !important;
+}
+
+button[aria-label="Enviar"]:hover {
+  animation: pulse-massive-blue 1s ease-out infinite !important;
+  transform: scale(1.1) !important;
+  box-shadow: 0 0 40px rgba(0, 200, 255, 1),
+              0 0 80px rgba(0, 150, 255, 0.6) !important;
+}
+
+/* CENTRAL ICON ANIMATION */
+@keyframes float-icon {
+  0%, 100% { transform: translateY(0px) scale(1); }
+  50% { transform: translateY(-15px) scale(1.05); }
+}
+
+/* SCROLLBAR - PREMIUM */
+::-webkit-scrollbar { width: 10px; }
+::-webkit-scrollbar-track { background: rgba(0, 30, 80, 0.3); }
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #0088ff, #00ffff);
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 200, 255, 0.5);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #00aaff, #00ffff);
+  box-shadow: 0 0 20px rgba(0, 200, 255, 0.8);
+}
+
+/* TEXT SELECTION */
+::selection {
+  background: rgba(0, 200, 255, 0.4);
+  color: #fff;
+}
