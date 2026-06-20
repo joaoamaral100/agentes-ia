@@ -14,13 +14,14 @@ export default function CopyDisplay({ content }: CopyDisplayProps) {
     let currentScene = { title: '', content: '' };
 
     for (const line of lines) {
-      if (line.includes('##') && line.includes('CENA')) {
+      // Detecta "CENA 1 — FAB:", "CENA 2 — FAB:", etc
+      if (line.includes('CENA') && line.includes('—')) {
         if (currentScene.content) scenes.push(currentScene);
         currentScene = {
-          title: line.replace('##', '').trim(),
+          title: line.trim(),
           content: ''
         };
-      } else if (line.trim() && !line.startsWith('#')) {
+      } else if (line.trim() && !line.startsWith('#') && !line.includes('---')) {
         currentScene.content += line + '\n';
       }
     }
