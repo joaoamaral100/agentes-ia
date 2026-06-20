@@ -124,30 +124,7 @@ export default function Sidebar({ activeAgent, onSelect, onNewChat, isOpen = fal
         </div>
 
         {/* Separator */}
-        <div className="mx-4 h-px" style={{ background: "rgba(255,255,255,0.05)" }} />
-
-        {/* User badge */}
-        <div className="mx-3 mt-3 mb-1 flex items-center gap-2.5 rounded-xl px-3 py-2.5"
-          style={{
-            background: "rgba(255,255,255,0.03)",
-            border: "1px solid rgba(255,255,255,0.05)",
-          }}
-        >
-          <div
-            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full"
-            style={{ background: "linear-gradient(135deg, #1a44ff, #0088cc)" }}
-          >
-            <UserIcon />
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-[12px] font-semibold" style={{ color: "rgba(224,244,255,0.85)" }}>Minha Conta</p>
-            <p className="text-[10px]" style={{ color: "rgba(74,158,187,0.45)" }}>Online</p>
-          </div>
-          <div className="h-1.5 w-1.5 rounded-full" style={{ background: "#22c55e", boxShadow: "0 0 5px rgba(34,197,94,0.7)" }} />
-        </div>
-
-        {/* Separator */}
-        <div className="mx-4 mt-3 mb-1 h-px" style={{ background: "rgba(255,255,255,0.05)" }} />
+        <div className="mx-4 mt-1 mb-1 h-px" style={{ background: "rgba(255,255,255,0.05)" }} />
 
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto px-2 py-2">
@@ -165,7 +142,7 @@ export default function Sidebar({ activeAgent, onSelect, onNewChat, isOpen = fal
                 <button
                   key={agent.id}
                   onClick={() => onSelect(agent.id)}
-                  className="relative flex w-full items-center gap-3 rounded-lg py-2.5 text-left"
+                  className="sidebar-btn relative flex w-full items-center gap-3 rounded-lg py-2.5 text-left"
                   style={{
                     paddingLeft: active ? "9px" : "11px",
                     paddingRight: "12px",

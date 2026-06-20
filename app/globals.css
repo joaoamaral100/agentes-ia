@@ -128,12 +128,61 @@ body::after {
   100% { background-position: 0% 50%; }
 }
 
-/* ── Message fade-in ─────────────────────────────────────────────────────────── */
+/* ── Message fade-in (spring) ───────────────────────────────────────────────── */
 @keyframes message-in {
-  from { opacity: 0; transform: translateY(6px); }
+  from { opacity: 0; transform: translateY(10px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-.message-in { animation: message-in 0.22s ease; }
+.message-in { animation: message-in 0.28s cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+/* ── HUD grid moving lines ───────────────────────────────────────────────────── */
+.hud-grid {
+  background-image:
+    linear-gradient(rgba(0,212,255,0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,212,255,0.035) 1px, transparent 1px);
+  background-size: 60px 60px;
+  animation: hud-grid-scroll 30s linear infinite;
+}
+@keyframes hud-grid-scroll {
+  from { background-position: 0 0; }
+  to   { background-position: 0 60px; }
+}
+
+/* ── HUD ring rotations ──────────────────────────────────────────────────────── */
+@keyframes ring-cw  { to { transform: rotate(360deg); } }
+@keyframes ring-ccw { to { transform: rotate(-360deg); } }
+
+/* ── Status pulse (online indicator) ────────────────────────────────────────── */
+@keyframes status-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(34,197,94,0.7); }
+  60%       { box-shadow: 0 0 0 5px rgba(34,197,94,0); }
+}
+.status-online { animation: status-pulse 2s ease-out infinite; background: #22c55e; }
+
+/* ── Sidebar button shimmer ──────────────────────────────────────────────────── */
+.sidebar-btn { position: relative; overflow: hidden; }
+.sidebar-btn::after {
+  content: "";
+  position: absolute;
+  top: 0; bottom: 0;
+  left: -80%;
+  width: 50%;
+  background: linear-gradient(105deg, transparent, rgba(0,212,255,0.1), transparent);
+  transform: skewX(-20deg);
+  pointer-events: none;
+}
+.sidebar-btn:hover::after { animation: btn-shimmer 0.5s ease-out forwards; }
+@keyframes btn-shimmer {
+  from { left: -80%; }
+  to   { left: 160%; }
+}
+
+/* ── Send button spring hover ────────────────────────────────────────────────── */
+.send-btn { transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s ease-out; }
+.send-btn:hover:not(:disabled) {
+  transform: scale(1.07);
+  box-shadow: 0 0 18px rgba(0,100,255,0.55), 0 2px 8px rgba(0,60,200,0.4), inset 0 1px 0 rgba(255,255,255,0.15) !important;
+}
 
 /* ── Glass (cyan) ────────────────────────────────────────────────────────────── */
 .glass {
