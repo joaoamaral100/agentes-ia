@@ -427,9 +427,11 @@ export default function ChatView({ agent, messages, onMessagesChange, onMenuClic
           ) : (
             /* ── Messages ── */
             <div className="space-y-5">
-              {messages.map((m, i) => (
-                <MessageBubble key={i} message={m} />
-              ))}
+              {messages.map((m, i) =>
+                agent.id === "copys" && m.role === "assistant" && m.content
+                  ? <CopyDisplay key={i} content={m.content} />
+                  : <MessageBubble key={i} message={m} />
+              )}
               {lastIsEmpty && (
                 <div className="flex items-end gap-1.5 px-1 pb-1">
                   <span className="typing-dot h-1.5 w-1.5 rounded-full" style={{ background: "#00d4ff" }} />
