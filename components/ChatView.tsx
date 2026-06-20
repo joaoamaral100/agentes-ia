@@ -85,9 +85,9 @@ function HamburgerIcon() {
     </svg>
   );
 }
-function SendIcon({ size = 14 }: { size?: number }) {
+function SendIcon({ size = 14, style }: { size?: number; style?: React.CSSProperties }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" style={style}>
       <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
     </svg>
   );
@@ -400,7 +400,7 @@ export default function ChatView({ agent, messages, onMessagesChange, onMenuClic
 
         <div className="min-w-0 flex-1">
           <h2
-            className="text-[16px] font-bold leading-tight"
+            className="font-display text-[16px] font-bold leading-tight"
             style={{
               background: "linear-gradient(135deg, #ffffff, #b0d8f0)",
               WebkitBackgroundClip: "text",
@@ -410,9 +410,16 @@ export default function ChatView({ agent, messages, onMessagesChange, onMenuClic
           >
             {agent.name}
           </h2>
-          <p className="truncate text-[11px]" style={{ color: "rgba(74,158,187,0.6)" }}>
-            {agent.description}
-          </p>
+          <div className="flex items-center gap-2">
+            <p className="truncate text-[11px]" style={{ color: "rgba(74,158,187,0.55)" }}>
+              {agent.description}
+            </p>
+            {!isEmpty && (
+              <span className="shrink-0 text-[10px]" style={{ color: "rgba(74,158,187,0.35)" }}>
+                · {messages.filter(m => !(m.role === "assistant" && m.content === "")).length} msgs
+              </span>
+            )}
+          </div>
         </div>
 
         {!isEmpty && !loading && (
@@ -481,7 +488,7 @@ export default function ChatView({ agent, messages, onMessagesChange, onMenuClic
               </div>
 
               <h3
-                className="mb-3 text-4xl font-bold tracking-tight"
+                className="font-display mb-3 text-4xl font-bold tracking-tight"
                 style={{
                   background: "linear-gradient(135deg, #ffffff 0%, #b0d8ef 50%, #00c8ff 100%)",
                   WebkitBackgroundClip: "text",
@@ -500,25 +507,30 @@ export default function ChatView({ agent, messages, onMessagesChange, onMenuClic
                 {examples.map((ex, i) => (
                   <button
                     key={i}
-                    onClick={() => setInput(ex)}
-                    className="rounded-xl px-4 py-3.5 text-left text-[12px] transition-all duration-150"
+                    onClick={() => { setInput(ex); textareaRef.current?.focus(); }}
+                    className="group flex flex-col rounded-xl px-4 py-3.5 text-left"
                     style={{
-                      background: "rgba(255,255,255,0.03)",
+                      background: "rgba(255,255,255,0.025)",
                       border: "1px solid rgba(255,255,255,0.07)",
-                      color: "rgba(160,210,230,0.65)",
+                      transition: "all 0.2s ease-out",
                     }}
                     onMouseEnter={(e) => Object.assign((e.currentTarget as HTMLElement).style, {
-                      background: "rgba(0,212,255,0.06)",
-                      border: "1px solid rgba(0,212,255,0.2)",
-                      color: "#e0f4ff",
+                      background: "rgba(0,212,255,0.05)",
+                      border: "1px solid rgba(0,212,255,0.18)",
+                      transform: "translateY(-1px)",
                     })}
                     onMouseLeave={(e) => Object.assign((e.currentTarget as HTMLElement).style, {
-                      background: "rgba(255,255,255,0.03)",
+                      background: "rgba(255,255,255,0.025)",
                       border: "1px solid rgba(255,255,255,0.07)",
-                      color: "rgba(160,210,230,0.65)",
+                      transform: "translateY(0)",
                     })}
                   >
-                    <span className="block font-medium leading-snug">{ex}</span>
+                    <span className="mb-1.5 block text-[13px] font-semibold leading-snug" style={{ color: "rgba(200,230,255,0.75)" }}>
+                      {ex}
+                    </span>
+                    <span className="block text-[11px]" style={{ color: "rgba(0,212,255,0.45)" }}>
+                      Usar como prompt →
+                    </span>
                   </button>
                 ))}
               </div>
@@ -529,7 +541,7 @@ export default function ChatView({ agent, messages, onMessagesChange, onMenuClic
               {messages.map((m, i) =>
                 agent.id === "copys" && m.role === "assistant" && m.content
                   ? <CopyDisplay key={i} content={m.content} />
-                  : <MessageBubble key={i} message={m} />
+                  : <MessageBubble key={i} message={m} agentId={agent.id} />
               )}
               {lastIsEmpty && (
                 <div className="flex items-end gap-1.5 px-1 pb-1">
@@ -665,23 +677,30 @@ export default function ChatView({ agent, messages, onMessagesChange, onMenuClic
               <MicIcon size={16} />
             </button>
 
-            {/* Send — small, round, discrete */}
+            {/* Send — round, gradient, always white icon */}
             <button
               onClick={sendMessage}
               disabled={!canSend()}
-              className="mb-0.5 mr-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full transition-all duration-150"
-              style={
-                canSend()
-                  ? {
-                      background: "linear-gradient(145deg, #1a44ff, #0077cc)",
-                      color: "#fff",
-                      boxShadow: "0 1px 6px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.08) inset",
-                    }
-                  : { background: "rgba(255,255,255,0.05)", color: "rgba(255,255,255,0.2)" }
-              }
+              className="mb-0.5 mr-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full"
+              style={{
+                background: canSend()
+                  ? "linear-gradient(145deg, #1a44ff, #0077cc)"
+                  : "rgba(255,255,255,0.05)",
+                boxShadow: canSend()
+                  ? "0 2px 8px rgba(0,60,200,0.4), inset 0 1px 0 rgba(255,255,255,0.12)"
+                  : undefined,
+                transition: "all 0.2s ease-out",
+              }}
               aria-label="Enviar"
             >
-              <SendIcon size={14} />
+              <SendIcon
+                size={14}
+                style={{
+                  color: "#fff",
+                  opacity: canSend() ? 1 : 0.3,
+                  filter: canSend() ? "drop-shadow(0 0 4px rgba(150,200,255,0.5))" : undefined,
+                }}
+              />
             </button>
           </div>
         </div>
