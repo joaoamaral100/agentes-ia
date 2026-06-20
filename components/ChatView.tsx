@@ -85,11 +85,10 @@ function HamburgerIcon() {
     </svg>
   );
 }
-function SendIcon({ size = 14, style }: { size?: number; style?: React.CSSProperties }) {
+function SendIcon({ size = 16, style }: { size?: number; style?: React.CSSProperties }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={style}>
-      <line x1="22" y1="2" x2="11" y2="13" />
-      <polygon points="22 2 15 22 11 13 2 9 22 2" fill="#fff" stroke="none" />
+    <svg width={size} height={size} viewBox="0 0 24 24" style={style}>
+      <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" fill="#ffffff" />
     </svg>
   );
 }
@@ -172,11 +171,12 @@ export default function ChatView({ agent, messages, onMessagesChange, onMenuClic
   const [listening, setListening]       = useState(false);
   const [chatDragOver, setDragOver]     = useState(false);
 
-  const draftKey     = `jarvis_draft_${agent.id}`;
-  const scrollRef    = useRef<HTMLDivElement>(null);
-  const textareaRef  = useRef<HTMLTextAreaElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const recRef       = useRef<any>(null);
+  const draftKey      = `jarvis_draft_${agent.id}`;
+  const scrollRef     = useRef<HTMLDivElement>(null);
+  const textareaRef   = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef  = useRef<HTMLInputElement>(null);
+  const recRef        = useRef<any>(null);
+  const listeningRef  = useRef(false);
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
@@ -230,7 +230,12 @@ export default function ChatView({ agent, messages, onMessagesChange, onMenuClic
   }
 
   function toggleMic() {
-    if (listening) { recRef.current?.stop(); setListening(false); return; }
+    if (listeningRef.current) {
+      listeningRef.current = false;
+      recRef.current?.stop();
+      setListening(false);
+      return;
+    }
     const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SR) { alert("Seu navegador não suporta reconhecimento de voz."); return; }
     const rec = new SR();
@@ -240,8 +245,18 @@ export default function ChatView({ agent, messages, onMessagesChange, onMenuClic
       for (let i = ev.resultIndex; i < ev.results.length; i++) t += ev.results[i][0].transcript;
       setInput(t);
     };
-    rec.onerror = rec.onend = () => setListening(false);
-    rec.start(); recRef.current = rec; setListening(true);
+    rec.onerror = () => { listeningRef.current = false; setListening(false); };
+    rec.onend = () => {
+      if (listeningRef.current) {
+        try { rec.start(); } catch { listeningRef.current = false; setListening(false); }
+      } else {
+        setListening(false);
+      }
+    };
+    listeningRef.current = true;
+    rec.start();
+    recRef.current = rec;
+    setListening(true);
   }
 
   function canSend(): boolean {
@@ -655,6 +670,7 @@ export default function ChatView({ agent, messages, onMessagesChange, onMenuClic
             />
 
             <button
+              type="button"
               onClick={toggleMic}
               title={listening ? "Parar gravação" : "Gravar voz (pt-BR)"}
               className={["mb-0.5 flex h-8 w-8 items-center justify-center rounded-lg", listening ? "mic-listening" : ""].join(" ")}
@@ -684,10 +700,10 @@ export default function ChatView({ agent, messages, onMessagesChange, onMenuClic
               aria-label="Enviar"
             >
               <SendIcon
-                size={14}
+                size={16}
                 style={{
-                  opacity: canSend() ? 1 : 0.25,
-                  filter: canSend() ? "drop-shadow(0 0 3px rgba(180,220,255,0.6))" : undefined,
+                  opacity: canSend() ? 1 : 0.2,
+                  filter: "drop-shadow(0 0 4px rgba(255,255,255,0.5))",
                 }}
               />
             </button>

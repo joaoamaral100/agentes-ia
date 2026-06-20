@@ -281,16 +281,42 @@ export default function MessageBubble({ message, agentId }: { message: ChatMessa
   const isUser = message.role === "user";
 
   if (isUser) {
+    const hasImages = message.images && message.images.length > 0;
+    const hasText   = message.content.trim().length > 0;
     return (
       <div className="message-in flex justify-end">
         <div
-          className="max-w-[80%] rounded-[18px] rounded-br-sm px-5 py-3.5 text-[14px] leading-relaxed text-white"
+          className="max-w-[80%] rounded-[18px] rounded-br-sm text-[14px] leading-relaxed text-white"
           style={{
             background: "linear-gradient(145deg, #0c307a 0%, #0a52a8 100%)",
             boxShadow: "0 2px 16px rgba(0,40,140,0.4), inset 0 1px 0 rgba(255,255,255,0.08)",
+            padding: hasImages ? "10px" : "14px 20px",
           }}
         >
-          {renderContent(message.content)}
+          {hasImages && (
+            <div className={["flex flex-wrap gap-2", hasText ? "mb-2.5" : ""].join(" ")}>
+              {message.images!.map((img, i) => (
+                <img
+                  key={i}
+                  src={`data:${img.mediaType};base64,${img.base64}`}
+                  alt={img.name}
+                  style={{
+                    maxWidth: "280px",
+                    maxHeight: "200px",
+                    borderRadius: "10px",
+                    objectFit: "cover",
+                    border: "1px solid rgba(255,255,255,0.15)",
+                    display: "block",
+                  }}
+                />
+              ))}
+            </div>
+          )}
+          {hasText && (
+            <div style={hasImages ? { padding: "0 4px" } : undefined}>
+              {renderContent(message.content)}
+            </div>
+          )}
         </div>
       </div>
     );
