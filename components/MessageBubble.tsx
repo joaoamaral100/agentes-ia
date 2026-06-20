@@ -256,8 +256,21 @@ export default function MessageBubble({ message }: { message: ChatMessage }) {
         <div
           className="max-w-[80%] rounded-[18px] rounded-br-sm px-4 py-3 text-[14px] leading-relaxed text-white"
           style={{
-            background: "linear-gradient(135deg, #0066ff 0%, #00d4ff 100%)",
-            boxShadow: "0 0 18px rgba(0,102,255,0.3), 0 0 4px rgba(0,212,255,0.2)",
+            background: "linear-gradient(135deg, #0055ee 0%, #00c8ff 100%)",
+            boxShadow: "0 0 20px rgba(0,102,255,0.35), 0 2px 8px rgba(0,0,0,0.4)",
+            transition: "box-shadow 0.2s ease, transform 0.2s ease",
+          }}
+          onMouseEnter={(e) => {
+            Object.assign((e.currentTarget as HTMLElement).style, {
+              boxShadow: "0 0 30px rgba(0,102,255,0.55), 0 4px 16px rgba(0,0,0,0.4)",
+              transform: "translateY(-1px)",
+            });
+          }}
+          onMouseLeave={(e) => {
+            Object.assign((e.currentTarget as HTMLElement).style, {
+              boxShadow: "0 0 20px rgba(0,102,255,0.35), 0 2px 8px rgba(0,0,0,0.4)",
+              transform: "translateY(0)",
+            });
           }}
         >
           {renderContent(message.content)}
@@ -271,9 +284,24 @@ export default function MessageBubble({ message }: { message: ChatMessage }) {
       <div
         className="max-w-[92%] rounded-xl px-4 py-3 text-[14px] leading-relaxed"
         style={{
-          background: "rgba(0,212,255,0.04)",
-          border: "1px solid rgba(0,212,255,0.1)",
+          background: "rgba(0,16,36,0.7)",
+          border: "1px solid rgba(0,212,255,0.12)",
           color: "#e0f4ff",
+          transition: "border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease",
+        }}
+        onMouseEnter={(e) => {
+          Object.assign((e.currentTarget as HTMLElement).style, {
+            borderColor: "rgba(0,212,255,0.28)",
+            boxShadow: "0 0 16px rgba(0,212,255,0.1)",
+            transform: "translateY(-1px)",
+          });
+        }}
+        onMouseLeave={(e) => {
+          Object.assign((e.currentTarget as HTMLElement).style, {
+            borderColor: "rgba(0,212,255,0.12)",
+            boxShadow: "",
+            transform: "translateY(0)",
+          });
         }}
       >
         {renderContent(message.content)}

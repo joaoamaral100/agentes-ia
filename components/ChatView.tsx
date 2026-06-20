@@ -354,20 +354,21 @@ export default function ChatView({ agent, messages, onMessagesChange, onMenuClic
 
         {/* Agent icon — desktop only */}
         <div
-          className="hidden h-9 w-9 shrink-0 items-center justify-center rounded-xl glow-pulse-anim md:flex"
+          className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-xl glow-pulse-anim md:flex"
           style={{
-            background: "rgba(0,212,255,0.1)",
-            border: "1px solid rgba(0,212,255,0.3)",
+            background: "linear-gradient(135deg, rgba(0,212,255,0.15), rgba(0,102,255,0.1))",
+            border: "1px solid rgba(0,212,255,0.4)",
+            boxShadow: "0 0 20px rgba(0,212,255,0.2)",
           }}
         >
-          <AgentIcon id={agent.id} size={18} style={{ color: "#00d4ff" }} />
+          <AgentIcon id={agent.id} size={20} style={{ color: "#00d4ff", filter: "drop-shadow(0 0 5px rgba(0,212,255,0.7))" }} />
         </div>
 
         <div>
-          <h2 className="text-[14px] font-semibold tracking-tight gradient-text">
+          <h2 className="text-[15px] font-bold tracking-tight gradient-text">
             {agent.name}
           </h2>
-          <p className="text-[11px]" style={{ color: "#4a9ebb" }}>{agent.description}</p>
+          <p className="text-[11px]" style={{ color: "rgba(74,158,187,0.7)" }}>{agent.description}</p>
         </div>
       </header>
 
@@ -398,29 +399,36 @@ export default function ChatView({ agent, messages, onMessagesChange, onMenuClic
           {isEmpty ? (
             /* ── Empty state ── */
             <div className="mt-10 text-center">
-              <div
-                className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl glow-pulse-anim"
-                style={{
-                  background: "rgba(0,212,255,0.08)",
-                  border: "1px solid rgba(0,212,255,0.3)",
-                  boxShadow: "0 0 40px rgba(0,212,255,0.15)",
-                }}
-              >
-                <AgentIcon
-                  id={agent.id}
-                  size={40}
-                  style={{ color: "#00d4ff", opacity: 0.85, filter: "drop-shadow(0 0 8px rgba(0,212,255,0.7))" }}
+              {/* Ambient glow ring */}
+              <div className="relative mx-auto mb-6 flex h-24 w-24 items-center justify-center">
+                <div
+                  className="absolute inset-0 rounded-full"
+                  style={{
+                    background: "radial-gradient(circle, rgba(0,212,255,0.15) 0%, transparent 70%)",
+                    filter: "blur(12px)",
+                    transform: "scale(1.6)",
+                  }}
                 />
+                <div
+                  className="relative flex h-20 w-20 items-center justify-center rounded-2xl glow-pulse-anim"
+                  style={{
+                    background: "linear-gradient(135deg, rgba(0,212,255,0.12), rgba(0,102,255,0.08))",
+                    border: "1px solid rgba(0,212,255,0.35)",
+                    boxShadow: "0 0 40px rgba(0,212,255,0.2), inset 0 0 30px rgba(0,212,255,0.04)",
+                    animation: "float-icon 4s ease-in-out infinite",
+                  }}
+                >
+                  <AgentIcon
+                    id={agent.id}
+                    size={42}
+                    style={{ color: "#00d4ff", filter: "drop-shadow(0 0 10px rgba(0,212,255,0.8))" }}
+                  />
+                </div>
               </div>
-              <h3
-                className="mb-3 text-2xl font-bold tracking-tight gradient-text"
-              >
+              <h3 className="mb-3 text-2xl font-bold tracking-tight gradient-text">
                 {agent.name}
               </h3>
-              <p
-                className="mx-auto max-w-sm text-[13px] leading-relaxed"
-                style={{ color: "#4a9ebb" }}
-              >
+              <p className="mx-auto max-w-sm text-[13px] leading-relaxed" style={{ color: "#4a9ebb" }}>
                 {agent.description} — use o botão 📎 para enviar imagens ou arraste para a tela
               </p>
             </div>
@@ -597,19 +605,31 @@ export default function ChatView({ agent, messages, onMessagesChange, onMenuClic
             <button
               onClick={sendMessage}
               disabled={!canSend()}
-              className="mb-0.5 mr-0.5 flex h-8 w-8 items-center justify-center rounded-xl transition-all duration-200"
+              className="mb-0.5 mr-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-all duration-200"
               style={
                 canSend()
                   ? {
-                      background: "linear-gradient(135deg, #0066ff, #00d4ff)",
-                      boxShadow: "0 0 14px rgba(0,212,255,0.35)",
-                      color: "#000814",
+                      background: "linear-gradient(135deg, #0055ee, #00d4ff)",
+                      boxShadow: "0 0 18px rgba(0,212,255,0.45), 0 0 8px rgba(0,102,255,0.3)",
+                      color: "#fff",
                     }
                   : { background: "rgba(0,212,255,0.05)", color: "rgba(0,212,255,0.15)" }
               }
+              onMouseEnter={(e) => {
+                if (canSend()) Object.assign((e.currentTarget as HTMLElement).style, {
+                  boxShadow: "0 0 28px rgba(0,212,255,0.65), 0 0 12px rgba(0,102,255,0.45)",
+                  transform: "scale(1.08)",
+                });
+              }}
+              onMouseLeave={(e) => {
+                if (canSend()) Object.assign((e.currentTarget as HTMLElement).style, {
+                  boxShadow: "0 0 18px rgba(0,212,255,0.45), 0 0 8px rgba(0,102,255,0.3)",
+                  transform: "scale(1)",
+                });
+              }}
               aria-label="Enviar"
             >
-              <SendIcon size={16} />
+              <SendIcon size={15} />
             </button>
           </div>
         </div>

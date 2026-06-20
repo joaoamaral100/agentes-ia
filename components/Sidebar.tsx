@@ -162,34 +162,42 @@ export default function Sidebar({ activeAgent, onSelect, onNewChat, isOpen = fal
             <button
               key={agent.id}
               onClick={() => onSelect(agent.id)}
-              className="group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-all duration-200"
+              className="group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left"
               style={
                 active
                   ? {
-                      background: "rgba(0, 212, 255, 0.1)",
-                      border: "1px solid rgba(0, 212, 255, 0.4)",
-                      boxShadow: "0 0 16px rgba(0,212,255,0.2), inset 0 0 20px rgba(0,212,255,0.05)",
+                      background: "linear-gradient(135deg, rgba(0,212,255,0.12), rgba(0,102,255,0.08))",
+                      border: "1px solid rgba(0,212,255,0.45)",
+                      boxShadow: "0 0 20px rgba(0,212,255,0.18), inset 0 0 20px rgba(0,212,255,0.04)",
+                      transform: "translateX(5px)",
+                      transition: "all 0.25s cubic-bezier(0.34,1.56,0.64,1)",
                     }
                   : {
-                      background: "rgba(0, 212, 255, 0.03)",
-                      border: "1px solid rgba(0, 212, 255, 0.1)",
+                      background: "rgba(0,212,255,0.02)",
+                      border: "1px solid rgba(0,212,255,0.08)",
+                      transform: "translateX(0)",
+                      transition: "all 0.25s cubic-bezier(0.34,1.56,0.64,1)",
                     }
               }
               onMouseEnter={(e) => {
                 if (!active) {
                   Object.assign((e.currentTarget as HTMLElement).style, {
-                    background: "rgba(0, 212, 255, 0.08)",
-                    border: "1px solid rgba(0, 212, 255, 0.3)",
-                    boxShadow: "0 0 10px rgba(0,212,255,0.15)",
+                    background: "rgba(0,212,255,0.07)",
+                    border: "1px solid rgba(0,212,255,0.3)",
+                    boxShadow: "0 0 12px rgba(0,212,255,0.12)",
+                    transform: "translateX(5px)",
+                    transition: "all 0.25s cubic-bezier(0.34,1.56,0.64,1)",
                   });
                 }
               }}
               onMouseLeave={(e) => {
                 if (!active) {
                   Object.assign((e.currentTarget as HTMLElement).style, {
-                    background: "rgba(0, 212, 255, 0.03)",
-                    border: "1px solid rgba(0, 212, 255, 0.1)",
+                    background: "rgba(0,212,255,0.02)",
+                    border: "1px solid rgba(0,212,255,0.08)",
                     boxShadow: "",
+                    transform: "translateX(0)",
+                    transition: "all 0.25s cubic-bezier(0.34,1.56,0.64,1)",
                   });
                 }
               }}
@@ -242,25 +250,30 @@ export default function Sidebar({ activeAgent, onSelect, onNewChat, isOpen = fal
         />
         <button
           onClick={() => onNewChat(activeAgent)}
-          className="flex w-full items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-[12px] font-medium transition-all duration-200"
+          className="flex w-full items-center justify-center gap-2 rounded-xl px-3 py-3 text-[12px] font-semibold"
           style={{
-            border: "1px solid rgba(0,212,255,0.3)",
+            border: "1px solid rgba(0,212,255,0.35)",
             color: "#00d4ff",
-            background: "transparent",
-            letterSpacing: "0.5px",
+            background: "rgba(0,212,255,0.03)",
+            letterSpacing: "1px",
+            transition: "all 0.2s ease",
           }}
           onMouseEnter={(e) => {
             Object.assign((e.currentTarget as HTMLElement).style, {
-              background: "#00d4ff",
-              color: "#000814",
-              boxShadow: "0 0 16px rgba(0,212,255,0.4)",
+              background: "linear-gradient(135deg, #0055ee, #00d4ff)",
+              border: "1px solid transparent",
+              color: "#fff",
+              boxShadow: "0 0 24px rgba(0,212,255,0.45)",
+              transform: "translateY(-1px)",
             });
           }}
           onMouseLeave={(e) => {
             Object.assign((e.currentTarget as HTMLElement).style, {
-              background: "transparent",
+              background: "rgba(0,212,255,0.03)",
+              border: "1px solid rgba(0,212,255,0.35)",
               color: "#00d4ff",
               boxShadow: "",
+              transform: "translateY(0)",
             });
           }}
         >
