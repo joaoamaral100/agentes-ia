@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
+import AppWrapper from "@/components/AppWrapper";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap", weight: ["400","500","600"] });
 const display = Plus_Jakarta_Sans({ subsets: ["latin"], variable: "--font-display", display: "swap", weight: ["600","700","800"] });
@@ -24,10 +25,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <div className="orb orb-3" />
         </div>
 
-        {/* App */}
-        <div className="relative h-full" style={{ zIndex: 1 }}>
-          {children}
-        </div>
+        {/* Boot sequence + HUD overlay + app */}
+        <AppWrapper>
+          <div className="relative h-full" style={{ zIndex: 1 }}>
+            {children}
+          </div>
+        </AppWrapper>
 
       </body>
     </html>

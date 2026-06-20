@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { AGENTS, AgentId } from "@/lib/agents";
 
 // ─── SVG icons ────────────────────────────────────────────────────────────────
@@ -56,20 +57,60 @@ function CloseIcon() {
     </svg>
   );
 }
-function UserIcon() {
-  return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
-      <circle cx="12" cy="7" r="4" />
-    </svg>
-  );
-}
-
 function AgentIcon({ id, size = 20, style }: { id: string; size?: number; style?: React.CSSProperties }) {
   if (id === "imagens")     return <CameraIcon size={size} style={style} />;
   if (id === "copys")       return <CopyIcon   size={size} style={style} />;
   if (id === "mode-amaral") return <ShirtIcon  size={size} style={style} />;
   return                           <VideoIcon  size={size} style={style} />;
+}
+
+// ─── Sidebar HUD status panel ─────────────────────────────────────────────────
+
+function SidebarStatus() {
+  const [lat, setLat] = useState(() => Math.floor(Math.random() * 180 + 80));
+
+  useEffect(() => {
+    const t = setInterval(() => {
+      setLat(Math.floor(Math.random() * 180 + 80));
+    }, 3200);
+    return () => clearInterval(t);
+  }, []);
+
+  const dot = (color: string, pulse = false) => (
+    <span style={{
+      display: "inline-block",
+      width: "6px", height: "6px", borderRadius: "50%",
+      background: color,
+      boxShadow: `0 0 5px ${color}`,
+      flexShrink: 0,
+      animation: pulse ? "status-pulse 2s ease-out infinite" : "none",
+    }} />
+  );
+
+  const row = (color: string, label: string, value: string, pulse = false) => (
+    <div style={{ display: "flex", alignItems: "center", gap: "7px", marginBottom: "5px" }}>
+      {dot(color, pulse)}
+      <span style={{ fontFamily: "monospace", fontSize: "9.5px", color: "rgba(0,212,255,0.45)", letterSpacing: "0.5px" }}>
+        {label}
+        <span style={{ color: "rgba(0,212,255,0.2)", margin: "0 3px" }}>·</span>
+        <span style={{ color }}>{value}</span>
+      </span>
+    </div>
+  );
+
+  return (
+    <div className="mx-3 mt-2 mb-1 rounded-lg p-2.5" style={{
+      background: "rgba(0,212,255,0.025)",
+      border: "1px solid rgba(0,212,255,0.08)",
+    }}>
+      <p style={{ fontFamily: "monospace", fontSize: "8px", letterSpacing: "2.5px", color: "rgba(0,212,255,0.28)", marginBottom: "8px" }}>
+        STATUS
+      </p>
+      {row("#22c55e", "API",     "ONLINE", true)}
+      {row("#00d4ff", "MODEL",   "CLAUDE 4.5")}
+      {row(lat < 150 ? "#00d4ff" : "#fbbf24", "LATENCY", `${lat}ms`)}
+    </div>
+  );
 }
 
 // ─── Sidebar ──────────────────────────────────────────────────────────────────
@@ -96,10 +137,7 @@ export default function Sidebar({ activeAgent, onSelect, onNewChat, isOpen = fal
           isOpen ? "translate-x-0" : "-translate-x-full",
           "md:relative md:w-[220px] md:shrink-0 md:translate-x-0",
         ].join(" ")}
-        style={{
-          background: "#00070e",
-          borderRight: "1px solid rgba(255,255,255,0.06)",
-        }}
+        style={{ background: "#00070e", borderRight: "1px solid rgba(255,255,255,0.06)" }}
       >
         {/* Brand + close */}
         <div className="flex items-center justify-between px-4 pt-5 pb-4">
@@ -124,20 +162,27 @@ export default function Sidebar({ activeAgent, onSelect, onNewChat, isOpen = fal
         </div>
 
         {/* Separator */}
-        <div className="mx-4 mt-1 mb-1 h-px" style={{ background: "rgba(255,255,255,0.05)" }} />
+        <div className="mx-4 mb-1 h-px" style={{ background: "rgba(255,255,255,0.05)" }} />
+
+        {/* HUD Status panel */}
+        <SidebarStatus />
+
+        {/* Separator */}
+        <div className="mx-4 mt-1 mb-1 h-px" style={{ background: "rgba(255,255,255,0.04)" }} />
 
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto px-2 py-2">
           <p
             className="mb-1.5 px-3 text-[10px] font-semibold tracking-[3px]"
-            style={{ color: "rgba(74,158,187,0.35)" }}
+            style={{ color: "rgba(74,158,187,0.3)", fontFamily: "monospace" }}
           >
             AGENTES
           </p>
 
           <div className="space-y-0.5">
-            {AGENTS.map((agent) => {
+            {AGENTS.map((agent, idx) => {
               const active = agent.id === activeAgent;
+              const agentNum = `[${String(idx + 1).padStart(2, "0")}]`;
               return (
                 <button
                   key={agent.id}
@@ -190,9 +235,12 @@ export default function Sidebar({ activeAgent, onSelect, onNewChat, isOpen = fal
                         transition: "color 0.15s ease-out",
                       }}
                     >
+                      <span style={{ fontFamily: "monospace", fontSize: "9px", color: active ? "rgba(0,212,255,0.55)" : "rgba(74,158,187,0.3)", marginRight: "5px", letterSpacing: "0.5px" }}>
+                        {agentNum}
+                      </span>
                       {agent.name}
                     </span>
-                    <span className="block truncate text-[11px]" style={{ color: "rgba(74,158,187,0.35)" }}>
+                    <span className="block truncate text-[11px]" style={{ color: "rgba(74,158,187,0.32)" }}>
                       {agent.description}
                     </span>
                   </span>

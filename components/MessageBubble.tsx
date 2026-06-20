@@ -277,7 +277,7 @@ function renderContent(raw: string) {
 
 // ─── MessageBubble ────────────────────────────────────────────────────────────
 
-export default function MessageBubble({ message, agentId }: { message: ChatMessage; agentId?: string }) {
+export default function MessageBubble({ message, agentId, isStreaming }: { message: ChatMessage; agentId?: string; isStreaming?: boolean }) {
   const isUser = message.role === "user";
 
   if (isUser) {
@@ -334,6 +334,22 @@ export default function MessageBubble({ message, agentId }: { message: ChatMessa
         }}
       >
         {renderContent(message.content)}
+        {isStreaming && (
+          <span
+            aria-hidden="true"
+            style={{
+              display: "inline-block",
+              width: "2px",
+              height: "14px",
+              background: "#00d4ff",
+              marginLeft: "3px",
+              verticalAlign: "middle",
+              borderRadius: "1px",
+              animation: "boot-blink 0.75s step-end infinite",
+              boxShadow: "0 0 6px rgba(0,212,255,0.7)",
+            }}
+          />
+        )}
       </div>
     </div>
   );

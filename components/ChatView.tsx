@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Agent } from "@/lib/agents";
 import MessageBubble, { ChatMessage, ImageData } from "./MessageBubble";
 import CopyDisplay from "./CopyDisplay";
+import { beepSend, beepReceive } from "@/lib/sound";
 
 interface AttachedImage {
   name: string;
@@ -177,10 +178,30 @@ export default function ChatView({ agent, messages, onMessagesChange, onMenuClic
   const fileInputRef  = useRef<HTMLInputElement>(null);
   const recRef        = useRef<any>(null);
   const listeningRef  = useRef(false);
+  const mountTimeRef  = useRef(Date.now());
+  const [uptime, setUptime] = useState("00:00:00");
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
   }, [messages, loading]);
+
+  // Reset uptime when agent changes
+  useEffect(() => {
+    mountTimeRef.current = Date.now();
+    setUptime("00:00:00");
+  }, [agent.id]);
+
+  // Uptime ticker
+  useEffect(() => {
+    const t = setInterval(() => {
+      const s = Math.floor((Date.now() - mountTimeRef.current) / 1000);
+      const h = Math.floor(s / 3600).toString().padStart(2, "0");
+      const m = Math.floor((s % 3600) / 60).toString().padStart(2, "0");
+      const sec = (s % 60).toString().padStart(2, "0");
+      setUptime(`${h}:${m}:${sec}`);
+    }, 1000);
+    return () => clearInterval(t);
+  }, []);
 
   useEffect(() => {
     try {
@@ -307,6 +328,7 @@ export default function ChatView({ agent, messages, onMessagesChange, onMenuClic
     setAttached([]);
     setPrice("");
     setLoading(true);
+    beepSend();
     onMessagesChange([...history, { role: "assistant", content: "" }]);
 
     try {
@@ -325,7 +347,7 @@ export default function ChatView({ agent, messages, onMessagesChange, onMenuClic
       let acc = "";
       while (true) {
         const { done, value } = await reader.read();
-        if (done) break;
+        if (done) { beepReceive(); break; }
         acc += dec.decode(value, { stream: true });
         onMessagesChange([...history, { role: "assistant", content: acc }]);
       }
@@ -348,6 +370,11 @@ export default function ChatView({ agent, messages, onMessagesChange, onMenuClic
     messages[messages.length - 1].content === "";
 
   const canAttachMore = attachedImages.length < maxImages(agent.id);
+
+  // Dashboard stats
+  const msgCount  = messages.filter(m => !(m.role === "assistant" && m.content === "")).length;
+  const tokenEst  = messages.reduce((a, m) => a + Math.floor((m.content.length + (m.apiText?.length ?? 0)) / 4), 0);
+  const tokenStr  = tokenEst >= 1000 ? `${(tokenEst / 1000).toFixed(1)}K` : String(tokenEst);
 
   return (
     <div
@@ -405,17 +432,21 @@ export default function ChatView({ agent, messages, onMessagesChange, onMenuClic
           >
             {agent.name}
           </h2>
-          <div className="flex items-center gap-2">
-            <p className="truncate text-[11px]" style={{ color: "rgba(74,158,187,0.5)" }}>
-              {agent.description}
-            </p>
-            {!isEmpty && (
-              <span className="shrink-0 text-[10px]" style={{ color: "rgba(74,158,187,0.3)" }}>
-                · {messages.filter(m => !(m.role === "assistant" && m.content === "")).length} msgs
-              </span>
-            )}
-          </div>
+          <p className="truncate text-[11px]" style={{ color: "rgba(74,158,187,0.45)" }}>
+            {agent.description}
+          </p>
         </div>
+
+        {/* Mini dashboard */}
+        {!isEmpty && (
+          <div className="hidden shrink-0 items-center gap-0 md:flex" style={{ fontFamily: "monospace", fontSize: "9px", color: "rgba(0,212,255,0.45)", letterSpacing: "0.8px" }}>
+            <span>MSGS&nbsp;<span style={{ color: "rgba(0,212,255,0.75)" }}>{String(msgCount).padStart(2, "0")}</span></span>
+            <span style={{ margin: "0 7px", color: "rgba(0,212,255,0.18)" }}>┃</span>
+            <span>TOKENS&nbsp;<span style={{ color: "rgba(0,212,255,0.75)" }}>{tokenStr}</span></span>
+            <span style={{ margin: "0 7px", color: "rgba(0,212,255,0.18)" }}>┃</span>
+            <span>UP&nbsp;<span style={{ color: "rgba(0,212,255,0.75)" }}>{uptime}</span></span>
+          </div>
+        )}
 
         {/* ONLINE indicator */}
         <div className="hidden items-center gap-1.5 md:flex">
@@ -558,7 +589,12 @@ export default function ChatView({ agent, messages, onMessagesChange, onMenuClic
               {messages.map((m, i) =>
                 agent.id === "copys" && m.role === "assistant" && m.content
                   ? <CopyDisplay key={i} content={m.content} />
-                  : <MessageBubble key={i} message={m} agentId={agent.id} />
+                  : <MessageBubble
+                      key={i}
+                      message={m}
+                      agentId={agent.id}
+                      isStreaming={loading && i === messages.length - 1 && m.role === "assistant"}
+                    />
               )}
               {lastIsEmpty && (
                 <div className="flex items-end gap-1.5 px-1 pb-1">
