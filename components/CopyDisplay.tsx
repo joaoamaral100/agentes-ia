@@ -6,31 +6,54 @@ interface CopyDisplayProps {
 }
 
 export default function CopyDisplay({ content }: CopyDisplayProps) {
-  const [copied, setCopied] = useState(false);
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(content);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  const parseCopys = (text: string) => {
+    const scenes = [];
+    const lines = text.split('\n');
+    let currentScene = { title: '', content: '' };
+
+    for (const line of lines) {
+      if (line.includes('##') && line.includes('CENA')) {
+        if (currentScene.content) scenes.push(currentScene);
+        currentScene = {
+          title: line.replace('##', '').trim(),
+          content: ''
+        };
+      } else if (line.trim() && !line.startsWith('#')) {
+        currentScene.content += line + '\n';
+      }
+    }
+    if (currentScene.content) scenes.push(currentScene);
+    return scenes;
   };
 
-  const scenes = content.split("\n\n").filter(s => s.trim());
+  const handleCopy = (text: string, index: number) => {
+    navigator.clipboard.writeText(text.trim());
+    setCopiedIndex(index);
+    setTimeout(() => setCopiedIndex(null), 2000);
+  };
+
+  const scenes = parseCopys(content);
 
   return (
-    <div className="copy-display">
+    <div className="copy-container">
       {scenes.map((scene, idx) => (
-        <div key={idx} className="copy-scene">
-          <div className="copy-content">
-            {scene.split("\n").map((line, lineIdx) => (
-              <p key={lineIdx}>{line}</p>
-            ))}
+        <div key={idx} className="copy-scene-box">
+          <div className="scene-header">
+            <h3>{scene.title}</h3>
+            <button
+              onClick={() => handleCopy(scene.content, idx)}
+              className={`copy-button ${copiedIndex === idx ? 'copied' : ''}`}
+            >
+              {copiedIndex === idx ? '✓ Copiado!' : 'Copiar'}
+            </button>
           </div>
-          <button
-            onClick={handleCopy}
-            className={`copy-btn ${copied ? 'copied' : ''}`}
-          >
-            {copied ? '✓ Copiado!' : 'Copiar'}
-          </button>
+          <div className="scene-content">
+            {scene.content.split('\n').map((line, lineIdx) =>
+              line.trim() && <p key={lineIdx}>{line}</p>
+            )}
+          </div>
         </div>
       ))}
     </div>
