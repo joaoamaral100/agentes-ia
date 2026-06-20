@@ -23,11 +23,6 @@
 /* ── Display font utility ────────────────────────────────────────────────────── */
 .font-display { font-family: var(--font-display), var(--font-inter), system-ui, sans-serif; }
 
-/* ── Custom HUD cursor (desktop only) ──────────────────────────────────────── */
-@media (pointer: fine) {
-  *, *::before, *::after { cursor: none !important; }
-}
-
 /* ── Boot screen blink cursor ────────────────────────────────────────────────── */
 @keyframes boot-blink {
   0%, 100% { opacity: 1; }
