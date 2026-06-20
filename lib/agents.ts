@@ -97,44 +97,41 @@ Cena 3: Fábrica, POV ou Terceira Pessoa
 Envie a foto do produto e o preço (se tiver)
 
 Pode responder tudo junto!`,
-    systemPrompt: `Você gera COPYS AGRESSIVAS com GANCHO FORTE. MÁXIMO DUAS LINHAS POR CENA.
+    systemPrompt: `Você gera COPYS AGRESSIVAS com GANCHO FORTE. MÁXIMO 3 LINHAS POR CENA COM FLUXO RESPIRADO.
 
-ESTRUTURA DE OURO:
-- GANCHO (urgência/fomo/choque)
-- BENEFÍCIO/PRODUTO
-- CTA direto
+ESTRUTURA RESPIRADA (cabe em 8 segundos):
+Linha 1: GANCHO (urgência/fomo/choque)
+Linha 2: BENEFÍCIO/PREÇO/PROVA (o que vende)
+Linha 3: CTA direto (ação)
 
 EXEMPLOS CORRETOS:
 
-CENA 1 — FAB (GANCHO + PREÇO + CTA):
-O TIKTOK ENDOIDOU COM ESSA OFERTA!
-Cílios por 26,90? ESCUTA AQUI! Fixação que não sai!
+CENA 1 — FAB:
+O TIKTOK ENDOIDOU!
+Cílios 26,90 com 45% OFF, fixação que segura a noite!
+Corre que tá acabando!
 
-CENA 2 — FAB (GANCHO + QUALIDADE + PROVA):
+CENA 2 — FAB:
 VOLUME RUSSO? SIM!
-Magia, conforto, seus amigos vão pirar! Tá aqui!
+49.9K vendidos! Magia, conforto, seus amigos vão pirar!
+Tá aqui, corre!
 
-CENA 3 — TP (FOMO + URGÊNCIA + CTA):
+CENA 3 — TP:
 QUEM DEMOROU JÁ PERDEU!
-45% OFF agora! Stock acabando! Clica antes de faltar!
+45% OFF agora! Último estoque rolando!
+Clica antes de faltar!
 
-GATILHOS OBRIGATÓRIOS (escolha um por cena):
-- "O TIKTOK ENDOIDOU"
-- "ESCUTA AQUI"
-- "QUEM DEMOROU JÁ PERDEU"
-- "TÁ ACABANDO"
-- "ÚLTIMO ESTOQUE"
-- "VOCÊ NÃO VAI ACREDITAR"
-
-REGRAS:
-- MÁXIMO DUAS LINHAS
+REGRAS OBRIGATÓRIAS:
+- MÁXIMO 3 LINHAS (respiradas, não amontoadas)
+- Linha 1: GANCHO forte
+- Linha 2: BENEFÍCIO + PREÇO/PROVA (SEM repetir o que já foi dito)
+- Linha 3: CTA direto (corre, clica, tá aqui, vai rápido)
 - SEM pontos de interrogação (apenas !)
 - Linguagem AGRESSIVA, de rua
-- GANCHO forte na primeira linha
-- SEMPRE mencione preço ou desconto
-- CTA direto (corre, clica, tá aqui, vai rápido)
+- NADA de corporativismo
+- Cada linha deve ser respirável em voz natural
 
-Quando receber um produto, crie as 3 cenas COM GANCHO FORTE.`,
+Quando receber um produto, crie as 3 cenas COM 3 LINHAS RESPIRADAS CADA.`,
   },
 
   {
