@@ -231,33 +231,49 @@ export default function ChatView({ agent, messages, onMessagesChange, onMenuClic
   }
 
   function toggleMic() {
+    console.log("[Mic] click — listeningRef:", listeningRef.current);
     if (listeningRef.current) {
       listeningRef.current = false;
-      recRef.current?.stop();
+      recRef.current?.abort ? recRef.current.abort() : recRef.current?.stop();
       setListening(false);
       return;
     }
     const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SR) { alert("Seu navegador não suporta reconhecimento de voz."); return; }
+    if (!SR) {
+      alert("Reconhecimento de voz não suportado. Use Chrome ou Edge.");
+      return;
+    }
     const rec = new SR();
-    rec.lang = "pt-BR"; rec.continuous = true; rec.interimResults = true;
+    rec.lang = "pt-BR";
+    rec.continuous = false;
+    rec.interimResults = false;
     rec.onresult = (ev: any) => {
-      let t = "";
-      for (let i = ev.resultIndex; i < ev.results.length; i++) t += ev.results[i][0].transcript;
-      setInput(t);
+      const transcript = Array.from(ev.results as any[])
+        .map((r: any) => r[0].transcript)
+        .join(" ");
+      setInput(prev => prev ? `${prev} ${transcript}` : transcript);
     };
-    rec.onerror = () => { listeningRef.current = false; setListening(false); };
+    rec.onerror = (ev: any) => {
+      console.error("[Mic] error:", ev.error);
+      listeningRef.current = false;
+      setListening(false);
+      if (ev.error === "not-allowed") alert("Permissão de microfone negada. Verifique as permissões do navegador.");
+    };
     rec.onend = () => {
-      if (listeningRef.current) {
-        try { rec.start(); } catch { listeningRef.current = false; setListening(false); }
-      } else {
-        setListening(false);
-      }
+      console.log("[Mic] ended");
+      listeningRef.current = false;
+      setListening(false);
     };
-    listeningRef.current = true;
-    rec.start();
-    recRef.current = rec;
-    setListening(true);
+    try {
+      listeningRef.current = true;
+      rec.start();
+      recRef.current = rec;
+      setListening(true);
+      console.log("[Mic] started");
+    } catch (e) {
+      console.error("[Mic] start failed:", e);
+      listeningRef.current = false;
+    }
   }
 
   function canSend(): boolean {
@@ -360,11 +376,9 @@ export default function ChatView({ agent, messages, onMessagesChange, onMenuClic
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 hud-grid" style={{ zIndex: 0 }} />
       <div aria-hidden="true" className="pointer-events-none absolute inset-0" style={{ zIndex: 0 }}>
         {/* Top-right orb */}
-        <div style={{ position: "absolute", top: "-160px", right: "-160px", width: "500px", height: "500px", borderRadius: "50%", background: "radial-gradient(circle, rgba(0,120,255,0.09) 0%, transparent 70%)", filter: "blur(120px)", animation: "orb-drift 18s ease-in-out infinite" }} />
+        <div style={{ position: "absolute", top: "-200px", right: "-200px", width: "560px", height: "560px", borderRadius: "50%", background: "radial-gradient(circle, rgba(0,120,255,0.07) 0%, transparent 70%)", filter: "blur(150px)", animation: "orb-drift 28s ease-in-out infinite" }} />
         {/* Bottom-left orb */}
-        <div style={{ position: "absolute", bottom: "-160px", left: "-160px", width: "420px", height: "420px", borderRadius: "50%", background: "radial-gradient(circle, rgba(0,200,255,0.07) 0%, transparent 70%)", filter: "blur(100px)", animation: "orb-drift 22s ease-in-out infinite reverse", animationDelay: "-8s" }} />
-        {/* Center dim orb */}
-        <div style={{ position: "absolute", top: "30%", left: "40%", width: "300px", height: "300px", borderRadius: "50%", background: "radial-gradient(circle, rgba(0,150,255,0.04) 0%, transparent 70%)", filter: "blur(80px)", animation: "orb-drift 14s ease-in-out infinite", animationDelay: "-4s" }} />
+        <div style={{ position: "absolute", bottom: "-200px", left: "-200px", width: "540px", height: "540px", borderRadius: "50%", background: "radial-gradient(circle, rgba(0,200,255,0.06) 0%, transparent 70%)", filter: "blur(150px)", animation: "orb-drift 32s ease-in-out infinite reverse", animationDelay: "-14s" }} />
       </div>
 
       {/* Header */}
@@ -453,71 +467,42 @@ export default function ChatView({ agent, messages, onMessagesChange, onMenuClic
 
         <div className="mx-auto w-full max-w-2xl px-5 py-8">
           {isEmpty ? (
-            /* ── Empty state: Iron Man HUD ── */
+            /* ── Empty state ── */
             <div className="flex flex-col items-center justify-center pt-12 text-center">
 
-              {/* Triple rotating HUD rings */}
-              <div className="relative mb-10 flex h-52 w-52 items-center justify-center">
-                {/* Outer ambient glow */}
+              {/* Single ring + large icon */}
+              <div className="relative mb-8 flex h-36 w-36 items-center justify-center">
+                {/* Ambient glow */}
                 <div style={{
                   position: "absolute",
-                  inset: "-20px",
+                  inset: "-24px",
                   borderRadius: "50%",
-                  background: "radial-gradient(circle, rgba(0,212,255,0.12) 0%, transparent 65%)",
-                  filter: "blur(24px)",
+                  background: "radial-gradient(circle, rgba(0,212,255,0.08) 0%, transparent 65%)",
+                  filter: "blur(20px)",
                 }} />
-                {/* Ring 1 — outermost, slow CW */}
+                {/* Single subtle ring */}
                 <div style={{
                   position: "absolute",
-                  width: "200px",
-                  height: "200px",
+                  width: "136px",
+                  height: "136px",
                   borderRadius: "50%",
                   border: "1px solid rgba(0,212,255,0.12)",
-                  borderTopColor: "rgba(0,212,255,0.6)",
-                  borderRightColor: "rgba(0,212,255,0.3)",
-                  animation: "ring-cw 14s linear infinite",
+                  borderTopColor: "rgba(0,212,255,0.5)",
+                  animation: "ring-cw 12s linear infinite",
                 }} />
-                {/* Ring 1 tick */}
-                <div style={{ position: "absolute", top: "22px", left: "50%", width: "4px", height: "4px", borderRadius: "50%", background: "rgba(0,212,255,0.8)", boxShadow: "0 0 6px rgba(0,212,255,0.9)", transform: "translateX(-50%)", animation: "ring-cw 14s linear infinite" }} />
-
-                {/* Ring 2 — middle, CCW */}
-                <div style={{
-                  position: "absolute",
-                  width: "162px",
-                  height: "162px",
-                  borderRadius: "50%",
-                  border: "1px solid rgba(0,212,255,0.08)",
-                  borderBottomColor: "rgba(0,212,255,0.5)",
-                  borderLeftColor: "rgba(0,212,255,0.25)",
-                  animation: "ring-ccw 9s linear infinite",
-                }} />
-                {/* Ring 2 tick */}
-                <div style={{ position: "absolute", bottom: "35px", left: "50%", width: "3px", height: "3px", borderRadius: "50%", background: "rgba(0,212,255,0.7)", boxShadow: "0 0 5px rgba(0,212,255,0.8)", transform: "translateX(-50%)", animation: "ring-ccw 9s linear infinite" }} />
-
-                {/* Ring 3 — inner, fast CW */}
-                <div style={{
-                  position: "absolute",
-                  width: "124px",
-                  height: "124px",
-                  borderRadius: "50%",
-                  border: "1px dashed rgba(0,212,255,0.06)",
-                  borderTopColor: "rgba(0,212,255,0.35)",
-                  animation: "ring-cw 5s linear infinite",
-                }} />
-
-                {/* Center icon */}
+                {/* Center icon h-28 w-28 */}
                 <div
-                  className="relative flex h-24 w-24 items-center justify-center rounded-3xl"
+                  className="relative flex h-28 w-28 items-center justify-center rounded-3xl"
                   style={{
-                    background: "linear-gradient(135deg, rgba(0,212,255,0.1), rgba(0,102,255,0.07))",
-                    border: "1px solid rgba(0,212,255,0.22)",
-                    boxShadow: "0 0 30px rgba(0,212,255,0.12), inset 0 0 20px rgba(0,212,255,0.04)",
+                    background: "linear-gradient(135deg, rgba(0,212,255,0.08), rgba(0,102,255,0.05))",
+                    border: "1px solid rgba(0,212,255,0.15)",
+                    boxShadow: "0 0 24px rgba(0,212,255,0.08), inset 0 0 16px rgba(0,212,255,0.03)",
                   }}
                 >
                   <AgentIcon
                     id={agent.id}
-                    size={46}
-                    style={{ color: "#00d4ff", filter: "drop-shadow(0 0 10px rgba(0,212,255,0.7))" }}
+                    size={52}
+                    style={{ color: "#00d4ff", filter: "drop-shadow(0 0 8px rgba(0,212,255,0.6))" }}
                   />
                 </div>
               </div>
@@ -529,15 +514,22 @@ export default function ChatView({ agent, messages, onMessagesChange, onMenuClic
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
                   backgroundClip: "text",
-                  textShadow: "none",
-                  filter: "drop-shadow(0 0 20px rgba(0,212,255,0.2))",
+                  filter: "drop-shadow(0 0 16px rgba(0,212,255,0.18))",
                 }}
               >
                 {agent.name}
               </h3>
-              <p className="mx-auto mb-8 max-w-xs text-[14px] leading-relaxed" style={{ color: "rgba(160,200,220,0.5)" }}>
+              <p className="mx-auto mb-6 max-w-xs text-[14px] leading-relaxed" style={{ color: "rgba(160,200,220,0.5)" }}>
                 {agent.description}
               </p>
+
+              {/* Decorative line */}
+              <div style={{
+                width: "200px",
+                height: "1px",
+                background: "linear-gradient(90deg, transparent, rgba(0,212,255,0.3), transparent)",
+                marginBottom: "20px",
+              }} />
 
               {/* Sistema online badge */}
               <div className="flex items-center gap-2">
@@ -558,6 +550,7 @@ export default function ChatView({ agent, messages, onMessagesChange, onMenuClic
                       message={m}
                       agentId={agent.id}
                       isStreaming={loading && i === messages.length - 1 && m.role === "assistant"}
+                      animDelay={Math.min(i * 40, 200)}
                     />
               )}
               {lastIsEmpty && (

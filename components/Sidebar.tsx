@@ -143,6 +143,7 @@ export default function Sidebar({ activeAgent, onSelect, onNewChat, isOpen = fal
                       background: "rgba(255,255,255,0.04)",
                       borderLeft: "2px solid rgba(0,212,255,0.25)",
                       paddingLeft: "9px",
+                      transform: "translateX(4px)",
                     });
                   }}
                   onMouseLeave={(e) => {
@@ -150,6 +151,7 @@ export default function Sidebar({ activeAgent, onSelect, onNewChat, isOpen = fal
                       background: "transparent",
                       borderLeft: "2px solid transparent",
                       paddingLeft: "11px",
+                      transform: "translateX(0)",
                     });
                   }}
                 >

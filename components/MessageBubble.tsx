@@ -277,14 +277,14 @@ function renderContent(raw: string) {
 
 // ─── MessageBubble ────────────────────────────────────────────────────────────
 
-export default function MessageBubble({ message, agentId, isStreaming }: { message: ChatMessage; agentId?: string; isStreaming?: boolean }) {
+export default function MessageBubble({ message, agentId, isStreaming, animDelay }: { message: ChatMessage; agentId?: string; isStreaming?: boolean; animDelay?: number }) {
   const isUser = message.role === "user";
 
   if (isUser) {
     const hasImages = message.images && message.images.length > 0;
     const hasText   = message.content.trim().length > 0;
     return (
-      <div className="message-in flex justify-end">
+      <div className="message-in flex justify-end" style={animDelay ? { animationDelay: `${animDelay}ms` } : undefined}>
         <div
           className="max-w-[80%] rounded-[18px] rounded-br-sm text-[14px] leading-relaxed text-white"
           style={{
@@ -323,7 +323,7 @@ export default function MessageBubble({ message, agentId, isStreaming }: { messa
   }
 
   return (
-    <div className="message-in flex items-start gap-2.5 justify-start">
+    <div className="message-in flex items-start gap-2.5 justify-start" style={animDelay ? { animationDelay: `${animDelay}ms` } : undefined}>
       <AgentAvatar agentId={agentId} />
       <div
         className="max-w-[88%] rounded-xl px-5 py-4 text-[14px] leading-relaxed"
