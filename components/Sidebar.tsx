@@ -56,6 +56,15 @@ function CloseIcon() {
     </svg>
   );
 }
+function SignOutIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
+      <polyline points="16 17 21 12 16 7" />
+      <line x1="21" y1="12" x2="9" y2="12" />
+    </svg>
+  );
+}
 function AgentIcon({ id, size = 20, style }: { id: string; size?: number; style?: React.CSSProperties }) {
   if (id === "imagens")     return <CameraIcon size={size} style={style} />;
   if (id === "copys")       return <CopyIcon   size={size} style={style} />;
@@ -69,11 +78,12 @@ interface SidebarProps {
   activeAgent: AgentId;
   onSelect: (id: AgentId) => void;
   onNewChat: (id: AgentId) => void;
+  onSignOut?: () => void;
   isOpen?: boolean;
   onClose?: () => void;
 }
 
-export default function Sidebar({ activeAgent, onSelect, onNewChat, isOpen = false, onClose }: SidebarProps) {
+export default function Sidebar({ activeAgent, onSelect, onNewChat, onSignOut, isOpen = false, onClose }: SidebarProps) {
   return (
     <>
       {isOpen && (
@@ -192,7 +202,7 @@ export default function Sidebar({ activeAgent, onSelect, onNewChat, isOpen = fal
           </div>
         </nav>
 
-        {/* Separator + New chat */}
+        {/* Separator + New chat + Sign out */}
         <div className="p-3 pb-4">
           <div className="mb-3 h-px" style={{ background: "rgba(255,255,255,0.05)" }} />
           <button
@@ -221,6 +231,30 @@ export default function Sidebar({ activeAgent, onSelect, onNewChat, isOpen = fal
             <PlusIcon />
             Nova conversa
           </button>
+
+          {onSignOut && (
+            <button
+              onClick={onSignOut}
+              className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg px-3 py-2 text-[11px] font-medium"
+              style={{
+                color: "rgba(74,158,187,0.35)",
+                background: "transparent",
+                transition: "all 0.15s ease-out",
+                letterSpacing: "0.3px",
+              }}
+              onMouseEnter={(e) => Object.assign((e.currentTarget as HTMLElement).style, {
+                color: "#f87171",
+                background: "rgba(248,113,113,0.06)",
+              })}
+              onMouseLeave={(e) => Object.assign((e.currentTarget as HTMLElement).style, {
+                color: "rgba(74,158,187,0.35)",
+                background: "transparent",
+              })}
+            >
+              <SignOutIcon />
+              Sair
+            </button>
+          )}
         </div>
       </aside>
     </>
