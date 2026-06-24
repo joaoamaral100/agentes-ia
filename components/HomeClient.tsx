@@ -3,81 +3,70 @@
 import { useEffect, useRef, useState } from "react";
 import Sidebar from "@/components/Sidebar";
 import ChatView from "@/components/ChatView";
-import LoginScreen from "@/components/LoginScreen";
 import Footer from "@/components/Footer";
 import { ChatMessage } from "@/components/MessageBubble";
 import { AGENTS, AgentId, getAgent } from "@/lib/agents";
-import { supabase, loadConversations, saveConversation, StoredMessage } from "@/lib/supabase";
-import type { User } from "@supabase/supabase-js";
 
 type ChatState = Record<AgentId, ChatMessage[]>;
 
-const emptyState: ChatState = AGENTS.reduce((acc, a) => {
-  acc[a.id] = [];
-  return acc;
-}, {} as ChatState);
+const CHATS_KEY = "jarvis_chats_v2";
 
-export default function HomeClient() {
-  const [user, setUser] = useState<User | null | undefined>(undefined);
-  const [activeAgent, setActiveAgent] = useState<AgentId>("imagens");
-  const [chats, setChats] = useState<ChatState>(emptyState);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  const chatsRef = useRef<ChatState>(emptyState);
-  const userRef = useRef<User | null>(null);
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      const u = session?.user ?? null;
-      userRef.current = u;
-      setUser(u);
-      if (u) fetchConversations(u.id);
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      const u = session?.user ?? null;
-      userRef.current = u;
-      setUser(u);
-      if (u) fetchConversations(u.id);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  async function fetchConversations(userId: string) {
-    const stored = await loadConversations(userId);
-    const merged = AGENTS.reduce((acc, a) => {
+function loadChats(): ChatState {
+  const empty = AGENTS.reduce((acc, a) => { acc[a.id] = []; return acc; }, {} as ChatState);
+  try {
+    const raw = localStorage.getItem(CHATS_KEY);
+    if (!raw) return empty;
+    const stored = JSON.parse(raw) as Partial<ChatState>;
+    return AGENTS.reduce((acc, a) => {
       acc[a.id] = (stored[a.id] ?? []) as ChatMessage[];
       return acc;
     }, {} as ChatState);
-    chatsRef.current = merged;
-    setChats(merged);
+  } catch {
+    return empty;
   }
+}
+
+function saveChats(chats: ChatState) {
+  try {
+    // Strip base64 images — too large for localStorage
+    const stripped = AGENTS.reduce((acc, a) => {
+      acc[a.id] = chats[a.id]
+        .filter((m) => !(m.role === "assistant" && m.content === ""))
+        .map((m) => ({
+          role: m.role,
+          content: m.content,
+          ...(m.apiText ? { apiText: m.apiText } : {}),
+        })) as ChatMessage[];
+      return acc;
+    }, {} as ChatState);
+    localStorage.setItem(CHATS_KEY, JSON.stringify(stripped));
+  } catch {}
+}
+
+const emptyState: ChatState = AGENTS.reduce((acc, a) => { acc[a.id] = []; return acc; }, {} as ChatState);
+
+export default function HomeClient() {
+  const [activeAgent, setActiveAgent] = useState<AgentId>("imagens");
+  const [chats, setChats]             = useState<ChatState>(emptyState);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const chatsRef                      = useRef<ChatState>(emptyState);
+
+  useEffect(() => {
+    const stored = loadChats();
+    chatsRef.current = stored;
+    setChats(stored);
+  }, []);
 
   function updateMessages(id: AgentId, messages: ChatMessage[]) {
     const next = { ...chatsRef.current, [id]: messages };
     chatsRef.current = next;
     setChats(next);
-
-    const uid = userRef.current?.id;
-    if (uid) {
-      const cleaned = messages
-        .filter((m) => !(m.role === "assistant" && m.content === ""))
-        .map((m) => ({ role: m.role, content: m.content, ...(m.apiText ? { apiText: m.apiText } : {}) }));
-      saveConversation(uid, id, cleaned as StoredMessage[]);
-    }
+    saveChats(next);
   }
 
-  function handleNewChat(id: AgentId) {
-    updateMessages(id, []);
-  }
-
-  if (user === undefined) {
-    return null;
-  }
-
-  if (user === null) {
-    return <LoginScreen onSuccess={() => { /* onAuthStateChange fires automatically */ }} />;
+  function handleSignOut() {
+    localStorage.removeItem("jarvis_auth");
+    window.location.reload();
   }
 
   const agent = getAgent(activeAgent)!;
@@ -87,8 +76,8 @@ export default function HomeClient() {
       <Sidebar
         activeAgent={activeAgent}
         onSelect={(id) => { setActiveAgent(id); setSidebarOpen(false); }}
-        onNewChat={(id) => { handleNewChat(id); setSidebarOpen(false); }}
-        onSignOut={() => supabase.auth.signOut()}
+        onNewChat={(id) => { updateMessages(id, []); setSidebarOpen(false); }}
+        onSignOut={handleSignOut}
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
       />
