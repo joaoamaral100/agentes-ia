@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
 import LoginScreen from "./LoginScreen";
@@ -9,7 +9,7 @@ import HudOverlay from "./HudOverlay";
 
 type ApprovalStatus = "loading" | "approved" | "pending";
 
-function PendingScreen() {
+function PendingScreen({ onRetry }: { onRetry: () => void }) {
   return (
     <div
       className="dot-grid relative flex min-h-screen w-full items-center justify-center overflow-hidden"
@@ -68,6 +68,32 @@ function PendingScreen() {
           </p>
 
           <button
+            onClick={onRetry}
+            className="mb-3 w-full rounded-xl text-[13px] font-semibold transition-all"
+            style={{
+              height: "44px",
+              background: "rgba(0,212,255,0.08)",
+              border: "1px solid rgba(0,212,255,0.2)",
+              color: "rgba(0,212,255,0.7)",
+              cursor: "pointer",
+            }}
+            onMouseEnter={(e) => {
+              Object.assign((e.currentTarget as HTMLElement).style, {
+                background: "rgba(0,212,255,0.15)",
+                color: "#00d4ff",
+              });
+            }}
+            onMouseLeave={(e) => {
+              Object.assign((e.currentTarget as HTMLElement).style, {
+                background: "rgba(0,212,255,0.08)",
+                color: "rgba(0,212,255,0.7)",
+              });
+            }}
+          >
+            Verificar novamente
+          </button>
+
+          <button
             onClick={() => supabase.auth.signOut()}
             className="w-full rounded-xl text-[13px] font-semibold transition-all"
             style={{
@@ -102,6 +128,7 @@ export default function AppWrapper({ children }: { children: React.ReactNode }) 
   const [user, setUser]         = useState<User | null | undefined>(undefined);
   const [approval, setApproval] = useState<ApprovalStatus>("loading");
   const [booted, setBooted]     = useState(false);
+  const userRef                 = useRef<User | null>(null);
 
   async function checkApproval(u: User) {
     const { data, error } = await supabase
@@ -112,20 +139,34 @@ export default function AppWrapper({ children }: { children: React.ReactNode }) 
 
     if (error) {
       // profiles table doesn't exist yet → fail open so admin can still access
-      console.log("[Auth] profiles check error (table may not exist yet):", error.message);
+      console.log("[Auth] profiles check error (table may not exist yet):", error.message, error.code);
       setApproval("approved");
       return;
     }
 
-    const ok = data?.is_admin === true || data?.approved === true;
-    console.log("[Auth] approval check →", ok ? "approved" : "pending", data);
+    if (!data) {
+      console.log("[Auth] no profile found for", u.email, "— showing pending");
+      setApproval("pending");
+      return;
+    }
+
+    const ok = data.is_admin === true || data.approved === true;
+    console.log("[Auth] approval →", ok ? "APROVADO" : "PENDENTE", { approved: data.approved, is_admin: data.is_admin });
     setApproval(ok ? "approved" : "pending");
+  }
+
+  function retryApproval() {
+    if (userRef.current) {
+      setApproval("loading");
+      checkApproval(userRef.current);
+    }
   }
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session }, error }) => {
       console.log("[Auth] getSession →", session?.user?.email ?? "sem sessão", error?.message ?? "");
       const u = session?.user ?? null;
+      userRef.current = u;
       setUser(u);
       if (u) checkApproval(u);
     });
@@ -133,6 +174,7 @@ export default function AppWrapper({ children }: { children: React.ReactNode }) 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       console.log("[Auth] onAuthStateChange →", event, session?.user?.email ?? "sem usuário");
       const u = session?.user ?? null;
+      userRef.current = u;
       setUser(u);
       if (u) {
         setApproval("loading");
@@ -158,7 +200,7 @@ export default function AppWrapper({ children }: { children: React.ReactNode }) 
 
   // Autenticado mas pendente
   if (approval === "pending") {
-    return <PendingScreen />;
+    return <PendingScreen onRetry={retryApproval} />;
   }
 
   // Autenticado e aprovado
