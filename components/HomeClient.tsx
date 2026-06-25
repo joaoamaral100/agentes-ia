@@ -6,6 +6,7 @@ import ChatView from "@/components/ChatView";
 import Footer from "@/components/Footer";
 import { ChatMessage } from "@/components/MessageBubble";
 import { AGENTS, AgentId, getAgent } from "@/lib/agents";
+import { supabase } from "@/lib/supabase";
 
 type ChatState = Record<AgentId, ChatMessage[]>;
 
@@ -28,7 +29,6 @@ function loadChats(): ChatState {
 
 function saveChats(chats: ChatState) {
   try {
-    // Strip base64 images — too large for localStorage
     const stripped = AGENTS.reduce((acc, a) => {
       acc[a.id] = chats[a.id]
         .filter((m) => !(m.role === "assistant" && m.content === ""))
@@ -64,9 +64,9 @@ export default function HomeClient() {
     saveChats(next);
   }
 
-  function handleSignOut() {
-    localStorage.removeItem("jarvis_auth");
-    window.location.reload();
+  async function handleSignOut() {
+    await supabase.auth.signOut();
+    // onAuthStateChange no AppWrapper detecta e redireciona para LoginScreen
   }
 
   const agent = getAgent(activeAgent)!;

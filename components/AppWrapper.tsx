@@ -1,38 +1,38 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type { User } from "@supabase/supabase-js";
+import { supabase } from "@/lib/supabase";
 import LoginScreen from "./LoginScreen";
 import BootScreen from "./BootScreen";
 import HudOverlay from "./HudOverlay";
 
 export default function AppWrapper({ children }: { children: React.ReactNode }) {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isLoading, setIsLoading]             = useState(true);
-  const [booted, setBooted]                   = useState(false);
+  const [user, setUser]     = useState<User | null | undefined>(undefined); // undefined = carregando
+  const [booted, setBooted] = useState(false);
 
   useEffect(() => {
-    const auth = localStorage.getItem("jarvis_auth");
-    if (auth === "true") {
-      setIsAuthenticated(true);
-    }
-    setIsLoading(false);
+    // Lê sessão inicial
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    // Escuta mudanças de auth (login, logout, refresh de token)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
-  // Tela preta enquanto verifica o localStorage — nunca mostra o app sem verificar
-  if (isLoading) {
+  // Aguardando verificação — tela preta, nunca expõe o app
+  if (user === undefined) {
     return <div style={{ position: "fixed", inset: 0, background: "#000814" }} />;
   }
 
-  // Não autenticado → APENAS LoginScreen, nada mais
-  if (!isAuthenticated) {
-    return (
-      <LoginScreen
-        onSuccess={() => {
-          localStorage.setItem("jarvis_auth", "true");
-          setIsAuthenticated(true);
-        }}
-      />
-    );
+  // Não autenticado → só LoginScreen
+  if (!user) {
+    return <LoginScreen onSuccess={() => { /* onAuthStateChange detecta automaticamente */ }} />;
   }
 
   // Autenticado → boot sequence + app
