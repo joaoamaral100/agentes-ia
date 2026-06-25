@@ -18,6 +18,90 @@ function LoadingGate() {
   return <div style={{ position: "fixed", inset: 0, background: "#000814" }} />;
 }
 
+// ── Screen shown when another device took over the session ────────────────────
+function KickedOutScreen({ onContinue }: { onContinue: () => void }) {
+  return (
+    <div
+      className="dot-grid relative flex min-h-screen w-full items-center justify-center overflow-hidden"
+      style={{ background: "#000814" }}
+    >
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="orb orb-1" />
+        <div className="orb orb-2" />
+        <div className="orb orb-3" />
+      </div>
+      <div className="relative z-10 w-full max-w-sm px-4">
+        <div
+          className="rounded-2xl p-8 text-center"
+          style={{
+            background: "rgba(0,12,30,0.7)",
+            backdropFilter: "blur(40px)",
+            WebkitBackdropFilter: "blur(40px)",
+            border: "1px solid rgba(248,113,113,0.2)",
+            boxShadow: "0 24px 64px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.04)",
+          }}
+        >
+          <span
+            className="mb-8 block text-center text-[28px] font-bold tracking-[14px]"
+            style={{
+              background: "linear-gradient(135deg, #ffffff 0%, #80ccee 40%, #00d4ff 100%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+            }}
+          >
+            JARVIS
+          </span>
+
+          <div
+            className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full"
+            style={{ background: "rgba(248,113,113,0.08)", border: "1px solid rgba(248,113,113,0.2)" }}
+          >
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+              <path d="M12 9v4M12 17h.01" stroke="#f87171" strokeWidth="1.5" strokeLinecap="round" />
+              <circle cx="12" cy="12" r="9" stroke="#f87171" strokeWidth="1.5" />
+            </svg>
+          </div>
+
+          <div className="mb-2 text-[15px] font-semibold" style={{ color: "rgba(255,255,255,0.85)" }}>
+            Sessão encerrada
+          </div>
+          <p className="mb-7 text-[13px] leading-relaxed" style={{ color: "rgba(74,158,187,0.65)" }}>
+            Sua conta foi acessada em outro dispositivo. Você foi desconectado automaticamente.
+          </p>
+
+          <button
+            onClick={onContinue}
+            className="w-full rounded-xl text-[13px] font-semibold"
+            style={{
+              height: "48px",
+              background: "linear-gradient(135deg, #1a44ff 0%, #0088cc 100%)",
+              color: "#fff",
+              cursor: "pointer",
+              boxShadow: "0 4px 20px rgba(0,100,255,0.35)",
+              transition: "all 0.2s ease",
+            }}
+            onMouseEnter={(e) =>
+              Object.assign((e.currentTarget as HTMLElement).style, {
+                boxShadow: "0 6px 28px rgba(0,100,255,0.5)",
+                transform: "translateY(-1px)",
+              })
+            }
+            onMouseLeave={(e) =>
+              Object.assign((e.currentTarget as HTMLElement).style, {
+                boxShadow: "0 4px 20px rgba(0,100,255,0.35)",
+                transform: "translateY(0)",
+              })
+            }
+          >
+            Entrar novamente
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Screen shown to authenticated-but-not-yet-approved users ─────────────────
 function PendingScreen({ onRetry }: { onRetry: () => void }) {
   return (
@@ -162,6 +246,7 @@ export default function AppWrapper({ children }: { children: React.ReactNode }) 
   const [user, setUser]           = useState<User | null>(null);
   const [approval, setApproval]   = useState<ApprovalStatus>("loading");
   const [booted, setBooted]       = useState(false);
+  const [kickedOut, setKickedOut] = useState(false);
 
   // Keep a ref so retryApproval doesn't close over a stale user value
   const userRef = useRef<User | null>(null);
@@ -238,21 +323,62 @@ export default function AppWrapper({ children }: { children: React.ReactNode }) 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // ── Single-session enforcement ────────────────────────────────────────────
+  // Only runs when the user is fully authenticated AND approved.
+  // Polls every 15 s to check whether another device has taken over the session.
+  useEffect(() => {
+    if (!user || approval !== "approved") return;
+
+    const userId = user.id;
+
+    async function verifySingleSession() {
+      const localToken = localStorage.getItem("jarvis_session_token");
+      if (!localToken) return; // this device has no token → skip (no kick)
+
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("active_session_id")
+        .eq("id", userId)
+        .single();
+
+      if (error || !data) return; // DB error or missing row → never kick on uncertainty
+      if (!data.active_session_id) return; // null → column not yet set, skip
+
+      if (data.active_session_id !== localToken) {
+        console.log("[Auth] session taken by another device — signing out");
+        setKickedOut(true);
+        await supabase.auth.signOut();
+        // signOut triggers onAuthStateChange → setUser(null)
+        // cleanup below clears the interval automatically
+      }
+    }
+
+    verifySingleSession(); // immediate check on becoming approved
+    const interval = setInterval(verifySingleSession, 15_000);
+
+    return () => clearInterval(interval);
+  // user?.id avoids re-running on token refresh (object ref changes but id stays the same)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id, approval]);
+
   // ── Render gates (evaluated in order) ────────────────────────────────────
 
   // Gate 1: waiting for getSession() to finish
   if (!authReady) return <LoadingGate />;
 
-  // Gate 2: no session → login form
+  // Gate 2: evicted by another device login
+  if (kickedOut) return <KickedOutScreen onContinue={() => setKickedOut(false)} />;
+
+  // Gate 3: no session → login form
   if (!user) return <LoginScreen onSuccess={() => {}} />;
 
-  // Gate 3: session found, profiles query in flight
+  // Gate 4: session found, profiles query in flight
   if (approval === "loading") return <LoadingGate />;
 
-  // Gate 4: authenticated but not approved
+  // Gate 5: authenticated but not approved
   if (approval === "pending") return <PendingScreen onRetry={retryApproval} />;
 
-  // Gate 5: authenticated + approved → boot animation then app
+  // Gate 6: authenticated + approved → boot animation then app
   return (
     <>
       <HudOverlay />

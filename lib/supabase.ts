@@ -71,6 +71,20 @@ export async function getAllProfiles(): Promise<Profile[]> {
   return (data ?? []) as Profile[];
 }
 
+/**
+ * Register this device as the active session for the current user.
+ * Calls a SECURITY DEFINER RPC so it bypasses the admin-only UPDATE policy
+ * while still only touching the caller's own row.
+ */
+export async function setActiveSession(token: string): Promise<boolean> {
+  const { error } = await supabase.rpc("set_active_session", { session_token: token });
+  if (error) {
+    console.log("[supabase] setActiveSession error:", error.code, error.message);
+    return false;
+  }
+  return true;
+}
+
 /** Admin: flip the approved flag on any profile. */
 export async function setUserApproval(userId: string, approved: boolean): Promise<void> {
   const { error } = await supabase

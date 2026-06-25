@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { supabase } from "@/lib/supabase";
+import { supabase, setActiveSession } from "@/lib/supabase";
 
 // ─── UI helpers ───────────────────────────────────────────────────────────────
 
@@ -115,8 +115,16 @@ export default function LoginScreen({ onSuccess }: LoginScreenProps) {
 
     try {
       if (mode === "signin") {
-        const { error: err } = await supabase.auth.signInWithPassword({ email, password });
+        const { data, error: err } = await supabase.auth.signInWithPassword({ email, password });
         if (err) throw err;
+
+        // Register this device as the sole active session
+        if (data.user) {
+          const token = crypto.randomUUID();
+          const saved = await setActiveSession(token);
+          if (saved) localStorage.setItem("jarvis_session_token", token);
+        }
+
         onSuccess(); // onAuthStateChange no AppWrapper detecta automaticamente
       } else if (mode === "signup") {
         const { data, error: err } = await supabase.auth.signUp({ email, password });
