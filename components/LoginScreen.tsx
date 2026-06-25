@@ -121,8 +121,15 @@ export default function LoginScreen({ onSuccess }: LoginScreenProps) {
         // Register this device as the sole active session
         if (data.user) {
           const token = crypto.randomUUID();
+          console.log("[Session] token gerado:", token.slice(0, 8) + "...");
+
           const saved = await setActiveSession(token);
-          if (saved) localStorage.setItem("jarvis_session_token", token);
+          if (saved) {
+            localStorage.setItem("jarvis_session_token", token);
+            console.log("[Session] token salvo no localStorage ✓ chave=jarvis_session_token");
+          } else {
+            console.error("[Session] FALHOU — token NÃO salvo (RPC falhou). Sessão única inoperante.");
+          }
         }
 
         onSuccess(); // onAuthStateChange no AppWrapper detecta automaticamente

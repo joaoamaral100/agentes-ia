@@ -77,11 +77,17 @@ export async function getAllProfiles(): Promise<Profile[]> {
  * while still only touching the caller's own row.
  */
 export async function setActiveSession(token: string): Promise<boolean> {
+  console.log("[Session] calling RPC set_active_session...");
   const { error } = await supabase.rpc("set_active_session", { session_token: token });
   if (error) {
-    console.log("[supabase] setActiveSession error:", error.code, error.message);
+    console.error("[Session] RPC FAILED:", error.code, error.message,
+      error.code === "PGRST202" || error.message?.includes("Could not find")
+        ? "→ a função set_active_session NÃO EXISTE no banco. Rode o SQL."
+        : ""
+    );
     return false;
   }
+  console.log("[Session] RPC OK — active_session_id atualizado no banco ✓");
   return true;
 }
 

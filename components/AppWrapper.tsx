@@ -333,7 +333,14 @@ export default function AppWrapper({ children }: { children: React.ReactNode }) 
 
     async function verifySingleSession() {
       const localToken = localStorage.getItem("jarvis_session_token");
-      if (!localToken) return; // this device has no token → skip (no kick)
+
+      if (!localToken) {
+        console.warn(
+          "[Session] ⚠ sem token local (chave=jarvis_session_token). " +
+          "Possível causa: RPC falhou no login → sessão única inoperante neste dispositivo."
+        );
+        return;
+      }
 
       const { data, error } = await supabase
         .from("profiles")
@@ -341,23 +348,49 @@ export default function AppWrapper({ children }: { children: React.ReactNode }) 
         .eq("id", userId)
         .single();
 
-      if (error || !data) return; // DB error or missing row → never kick on uncertainty
-      if (!data.active_session_id) return; // null → column not yet set, skip
+      if (error) {
+        console.warn(
+          "[Session] ⚠ erro ao ler active_session_id do banco:", error.code, error.message,
+          !error.message ? "" :
+          error.message.includes("active_session_id")
+            ? "→ a COLUNA active_session_id NÃO EXISTE. Rode o SQL ALTER TABLE."
+            : ""
+        );
+        return;
+      }
 
-      if (data.active_session_id !== localToken) {
-        console.log("[Auth] session taken by another device — signing out");
+      const dbToken = data?.active_session_id ?? null;
+      console.log(
+        "[Session] check — local:", localToken.slice(0, 8) + "...",
+        "| DB:", dbToken ? dbToken.slice(0, 8) + "..." : "NULL"
+      );
+
+      if (!dbToken) {
+        console.warn(
+          "[Session] ⚠ active_session_id é NULL no banco. " +
+          "Causas: (a) SQL não rodou ainda, (b) login não chamou a RPC, (c) RPC falhou silenciosamente."
+        );
+        return;
+      }
+
+      if (dbToken !== localToken) {
+        console.log("[Session] MISMATCH — outro dispositivo tomou a sessão. Deslogando este...");
         setKickedOut(true);
         await supabase.auth.signOut();
-        // signOut triggers onAuthStateChange → setUser(null)
-        // cleanup below clears the interval automatically
+      } else {
+        console.log("[Session] ✓ sessão válida — tokens coincidem");
       }
     }
 
-    verifySingleSession(); // immediate check on becoming approved
+    console.log("[Session] interval registrado para userId:", userId.slice(0, 8) + "... (check a cada 15s)");
+    verifySingleSession(); // check imediato ao entrar no estado aprovado
     const interval = setInterval(verifySingleSession, 15_000);
 
-    return () => clearInterval(interval);
-  // user?.id avoids re-running on token refresh (object ref changes but id stays the same)
+    return () => {
+      console.log("[Session] interval limpo (user saiu ou approval mudou)");
+      clearInterval(interval);
+    };
+  // user?.id evita re-run em cada refresh de token (referência muda mas id é o mesmo)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id, approval]);
 
