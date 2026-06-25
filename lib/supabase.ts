@@ -3,7 +3,13 @@ import { createClient } from "@supabase/supabase-js";
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
-export const supabase = createClient(url, key);
+export const supabase = createClient(url, key, {
+  auth: {
+    persistSession:    true,   // salva sessão no localStorage automaticamente
+    autoRefreshToken:  true,   // renova token antes de expirar
+    detectSessionInUrl: true,  // captura magic-link / reset-password da URL
+  },
+});
 
 // ── Profile helpers ────────────────────────────────────────
 

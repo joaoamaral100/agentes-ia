@@ -119,10 +119,20 @@ export default function LoginScreen({ onSuccess }: LoginScreenProps) {
         if (err) throw err;
         onSuccess(); // onAuthStateChange no AppWrapper detecta automaticamente
       } else if (mode === "signup") {
-        const { error: err } = await supabase.auth.signUp({ email, password });
+        const { data, error: err } = await supabase.auth.signUp({ email, password });
         if (err) throw err;
-        setInfo("Conta criada! Verifique seu e-mail para confirmar o cadastro.");
-        setMode("signin");
+        if (data.session) {
+          // Confirmação de e-mail desabilitada → usuário já está logado
+          onSuccess();
+        } else {
+          // Confirmação necessária → orienta o usuário
+          setInfo(
+            "Conta criada! Verifique seu e-mail para confirmar. " +
+            "Se não chegar, acesse Supabase Dashboard → Authentication → Users " +
+            "e confirme manualmente ou reenvie o link de confirmação."
+          );
+          setMode("signin");
+        }
       } else {
         const { error: err } = await supabase.auth.resetPasswordForEmail(email);
         if (err) throw err;

@@ -12,13 +12,15 @@ export default function AppWrapper({ children }: { children: React.ReactNode }) 
   const [booted, setBooted] = useState(false);
 
   useEffect(() => {
-    // Lê sessão inicial
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    // Lê sessão inicial (supabase-js já recupera do localStorage automaticamente)
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      console.log("[Auth] getSession →", session?.user?.email ?? "sem sessão", error?.message ?? "");
       setUser(session?.user ?? null);
     });
 
-    // Escuta mudanças de auth (login, logout, refresh de token)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    // Escuta login / logout / refresh de token
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log("[Auth] onAuthStateChange →", event, session?.user?.email ?? "sem usuário");
       setUser(session?.user ?? null);
     });
 
