@@ -1,24 +1,38 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
+import LoginScreen from "./LoginScreen";
 import BootScreen from "./BootScreen";
 import HudOverlay from "./HudOverlay";
-import LoginScreen from "./LoginScreen";
 
 export default function AppWrapper({ children }: { children: React.ReactNode }) {
-  const [authed, setAuthed] = useState<boolean | null>(null);
-  const [booted, setBooted] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isLoading, setIsLoading]             = useState(true);
+  const [booted, setBooted]                   = useState(false);
 
   useEffect(() => {
-    setAuthed(localStorage.getItem("jarvis_auth") === "true");
+    const auth = localStorage.getItem("jarvis_auth");
+    if (auth === "true") {
+      setIsAuthenticated(true);
+    }
+    setIsLoading(false);
   }, []);
 
-  // Aguardando verificação do localStorage
-  if (authed === null) return null;
+  // Tela preta enquanto verifica o localStorage — nunca mostra o app sem verificar
+  if (isLoading) {
+    return <div style={{ position: "fixed", inset: 0, background: "#000814" }} />;
+  }
 
-  // Não autenticado → tela de login
-  if (!authed) {
-    return <LoginScreen onSuccess={() => setAuthed(true)} />;
+  // Não autenticado → APENAS LoginScreen, nada mais
+  if (!isAuthenticated) {
+    return (
+      <LoginScreen
+        onSuccess={() => {
+          localStorage.setItem("jarvis_auth", "true");
+          setIsAuthenticated(true);
+        }}
+      />
+    );
   }
 
   // Autenticado → boot sequence + app

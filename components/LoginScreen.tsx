@@ -65,8 +65,7 @@ export default function LoginScreen({ onSuccess }: LoginScreenProps) {
     const correct = process.env.NEXT_PUBLIC_APP_PASSWORD ?? "bext2024";
 
     if (password === correct) {
-      localStorage.setItem("jarvis_auth", "true");
-      onSuccess();
+      onSuccess(); // AppWrapper é responsável por salvar no localStorage
     } else {
       setError("Senha incorreta. Tente novamente.");
       setPassword("");
