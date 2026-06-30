@@ -3,25 +3,7 @@
 import { useState } from "react";
 import { supabase, setActiveSession } from "@/lib/supabase";
 
-// ─── UI helpers ───────────────────────────────────────────────────────────────
-
-function JarvisWordmark() {
-  return (
-    <span
-      className="block text-center text-3xl font-bold tracking-[14px]"
-      style={{
-        background: "linear-gradient(135deg, #ffffff 0%, #80c8ee 40%, #00d9ff 100%)",
-        WebkitBackgroundClip: "text",
-        WebkitTextFillColor: "transparent",
-        backgroundClip: "text",
-        filter: "drop-shadow(0 0 28px rgba(0,217,255,0.4))",
-      }}
-    >
-      JARVIS
-    </span>
-  );
-}
-
+// ─── Eye icon ─────────────────────────────────────────────────────────────────
 function EyeIcon({ open }: { open: boolean }) {
   return open ? (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -39,64 +21,10 @@ function EyeIcon({ open }: { open: boolean }) {
 
 function Spinner() {
   return (
-    <svg className="animate-spin" width="18" height="18" viewBox="0 0 24 24" fill="none">
-      <circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,0.15)" strokeWidth="3" />
+    <svg className="animate-spin" width="20" height="20" viewBox="0 0 24 24" fill="none">
+      <circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,0.2)" strokeWidth="3" />
       <path d="M12 2a10 10 0 0110 10" stroke="white" strokeWidth="3" strokeLinecap="round" />
     </svg>
-  );
-}
-
-function Field({
-  label, type, value, onChange, placeholder, autoComplete, suffix,
-}: {
-  label: string; type: string; value: string;
-  onChange: (v: string) => void; placeholder: string;
-  autoComplete?: string; suffix?: React.ReactNode;
-}) {
-  return (
-    <div className="mb-4">
-      <label
-        className="mb-1 block text-xs font-semibold uppercase"
-        style={{ color: "rgba(0,217,255,0.45)", letterSpacing: "0.12em" }}
-      >
-        {label}
-      </label>
-      <div
-        className="flex items-center rounded-md transition duration-200"
-        style={{
-          background: "rgba(15,21,53,0.7)",
-          border: "1px solid #1a2555",
-          height: "50px",
-        }}
-        onFocusCapture={(e) => {
-          const el = e.currentTarget as HTMLElement;
-          el.style.border = "1px solid rgba(0,217,255,0.45)";
-          el.style.background = "rgba(15,21,53,0.9)";
-          el.style.boxShadow = "0 0 0 3px rgba(0,217,255,0.07), 0 0 12px rgba(0,217,255,0.08)";
-        }}
-        onBlurCapture={(e) => {
-          const el = e.currentTarget as HTMLElement;
-          el.style.border = "1px solid #1a2555";
-          el.style.background = "rgba(15,21,53,0.7)";
-          el.style.boxShadow = "";
-        }}
-      >
-        <input
-          type={type} value={value} onChange={(e) => onChange(e.target.value)}
-          placeholder={placeholder} autoComplete={autoComplete}
-          autoCapitalize="none" autoCorrect="off" spellCheck={false}
-          className="flex-1 bg-transparent text-base outline-none"
-          style={{
-            color: "#e0e6ff",
-            padding: "0 16px",
-            height: "100%",
-            WebkitAppearance: "none",
-            borderRadius: "8px",
-          }}
-        />
-        {suffix}
-      </div>
-    </div>
   );
 }
 
@@ -109,13 +37,15 @@ interface LoginScreenProps {
 type Mode = "signin" | "signup" | "forgot";
 
 export default function LoginScreen({ onSuccess }: LoginScreenProps) {
-  const [mode, setMode]               = useState<Mode>("signin");
-  const [email, setEmail]             = useState("");
-  const [password, setPassword]       = useState("");
+  const [mode, setMode]                 = useState<Mode>("signin");
+  const [email, setEmail]               = useState("");
+  const [password, setPassword]         = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError]             = useState("");
-  const [info, setInfo]               = useState("");
-  const [loading, setLoading]         = useState(false);
+  const [error, setError]               = useState("");
+  const [info, setInfo]                 = useState("");
+  const [loading, setLoading]           = useState(false);
+  const [emailFocused, setEmailFocused] = useState(false);
+  const [passFocused, setPassFocused]   = useState(false);
 
   function reset() { setError(""); setInfo(""); }
 
@@ -134,17 +64,9 @@ export default function LoginScreen({ onSuccess }: LoginScreenProps) {
 
         if (data.user) {
           const token = crypto.randomUUID();
-          console.log("[Session] token gerado:", token.slice(0, 8) + "...");
-
           const saved = await setActiveSession(token);
-          if (saved) {
-            localStorage.setItem("jarvis_session_token", token);
-            console.log("[Session] token salvo no localStorage ✓ chave=jarvis_session_token");
-          } else {
-            console.error("[Session] FALHOU — token NÃO salvo (RPC falhou). Sessão única inoperante.");
-          }
+          if (saved) localStorage.setItem("jarvis_session_token", token);
         }
-
         onSuccess();
       } else if (mode === "signup") {
         const { data, error: err } = await supabase.auth.signUp({ email, password });
@@ -181,193 +103,491 @@ export default function LoginScreen({ onSuccess }: LoginScreenProps) {
   };
   const { heading, sub, btn } = titles[mode];
 
-  const eyeToggle = (
-    <button
-      type="button"
-      onClick={() => setShowPassword((v) => !v)}
-      className="transition duration-200"
-      style={{
-        color: showPassword ? "#00d9ff" : "rgba(160,170,192,0.5)",
-        padding: "0 14px",
-        height: "100%",
-        flexShrink: 0,
-        WebkitTapHighlightColor: "transparent",
-        touchAction: "manipulation",
-      }}
-    >
-      <EyeIcon open={showPassword} />
-    </button>
-  );
-
   return (
     <div
-      className="dot-grid relative flex min-h-screen w-full flex-col items-center justify-center overflow-hidden"
-      style={{ background: "#0a0e27" }}
+      style={{
+        position: "relative",
+        minHeight: "100vh",
+        width: "100%",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        overflow: "hidden",
+        background: "#0a0e27",
+        animation: "page-in 0.8s cubic-bezier(0.16, 1, 0.3, 1) both",
+      }}
     >
-      {/* Background orbs */}
-      <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="orb orb-1" />
-        <div className="orb orb-2" />
-        <div className="orb orb-3" />
+      <style>{`
+        @keyframes page-in {
+          from { opacity: 0; }
+          to   { opacity: 1; }
+        }
+        @keyframes card-rise {
+          from { opacity: 0; transform: translateY(32px) scale(0.97); }
+          to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes logo-glow {
+          0%, 100% { filter: drop-shadow(0 0 20px rgba(0,217,255,0.5)) drop-shadow(0 0 60px rgba(0,217,255,0.15)); }
+          50%       { filter: drop-shadow(0 0 30px rgba(0,217,255,0.8)) drop-shadow(0 0 80px rgba(0,217,255,0.25)); }
+        }
+        @keyframes orb-a {
+          0%, 100% { transform: translate(0,0) scale(1); }
+          40%       { transform: translate(40px,-30px) scale(1.08); }
+          70%       { transform: translate(-20px,35px) scale(0.95); }
+        }
+        @keyframes orb-b {
+          0%, 100% { transform: translate(0,0) scale(1); }
+          35%       { transform: translate(-50px,25px) scale(1.06); }
+          65%       { transform: translate(30px,-40px) scale(0.96); }
+        }
+        @keyframes dot-grid-scroll {
+          from { background-position: 0 0; }
+          to   { background-position: 28px 28px; }
+        }
+        @keyframes input-appear {
+          from { opacity: 0; transform: translateX(-8px); }
+          to   { opacity: 1; transform: translateX(0); }
+        }
+        .login-input-wrap:focus-within .login-label {
+          color: rgba(0,217,255,0.8) !important;
+        }
+      `}</style>
+
+      {/* Dot grid */}
+      <div style={{
+        position: "absolute", inset: 0, pointerEvents: "none",
+        backgroundImage: "radial-gradient(circle, rgba(0,217,255,0.06) 1px, transparent 1px)",
+        backgroundSize: "28px 28px",
+        animation: "dot-grid-scroll 12s linear infinite",
+        zIndex: 0,
+      }} />
+
+      {/* Ambient orbs */}
+      <div style={{ position: "absolute", inset: 0, pointerEvents: "none", overflow: "hidden", zIndex: 0 }}>
+        {/* Big blue orb top-left */}
+        <div style={{
+          position: "absolute", top: "-220px", left: "-220px",
+          width: "700px", height: "700px", borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(0,80,200,0.18) 0%, transparent 65%)",
+          filter: "blur(80px)",
+          animation: "orb-a 28s ease-in-out infinite",
+        }} />
+        {/* Cyan orb bottom-right */}
+        <div style={{
+          position: "absolute", bottom: "-200px", right: "-200px",
+          width: "650px", height: "650px", borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(0,217,255,0.12) 0%, transparent 65%)",
+          filter: "blur(80px)",
+          animation: "orb-b 32s ease-in-out infinite",
+        }} />
+        {/* Subtle teal center */}
+        <div style={{
+          position: "absolute", top: "40%", left: "50%",
+          width: "500px", height: "500px",
+          transform: "translate(-50%, -50%)",
+          borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(0,150,255,0.06) 0%, transparent 60%)",
+          filter: "blur(60px)",
+          pointerEvents: "none",
+        }} />
       </div>
 
-      <div className="relative z-10 w-full max-w-sm px-4">
+      {/* Scan line */}
+      <div className="scan-line" />
 
-        {/* Hero */}
-        <div className="mb-8 text-center">
-          <JarvisWordmark />
-          <p
-            className="mt-3 text-xs uppercase"
-            style={{ color: "rgba(0,217,255,0.32)", letterSpacing: "0.24em" }}
+      {/* Card wrapper */}
+      <div
+        style={{
+          position: "relative", zIndex: 10,
+          width: "100%", maxWidth: "420px",
+          padding: "20px 16px",
+          animation: "card-rise 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both",
+        }}
+      >
+
+        {/* ── HERO ── */}
+        <div style={{ textAlign: "center", marginBottom: "40px" }}>
+
+          {/* Decorative ring behind logo */}
+          <div style={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center", marginBottom: "16px" }}>
+            <div style={{
+              position: "absolute",
+              width: "96px", height: "96px",
+              borderRadius: "50%",
+              border: "1px solid rgba(0,217,255,0.15)",
+              borderTopColor: "rgba(0,217,255,0.5)",
+              animation: "ring-cw 10s linear infinite",
+            }} />
+            <div style={{
+              position: "absolute",
+              width: "116px", height: "116px",
+              borderRadius: "50%",
+              border: "1px solid rgba(0,217,255,0.07)",
+              borderBottomColor: "rgba(0,217,255,0.25)",
+              animation: "ring-ccw 16s linear infinite",
+            }} />
+
+            {/* Logo glow disc */}
+            <div style={{
+              width: "72px", height: "72px",
+              borderRadius: "18px",
+              background: "linear-gradient(135deg, rgba(0,128,255,0.12), rgba(0,217,255,0.06))",
+              border: "1px solid rgba(0,217,255,0.18)",
+              boxShadow: "0 0 30px rgba(0,217,255,0.1), inset 0 0 20px rgba(0,217,255,0.05)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}>
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" style={{ filter: "drop-shadow(0 0 8px rgba(0,217,255,0.6))" }}>
+                <circle cx="12" cy="12" r="3" fill="#00d9ff" />
+                <circle cx="12" cy="12" r="6" stroke="rgba(0,217,255,0.4)" strokeWidth="1" fill="none" />
+                <circle cx="12" cy="12" r="10" stroke="rgba(0,217,255,0.15)" strokeWidth="0.5" fill="none" />
+                <line x1="12" y1="2" x2="12" y2="6"  stroke="#00d9ff" strokeWidth="1.5" strokeLinecap="round" />
+                <line x1="12" y1="18" x2="12" y2="22" stroke="#00d9ff" strokeWidth="1.5" strokeLinecap="round" />
+                <line x1="2" y1="12" x2="6" y2="12"  stroke="#00d9ff" strokeWidth="1.5" strokeLinecap="round" />
+                <line x1="18" y1="12" x2="22" y2="12" stroke="#00d9ff" strokeWidth="1.5" strokeLinecap="round" />
+              </svg>
+            </div>
+          </div>
+
+          {/* JARVIS wordmark */}
+          <div
+            style={{
+              fontSize: "clamp(40px, 8vw, 64px)",
+              fontWeight: 800,
+              letterSpacing: "16px",
+              lineHeight: 1,
+              background: "linear-gradient(135deg, #ffffff 0%, #c0e0ff 35%, #00d9ff 70%, #00f0ff 100%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+              animation: "logo-glow 4s ease-in-out infinite",
+              marginBottom: "10px",
+              fontFamily: "var(--font-display), system-ui, sans-serif",
+            }}
           >
-            TikTok Shopping
-          </p>
+            JARVIS
+          </div>
+
+          <div style={{
+            fontSize: "11px",
+            letterSpacing: "4px",
+            color: "rgba(0,217,255,0.35)",
+            fontFamily: "monospace",
+            textTransform: "uppercase",
+            marginBottom: "6px",
+          }}>
+            TikTok Shopping · AI Platform
+          </div>
+
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+            <div style={{ height: "1px", width: "48px", background: "linear-gradient(90deg, transparent, rgba(0,217,255,0.25))" }} />
+            <div style={{ width: "4px", height: "4px", borderRadius: "50%", background: "rgba(0,217,255,0.5)", boxShadow: "0 0 6px rgba(0,217,255,0.8)" }} />
+            <div style={{ height: "1px", width: "48px", background: "linear-gradient(90deg, rgba(0,217,255,0.25), transparent)" }} />
+          </div>
         </div>
 
-        {/* Card */}
-        <form
-          onSubmit={handleSubmit}
-          className="rounded-lg"
+        {/* ── CARD ── */}
+        <div
           style={{
-            background: "rgba(15,21,53,0.82)",
-            backdropFilter: "blur(20px)",
-            WebkitBackdropFilter: "blur(20px)",
+            background: "rgba(10,14,39,0.88)",
+            backdropFilter: "blur(24px)",
+            WebkitBackdropFilter: "blur(24px)",
             border: "1px solid rgba(26,37,85,0.9)",
-            boxShadow: "0 24px 64px rgba(0,0,0,0.5), 0 0 0 1px rgba(0,217,255,0.04), inset 0 1px 0 rgba(255,255,255,0.04)",
+            borderRadius: "16px",
+            boxShadow: "0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(0,217,255,0.04), inset 0 1px 0 rgba(255,255,255,0.05), 0 0 60px rgba(0,80,200,0.08)",
+            overflow: "hidden",
           }}
         >
-          <div className="p-8">
+          {/* Top accent line */}
+          <div style={{
+            height: "2px",
+            background: "linear-gradient(90deg, transparent 0%, rgba(0,128,255,0.6) 30%, rgba(0,217,255,0.9) 50%, rgba(0,128,255,0.6) 70%, transparent 100%)",
+          }} />
+
+          <div style={{ padding: "40px 40px 36px" }}>
 
             {/* Heading */}
-            <div className="mb-6">
-              <h1 className="text-lg font-semibold" style={{ color: "#e0e6ff" }}>
+            <div style={{ marginBottom: "28px" }}>
+              <h1 style={{
+                fontSize: "20px",
+                fontWeight: 700,
+                color: "#e0e6ff",
+                marginBottom: "6px",
+                letterSpacing: "-0.2px",
+              }}>
                 {heading}
               </h1>
-              <p className="mt-1 text-sm" style={{ color: "#a0aac0" }}>
+              <p style={{ fontSize: "13px", color: "rgba(160,170,192,0.6)", lineHeight: "1.5" }}>
                 {sub}
               </p>
             </div>
 
             {/* Feedback banners */}
             {info && (
-              <div
-                className="mb-4 rounded-md px-4 py-3 text-xs"
-                style={{
-                  background: "rgba(0,217,255,0.05)",
-                  border: "1px solid rgba(0,217,255,0.12)",
-                  color: "#7dd3fc",
-                  lineHeight: "1.6",
-                }}
-              >
+              <div style={{
+                marginBottom: "20px",
+                padding: "14px 16px",
+                borderRadius: "10px",
+                background: "rgba(0,217,255,0.05)",
+                border: "1px solid rgba(0,217,255,0.14)",
+                color: "#7dd3fc",
+                fontSize: "12px",
+                lineHeight: "1.65",
+              }}>
                 {info}
               </div>
             )}
             {error && (
-              <div
-                className="mb-4 rounded-md px-4 py-3 text-xs"
-                style={{
-                  background: "rgba(239,68,68,0.06)",
-                  border: "1px solid rgba(239,68,68,0.16)",
-                  color: "#f87171",
-                  lineHeight: "1.6",
-                }}
-              >
+              <div style={{
+                marginBottom: "20px",
+                padding: "14px 16px",
+                borderRadius: "10px",
+                background: "rgba(239,68,68,0.06)",
+                border: "1px solid rgba(239,68,68,0.18)",
+                color: "#f87171",
+                fontSize: "12px",
+                lineHeight: "1.65",
+              }}>
                 {error}
               </div>
             )}
 
-            {/* Fields */}
-            <Field
-              label="E-mail" type="email" value={email}
-              onChange={(v) => { setEmail(v); reset(); }}
-              placeholder="seu@email.com" autoComplete="email"
-            />
+            {/* ── Email field ── */}
+            <div style={{ marginBottom: "16px", animation: "input-appear 0.5s 0.2s both" }}>
+              <label className="login-label" style={{
+                display: "block",
+                fontSize: "11px",
+                fontWeight: 700,
+                letterSpacing: "0.14em",
+                textTransform: "uppercase",
+                color: emailFocused ? "rgba(0,217,255,0.8)" : "rgba(0,217,255,0.4)",
+                marginBottom: "8px",
+                transition: "color 0.2s ease",
+              }}>
+                E-mail
+              </label>
+              <div
+                className="login-input-wrap"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  height: "52px",
+                  borderRadius: "10px",
+                  background: emailFocused ? "rgba(0,20,60,0.9)" : "rgba(15,21,53,0.7)",
+                  border: emailFocused
+                    ? "1.5px solid rgba(0,217,255,0.6)"
+                    : "1.5px solid rgba(26,37,85,0.9)",
+                  boxShadow: emailFocused
+                    ? "0 0 0 3px rgba(0,217,255,0.08), 0 0 20px rgba(0,217,255,0.1)"
+                    : "none",
+                  transition: "all 0.25s ease",
+                }}
+              >
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => { setEmail(e.target.value); reset(); }}
+                  onFocus={() => setEmailFocused(true)}
+                  onBlur={() => setEmailFocused(false)}
+                  placeholder="seu@email.com"
+                  autoComplete="email"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  style={{
+                    flex: 1,
+                    height: "100%",
+                    background: "transparent",
+                    border: "none",
+                    outline: "none",
+                    padding: "0 18px",
+                    fontSize: "15px",
+                    color: "#e0e6ff",
+                    WebkitAppearance: "none",
+                  }}
+                />
+              </div>
+            </div>
 
+            {/* ── Password field ── */}
             {mode !== "forgot" && (
-              <Field
-                label="Senha" type={showPassword ? "text" : "password"} value={password}
-                onChange={(v) => { setPassword(v); reset(); }}
-                placeholder={mode === "signup" ? "Mínimo 6 caracteres" : "Senha de acesso"}
-                autoComplete={mode === "signup" ? "new-password" : "current-password"}
-                suffix={eyeToggle}
-              />
+              <div style={{ marginBottom: "20px", animation: "input-appear 0.5s 0.3s both" }}>
+                <label style={{
+                  display: "block",
+                  fontSize: "11px",
+                  fontWeight: 700,
+                  letterSpacing: "0.14em",
+                  textTransform: "uppercase",
+                  color: passFocused ? "rgba(0,217,255,0.8)" : "rgba(0,217,255,0.4)",
+                  marginBottom: "8px",
+                  transition: "color 0.2s ease",
+                }}>
+                  Senha
+                </label>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    height: "52px",
+                    borderRadius: "10px",
+                    background: passFocused ? "rgba(0,20,60,0.9)" : "rgba(15,21,53,0.7)",
+                    border: passFocused
+                      ? "1.5px solid rgba(0,217,255,0.6)"
+                      : "1.5px solid rgba(26,37,85,0.9)",
+                    boxShadow: passFocused
+                      ? "0 0 0 3px rgba(0,217,255,0.08), 0 0 20px rgba(0,217,255,0.1)"
+                      : "none",
+                    transition: "all 0.25s ease",
+                  }}
+                >
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => { setPassword(e.target.value); reset(); }}
+                    onFocus={() => setPassFocused(true)}
+                    onBlur={() => setPassFocused(false)}
+                    placeholder={mode === "signup" ? "Mínimo 6 caracteres" : "Senha de acesso"}
+                    autoComplete={mode === "signup" ? "new-password" : "current-password"}
+                    style={{
+                      flex: 1,
+                      height: "100%",
+                      background: "transparent",
+                      border: "none",
+                      outline: "none",
+                      padding: "0 0 0 18px",
+                      fontSize: "15px",
+                      color: "#e0e6ff",
+                      WebkitAppearance: "none",
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((v) => !v)}
+                    style={{
+                      height: "100%",
+                      padding: "0 16px",
+                      flexShrink: 0,
+                      background: "transparent",
+                      border: "none",
+                      color: showPassword ? "#00d9ff" : "rgba(160,170,192,0.4)",
+                      cursor: "pointer",
+                      transition: "color 0.2s ease",
+                    }}
+                  >
+                    <EyeIcon open={showPassword} />
+                  </button>
+                </div>
+              </div>
             )}
 
-            {/* Forgot */}
+            {/* Forgot link */}
             {mode === "signin" && (
-              <div className="mb-4 text-right">
+              <div style={{ textAlign: "right", marginBottom: "24px", marginTop: "-8px" }}>
                 <button
                   type="button"
                   onClick={() => { setMode("forgot"); reset(); }}
-                  className="text-xs transition duration-200"
-                  style={{ color: "rgba(0,217,255,0.38)" }}
-                  onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "rgba(0,217,255,0.8)")}
-                  onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "rgba(0,217,255,0.38)")}
+                  style={{
+                    fontSize: "12px",
+                    color: "rgba(0,217,255,0.4)",
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    transition: "color 0.2s ease",
+                  }}
+                  onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "rgba(0,217,255,0.85)")}
+                  onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "rgba(0,217,255,0.4)")}
                 >
                   Esqueceu a senha?
                 </button>
               </div>
             )}
 
-            {/* Submit */}
+            {/* ── Submit button ── */}
             <button
-              type="submit"
+              type="button"
+              onClick={handleSubmit as unknown as React.MouseEventHandler}
               disabled={!canSubmit}
-              className="flex w-full items-center justify-center gap-2 rounded-lg text-sm font-semibold tracking-widest transition duration-200"
               style={{
-                height: "50px",
-                WebkitTapHighlightColor: "transparent",
-                touchAction: "manipulation",
+                width: "100%",
+                height: "54px",
+                borderRadius: "10px",
+                border: "none",
+                fontSize: "13px",
+                fontWeight: 700,
+                letterSpacing: "2px",
+                cursor: canSubmit ? "pointer" : "not-allowed",
+                transition: "all 0.25s cubic-bezier(0.16, 1, 0.3, 1)",
+                position: "relative",
+                overflow: "hidden",
                 ...(canSubmit
                   ? {
-                      background: "linear-gradient(135deg, #0066cc 0%, #0080ff 50%, #00a8ff 100%)",
+                      background: "linear-gradient(135deg, #0055cc 0%, #0080ff 45%, #00bfff 100%)",
                       color: "#ffffff",
-                      boxShadow: "0 4px 20px rgba(0,128,255,0.3), 0 0 0 1px rgba(0,217,255,0.1)",
-                      cursor: "pointer",
+                      boxShadow: "0 4px 24px rgba(0,128,255,0.35), 0 0 0 1px rgba(0,217,255,0.12), inset 0 1px 0 rgba(255,255,255,0.15)",
                     }
                   : {
-                      background: "rgba(26,37,85,0.6)",
-                      color: "rgba(255,255,255,0.18)",
-                      cursor: "not-allowed",
+                      background: "rgba(20,28,58,0.7)",
+                      color: "rgba(255,255,255,0.2)",
+                      boxShadow: "none",
                     }),
               }}
               onMouseEnter={(e) => {
-                if (canSubmit)
-                  Object.assign((e.currentTarget as HTMLElement).style, {
-                    boxShadow: "0 6px 28px rgba(0,128,255,0.45), 0 0 0 1px rgba(0,217,255,0.2)",
-                    transform: "translateY(-2px)",
-                  });
+                if (!canSubmit) return;
+                Object.assign((e.currentTarget as HTMLElement).style, {
+                  background: "linear-gradient(135deg, #0066dd 0%, #0090ff 45%, #00d0ff 100%)",
+                  boxShadow: "0 8px 40px rgba(0,128,255,0.55), 0 0 0 1px rgba(0,217,255,0.25), 0 0 30px rgba(0,217,255,0.2), inset 0 1px 0 rgba(255,255,255,0.2)",
+                  transform: "translateY(-2px)",
+                });
               }}
               onMouseLeave={(e) => {
-                if (canSubmit)
-                  Object.assign((e.currentTarget as HTMLElement).style, {
-                    boxShadow: "0 4px 20px rgba(0,128,255,0.3), 0 0 0 1px rgba(0,217,255,0.1)",
-                    transform: "translateY(0)",
-                  });
+                if (!canSubmit) return;
+                Object.assign((e.currentTarget as HTMLElement).style, {
+                  background: "linear-gradient(135deg, #0055cc 0%, #0080ff 45%, #00bfff 100%)",
+                  boxShadow: "0 4px 24px rgba(0,128,255,0.35), 0 0 0 1px rgba(0,217,255,0.12), inset 0 1px 0 rgba(255,255,255,0.15)",
+                  transform: "translateY(0)",
+                });
+              }}
+              onMouseDown={(e) => {
+                if (!canSubmit) return;
+                (e.currentTarget as HTMLElement).style.transform = "translateY(0) scale(0.98)";
+              }}
+              onMouseUp={(e) => {
+                if (!canSubmit) return;
+                (e.currentTarget as HTMLElement).style.transform = "translateY(-2px) scale(1)";
               }}
             >
-              {loading ? <Spinner /> : btn}
+              {loading ? (
+                <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "10px" }}>
+                  <Spinner /> Aguarde...
+                </span>
+              ) : btn}
             </button>
 
             {/* Divider */}
-            <div className="my-6 flex items-center gap-3">
-              <div className="h-px flex-1" style={{ background: "rgba(26,37,85,0.8)" }} />
-              <span className="text-xs" style={{ color: "rgba(160,170,192,0.35)" }}>ou</span>
-              <div className="h-px flex-1" style={{ background: "rgba(26,37,85,0.8)" }} />
+            <div style={{ display: "flex", alignItems: "center", gap: "12px", margin: "28px 0" }}>
+              <div style={{ flex: 1, height: "1px", background: "rgba(26,37,85,0.9)" }} />
+              <span style={{ fontSize: "11px", color: "rgba(160,170,192,0.3)", letterSpacing: "0.05em" }}>ou</span>
+              <div style={{ flex: 1, height: "1px", background: "rgba(26,37,85,0.9)" }} />
             </div>
 
             {/* Mode switcher */}
-            <div className="text-center text-sm" style={{ color: "rgba(160,170,192,0.5)" }}>
+            <p style={{ textAlign: "center", fontSize: "13px", color: "rgba(160,170,192,0.5)" }}>
               {mode === "signin" ? (
                 <>
                   Não tem conta?{" "}
                   <button
                     type="button"
                     onClick={() => { setMode("signup"); reset(); }}
-                    className="font-semibold transition duration-200"
-                    style={{ color: "rgba(0,217,255,0.7)" }}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      fontSize: "13px",
+                      fontWeight: 700,
+                      color: "rgba(0,217,255,0.75)",
+                      cursor: "pointer",
+                      transition: "color 0.2s ease",
+                    }}
                     onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "#00d9ff")}
-                    onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "rgba(0,217,255,0.7)")}
+                    onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "rgba(0,217,255,0.75)")}
                   >
                     Criar conta
                   </button>
@@ -378,26 +598,54 @@ export default function LoginScreen({ onSuccess }: LoginScreenProps) {
                   <button
                     type="button"
                     onClick={() => { setMode("signin"); reset(); }}
-                    className="font-semibold transition duration-200"
-                    style={{ color: "rgba(0,217,255,0.7)" }}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      fontSize: "13px",
+                      fontWeight: 700,
+                      color: "rgba(0,217,255,0.75)",
+                      cursor: "pointer",
+                      transition: "color 0.2s ease",
+                    }}
                     onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "#00d9ff")}
-                    onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "rgba(0,217,255,0.7)")}
+                    onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "rgba(0,217,255,0.75)")}
                   >
                     Entrar
                   </button>
                 </>
               )}
-            </div>
+            </p>
           </div>
-        </form>
 
-        {/* Footnote */}
-        <p
-          className="mt-6 text-center text-xs"
-          style={{ color: "rgba(255,255,255,0.1)", letterSpacing: "0.05em" }}
-        >
-          Acesso restrito · Apenas contas autorizadas
-        </p>
+          {/* Bottom accent line */}
+          <div style={{
+            height: "1px",
+            background: "linear-gradient(90deg, transparent, rgba(0,217,255,0.08), transparent)",
+          }} />
+
+          <div style={{
+            padding: "12px 40px",
+            textAlign: "center",
+            background: "rgba(0,217,255,0.015)",
+          }}>
+            <p style={{
+              fontSize: "10px",
+              letterSpacing: "1.5px",
+              color: "rgba(160,170,192,0.2)",
+              fontFamily: "monospace",
+            }}>
+              ACESSO RESTRITO · APENAS CONTAS AUTORIZADAS
+            </p>
+          </div>
+        </div>
+
+        {/* Below-card status */}
+        <div style={{ textAlign: "center", marginTop: "24px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+          <div className="status-online" style={{ width: "6px", height: "6px", borderRadius: "50%" }} />
+          <span style={{ fontSize: "10px", letterSpacing: "2.5px", color: "rgba(34,197,94,0.5)", fontFamily: "monospace" }}>
+            SISTEMA ONLINE
+          </span>
+        </div>
       </div>
     </div>
   );
