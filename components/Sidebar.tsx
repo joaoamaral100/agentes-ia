@@ -42,7 +42,7 @@ function ShirtIcon({ size = 20, style }: { size?: number; style?: React.CSSPrope
 }
 function PlusIcon() {
   return (
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
       <line x1="12" y1="5" x2="12" y2="19" />
       <line x1="5" y1="12" x2="19" y2="12" />
     </svg>
@@ -58,7 +58,7 @@ function CloseIcon() {
 }
 function SignOutIcon() {
   return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
       <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
       <polyline points="16 17 21 12 16 7" />
       <line x1="21" y1="12" x2="9" y2="12" />
@@ -93,16 +93,16 @@ export default function Sidebar({ activeAgent, onSelect, onNewChat, onSignOut, i
       <aside
         className={[
           "flex h-full flex-col",
-          "fixed inset-y-0 left-0 z-50 w-[272px] transition-transform duration-300 ease-out",
+          "fixed inset-y-0 left-0 z-50 w-[280px] transition-transform duration-300 ease-out",
           isOpen ? "translate-x-0" : "-translate-x-full",
-          "md:relative md:w-[220px] md:shrink-0 md:translate-x-0",
+          "md:relative md:w-[260px] md:shrink-0 md:translate-x-0",
         ].join(" ")}
         style={{ background: "#00070e", borderRight: "1px solid rgba(255,255,255,0.06)" }}
       >
         {/* Brand + close */}
-        <div className="flex items-center justify-between px-4 pt-5 pb-4">
+        <div className="flex items-center justify-between px-6 pt-8 pb-6">
           <span
-            className="font-display text-[17px] font-bold tracking-[10px]"
+            className="font-display text-xl font-bold tracking-[10px]"
             style={{
               background: "linear-gradient(135deg, #fff 0%, #7cc8f0 45%, #00d4ff 100%)",
               WebkitBackgroundClip: "text",
@@ -122,38 +122,37 @@ export default function Sidebar({ activeAgent, onSelect, onNewChat, onSignOut, i
         </div>
 
         {/* Separator */}
-        <div className="mx-4 mb-1 h-px" style={{ background: "rgba(255,255,255,0.05)" }} />
+        <div className="mx-6 mb-2 h-px" style={{ background: "rgba(255,255,255,0.05)" }} />
 
         {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto px-2 py-2">
+        <nav className="flex-1 overflow-y-auto px-3 py-6">
           <p
-            className="mb-1.5 px-3 text-[10px] font-semibold tracking-[3px]"
+            className="mb-3 px-3 text-[10px] font-semibold tracking-[3px]"
             style={{ color: "rgba(74,158,187,0.3)", fontFamily: "monospace" }}
           >
             AGENTES
           </p>
 
-          <div className="space-y-0.5">
+          <div className="space-y-1">
             {AGENTS.map((agent) => {
               const active = agent.id === activeAgent;
               return (
                 <button
                   key={agent.id}
                   onClick={() => onSelect(agent.id)}
-                  className="sidebar-btn relative flex w-full items-center gap-3 rounded-lg py-2.5 text-left"
+                  className="sidebar-btn relative flex w-full items-center gap-4 rounded-lg py-3 text-left"
                   style={{
                     paddingLeft: active ? "9px" : "11px",
                     paddingRight: "12px",
                     background: active ? "rgba(0,212,255,0.07)" : "transparent",
-                    borderLeft: active ? "2px solid rgba(0,212,255,0.8)" : "2px solid transparent",
+                    borderLeft: active ? "2px solid rgba(0,212,255,0.85)" : "2px solid transparent",
                     transition: "all 0.15s ease-out",
                   }}
                   onMouseEnter={(e) => {
                     if (!active) Object.assign((e.currentTarget as HTMLElement).style, {
-                      background: "rgba(255,255,255,0.04)",
-                      borderLeft: "2px solid rgba(0,212,255,0.25)",
+                      background: "#334155",
+                      borderLeft: "2px solid rgba(0,212,255,0.3)",
                       paddingLeft: "9px",
-                      transform: "translateX(4px)",
                     });
                   }}
                   onMouseLeave={(e) => {
@@ -161,7 +160,6 @@ export default function Sidebar({ activeAgent, onSelect, onNewChat, onSignOut, i
                       background: "transparent",
                       borderLeft: "2px solid transparent",
                       paddingLeft: "11px",
-                      transform: "translateX(0)",
                     });
                   }}
                 >
@@ -174,7 +172,7 @@ export default function Sidebar({ activeAgent, onSelect, onNewChat, onSignOut, i
                   >
                     <AgentIcon
                       id={agent.id}
-                      size={16}
+                      size={20}
                       style={{
                         color: active ? "#00d4ff" : "rgba(74,158,187,0.55)",
                         transition: "color 0.15s ease-out",
@@ -184,15 +182,15 @@ export default function Sidebar({ activeAgent, onSelect, onNewChat, onSignOut, i
 
                   <span className="min-w-0 flex-1">
                     <span
-                      className="block truncate text-[13px] font-semibold"
+                      className="block truncate text-lg font-semibold"
                       style={{
-                        color: active ? "rgba(224,244,255,0.95)" : "rgba(180,210,230,0.55)",
+                        color: active ? "rgba(224,244,255,0.95)" : "rgba(180,210,230,0.65)",
                         transition: "color 0.15s ease-out",
                       }}
                     >
                       {agent.name}
                     </span>
-                    <span className="block truncate text-[11px]" style={{ color: "rgba(74,158,187,0.32)" }}>
+                    <span className="block truncate text-[13px]" style={{ color: "rgba(74,158,187,0.35)" }}>
                       {agent.description}
                     </span>
                   </span>
@@ -202,12 +200,12 @@ export default function Sidebar({ activeAgent, onSelect, onNewChat, onSignOut, i
           </div>
         </nav>
 
-        {/* Separator + New chat + Sign out */}
-        <div className="p-3 pb-4">
-          <div className="mb-3 h-px" style={{ background: "rgba(255,255,255,0.05)" }} />
+        {/* Footer: New chat + Sign out */}
+        <div className="p-6">
+          <div className="mb-4 h-px" style={{ background: "rgba(255,255,255,0.05)" }} />
           <button
             onClick={() => onNewChat(activeAgent)}
-            className="flex w-full items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-[12px] font-semibold"
+            className="flex w-full items-center justify-center gap-2 rounded-lg px-3 py-3 text-sm font-semibold"
             style={{
               border: "1px solid rgba(0,212,255,0.2)",
               color: "rgba(0,212,255,0.75)",
@@ -235,7 +233,7 @@ export default function Sidebar({ activeAgent, onSelect, onNewChat, onSignOut, i
           {onSignOut && (
             <button
               onClick={onSignOut}
-              className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg px-3 py-2 text-[11px] font-medium"
+              className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg px-3 py-2 text-xs font-medium"
               style={{
                 color: "rgba(74,158,187,0.35)",
                 background: "transparent",
