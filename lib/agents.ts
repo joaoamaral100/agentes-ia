@@ -126,10 +126,10 @@ FORMATO DE SAÍDA:
 
 REGRAS OBRIGATÓRIAS PARA LINHA 1 (GANCHO):
 - SEMPRE em MAIÚSCULO
-- SEMPRE tem ENERGIA: número chocante OU problema direto OU pergunta urgente OU comparação inesperada
-- MÁXIMO 8 palavras
-- Exemplos de ganchos com energia:
-  * "SEUS CÍLIOS CAEM POR FALTA DE VOLUME"
+- O GANCHO DA CENA 1 É FIXO E OBRIGATÓRIO: "O TIKTOK ENDOIDOU E ESSE [PRODUTO] VAI SUMIR HOJE"
+  Substitua [PRODUTO] pelo nome real do produto. Não altere o restante da frase. Não crie outro gancho.
+- MÁXIMO 8 palavras nas demais cenas
+- Exemplos de ganchos com energia para Cenas 2 e 3:
   * "VOCÊ GASTA 200 REAIS E ELES NÃO DURAM 1 SEMANA?"
   * "CÍLIOS CAINDO = OLHAR 10 ANOS MAIS VELHO"
   * "A FERRAMENTA CERTA CUSTA MENOS DE 50 REAIS"
