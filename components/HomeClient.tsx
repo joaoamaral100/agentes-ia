@@ -503,6 +503,9 @@ function HeroHome({ chats, onSelectAgent, onMenuClick }: {
 
 // ─── HomeClient ───────────────────────────────────────────────────────────────
 
+const VIEW_KEY  = "jarvis_view";
+const AGENT_KEY = "jarvis_active_agent";
+
 export default function HomeClient() {
   const [view, setView]               = useState<View>("home");
   const [activeAgent, setActiveAgent] = useState<AgentId>("imagens");
@@ -510,10 +513,17 @@ export default function HomeClient() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const chatsRef                      = useRef<ChatState>(emptyState);
 
+  // Restore persisted view + agent on mount
   useEffect(() => {
     const stored = loadChats();
     chatsRef.current = stored;
     setChats(stored);
+    try {
+      const savedAgent = sessionStorage.getItem(AGENT_KEY) as AgentId | null;
+      const savedView  = sessionStorage.getItem(VIEW_KEY)  as View    | null;
+      if (savedAgent && AGENTS.some(a => a.id === savedAgent)) setActiveAgent(savedAgent);
+      if (savedView === "chat" || savedView === "home")         setView(savedView);
+    } catch {}
   }, []);
 
   function updateMessages(id: AgentId, messages: ChatMessage[]) {
@@ -531,11 +541,13 @@ export default function HomeClient() {
     setActiveAgent(id);
     setView("chat");
     setSidebarOpen(false);
+    try { sessionStorage.setItem(AGENT_KEY, id); sessionStorage.setItem(VIEW_KEY, "chat"); } catch {}
   }
 
   function handleGoHome() {
     setView("home");
     setSidebarOpen(false);
+    try { sessionStorage.setItem(VIEW_KEY, "home"); } catch {}
   }
 
   const agent = getAgent(activeAgent)!;
