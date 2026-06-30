@@ -110,9 +110,8 @@ export default function LoginScreen({ onSuccess }: LoginScreenProps) {
         setMode("signin");
       }
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Erro desconhecido.";
-      console.error("[Auth] catch final →", msg, err);
-      setError(translateError(msg));
+      console.error("[Auth] catch final →", err);
+      setError(translateError(err));
     } finally {
       setLoading(false);
     }
@@ -686,18 +685,53 @@ export default function LoginScreen({ onSuccess }: LoginScreenProps) {
   );
 }
 
-function translateError(msg: string): string {
-  if (msg.includes("Invalid login credentials"))          return "E-mail ou senha incorretos.";
-  if (msg.includes("Email not confirmed"))                return "Confirme seu e-mail antes de entrar.";
-  if (msg.includes("User already registered"))            return "Este e-mail já está cadastrado.";
-  if (msg.includes("Password should be at least"))       return "A senha precisa ter pelo menos 6 caracteres.";
-  if (msg.includes("Unable to validate email"))          return "E-mail inválido. Verifique o formato.";
-  if (msg.includes("Email rate limit exceeded"))         return "Muitas tentativas. Aguarde alguns minutos.";
-  if (msg.includes("signup_disabled"))                   return "Cadastro desativado pelo administrador.";
-  if (msg.includes("over_email_send_rate_limit"))        return "Limite de envio atingido. Tente em 1 minuto.";
-  if (msg.includes("For security purposes"))             return "Aguarde alguns segundos antes de tentar novamente.";
-  if (msg.includes("Token has expired"))                 return "Link expirado. Solicite um novo.";
-  if (msg.includes("User not found"))                    return "Conta não encontrada.";
-  if (msg.includes("Network") || msg.includes("fetch")) return "Falha de conexão. Verifique sua internet.";
-  return msg;
+function translateError(raw: unknown): string {
+  // Accept Error objects, Supabase AuthError, plain strings, or anything else
+  const msg: string =
+    raw instanceof Error          ? raw.message :
+    typeof raw === "string"       ? raw :
+    typeof (raw as any)?.message === "string" ? (raw as any).message :
+    JSON.stringify(raw) ?? "Erro desconhecido.";
+
+  const m = msg.toLowerCase();
+
+  // Auth errors
+  if (m.includes("invalid login credentials") || m.includes("invalid_credentials"))
+    return "E-mail ou senha incorretos.";
+  if (m.includes("email not confirmed"))
+    return "Confirme seu e-mail antes de entrar.";
+  if (m.includes("user already registered") || m.includes("already registered"))
+    return "Este e-mail já está cadastrado.";
+  if (m.includes("password should be at least") || m.includes("weak_password"))
+    return "A senha precisa ter pelo menos 6 caracteres.";
+  if (m.includes("unable to validate email") || m.includes("invalid email"))
+    return "E-mail inválido. Verifique o formato.";
+
+  // Rate limits
+  if (m.includes("email rate limit") || m.includes("over_email_send_rate_limit"))
+    return "Muitas tentativas de envio. Aguarde 1 minuto.";
+  if (m.includes("too many requests") || m.includes("request rate limit"))
+    return "Muitas tentativas. Aguarde alguns minutos.";
+  if (m.includes("for security purposes"))
+    return "Aguarde alguns segundos antes de tentar novamente.";
+
+  // Account / token
+  if (m.includes("signup_disabled"))
+    return "Cadastro desativado pelo administrador.";
+  if (m.includes("token has expired") || m.includes("otp expired"))
+    return "Link expirado. Solicite um novo.";
+  if (m.includes("user not found"))
+    return "Conta não encontrada.";
+  if (m.includes("anonymous") || m.includes("not authorized"))
+    return "Acesso não autorizado.";
+
+  // Network / infra
+  if (m.includes("network") || m.includes("fetch") || m.includes("failed to fetch"))
+    return "Falha de conexão. Verifique sua internet.";
+  if (m.includes("timeout"))
+    return "Tempo esgotado. Tente novamente.";
+
+  // Raw message fallback — strip Supabase internal jargon if present
+  const cleaned = msg.replace(/^\[.*?\]\s*/, "").trim();
+  return cleaned.length > 0 && cleaned.length < 120 ? cleaned : "Ocorreu um erro. Tente novamente.";
 }
