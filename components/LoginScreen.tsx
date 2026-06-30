@@ -341,12 +341,23 @@ export default function LoginScreen({ onSuccess }: LoginScreenProps) {
                 marginBottom: "20px",
                 padding: "14px 16px",
                 borderRadius: "10px",
-                background: "rgba(239,68,68,0.06)",
-                border: "1px solid rgba(239,68,68,0.18)",
-                color: "#f87171",
-                fontSize: "12px",
-                lineHeight: "1.65",
+                background: "rgba(239,68,68,0.1)",
+                border: "1.5px solid rgba(239,68,68,0.4)",
+                color: "#fca5a5",
+                fontSize: "13px",
+                fontWeight: 500,
+                lineHeight: "1.6",
+                display: "flex",
+                alignItems: "flex-start",
+                gap: "10px",
+                boxShadow: "0 0 16px rgba(239,68,68,0.08)",
               }}>
+                <span style={{ flexShrink: 0, marginTop: "1px" }}>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12" r="9" stroke="#f87171" strokeWidth="1.5" />
+                    <path d="M12 8v4M12 16h.01" stroke="#f87171" strokeWidth="1.5" strokeLinecap="round" />
+                  </svg>
+                </span>
                 {error}
               </div>
             )}
@@ -652,11 +663,17 @@ export default function LoginScreen({ onSuccess }: LoginScreenProps) {
 }
 
 function translateError(msg: string): string {
-  if (msg.includes("Invalid login credentials"))     return "E-mail ou senha incorretos.";
-  if (msg.includes("Email not confirmed"))           return "Confirme seu e-mail antes de entrar.";
-  if (msg.includes("User already registered"))       return "Este e-mail já está cadastrado.";
-  if (msg.includes("Password should be at least"))  return "A senha precisa ter pelo menos 6 caracteres.";
-  if (msg.includes("Unable to validate email"))     return "E-mail inválido.";
-  if (msg.includes("Email rate limit exceeded"))    return "Muitas tentativas. Aguarde alguns minutos.";
+  if (msg.includes("Invalid login credentials"))          return "E-mail ou senha incorretos.";
+  if (msg.includes("Email not confirmed"))                return "Confirme seu e-mail antes de entrar.";
+  if (msg.includes("User already registered"))            return "Este e-mail já está cadastrado.";
+  if (msg.includes("Password should be at least"))       return "A senha precisa ter pelo menos 6 caracteres.";
+  if (msg.includes("Unable to validate email"))          return "E-mail inválido. Verifique o formato.";
+  if (msg.includes("Email rate limit exceeded"))         return "Muitas tentativas. Aguarde alguns minutos.";
+  if (msg.includes("signup_disabled"))                   return "Cadastro desativado pelo administrador.";
+  if (msg.includes("over_email_send_rate_limit"))        return "Limite de envio atingido. Tente em 1 minuto.";
+  if (msg.includes("For security purposes"))             return "Aguarde alguns segundos antes de tentar novamente.";
+  if (msg.includes("Token has expired"))                 return "Link expirado. Solicite um novo.";
+  if (msg.includes("User not found"))                    return "Conta não encontrada.";
+  if (msg.includes("Network") || msg.includes("fetch")) return "Falha de conexão. Verifique sua internet.";
   return msg;
 }
