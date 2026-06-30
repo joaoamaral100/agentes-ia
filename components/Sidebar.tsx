@@ -114,13 +114,15 @@ export default function Sidebar({
                 fontFamily: "var(--font-display), system-ui, sans-serif",
                 fontSize: "18px",
                 fontWeight: 800,
-                letterSpacing: "10px",
+                letterSpacing: "5px",
                 background: "linear-gradient(135deg, #fff 0%, #80c8ee 45%, #00d9ff 100%)",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
                 backgroundClip: "text",
                 filter: "drop-shadow(0 0 14px rgba(0,217,255,0.35))",
                 display: "block",
+                overflow: "visible",
+                whiteSpace: "nowrap",
               }}
             >
               JARVIS
