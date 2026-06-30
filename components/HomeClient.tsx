@@ -380,7 +380,7 @@ function HeroHome({ chats, onSelectAgent, onMenuClick }: {
         <div style={{ textAlign: "center", marginBottom: "clamp(48px,6vw,72px)", animation: "hero-text-in 0.7s cubic-bezier(0.16,1,0.3,1) both" }}>
 
           {/* Icon disc */}
-          <div style={{ display: "inline-flex", marginBottom: "22px" }}>
+          <div style={{ display: "inline-flex", marginBottom: "22px", overflow: "visible" }}>
             <div style={{
               width: "88px", height: "88px",
               borderRadius: "22px",
@@ -388,6 +388,7 @@ function HeroHome({ chats, onSelectAgent, onMenuClick }: {
               border: "1px solid rgba(0,217,255,0.18)",
               boxShadow: "0 0 40px rgba(0,217,255,0.1), inset 0 0 28px rgba(0,217,255,0.04)",
               display: "flex", alignItems: "center", justifyContent: "center",
+              overflow: "visible",
             }}>
               <svg width="42" height="42" viewBox="0 0 24 24" fill="none" style={{ filter: "drop-shadow(0 0 10px rgba(0,217,255,0.7))" }}>
                 <circle cx="12" cy="12" r="3" fill="#00d9ff" />
