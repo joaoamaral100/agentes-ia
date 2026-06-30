@@ -15,7 +15,7 @@ type ApprovalStatus = "loading" | "approved" | "pending";
 
 // ── Black screen shown while any async gate is resolving ─────────────────────
 function LoadingGate() {
-  return <div style={{ position: "fixed", inset: 0, background: "#000814" }} />;
+  return <div style={{ position: "fixed", inset: 0, background: "#0a0e27" }} />;
 }
 
 // ── Screen shown when another device took over the session ────────────────────
@@ -23,7 +23,7 @@ function KickedOutScreen({ onContinue }: { onContinue: () => void }) {
   return (
     <div
       className="dot-grid relative flex min-h-screen w-full items-center justify-center overflow-hidden"
-      style={{ background: "#000814" }}
+      style={{ background: "#0a0e27" }}
     >
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="orb orb-1" />
@@ -32,11 +32,11 @@ function KickedOutScreen({ onContinue }: { onContinue: () => void }) {
       </div>
       <div className="relative z-10 w-full max-w-sm px-4">
         <div
-          className="rounded-2xl p-8 text-center"
+          className="rounded-lg p-8 text-center"
           style={{
-            background: "rgba(0,12,30,0.7)",
-            backdropFilter: "blur(40px)",
-            WebkitBackdropFilter: "blur(40px)",
+            background: "rgba(15,21,53,0.82)",
+            backdropFilter: "blur(20px)",
+            WebkitBackdropFilter: "blur(20px)",
             border: "1px solid rgba(248,113,113,0.2)",
             boxShadow: "0 24px 64px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.04)",
           }}
@@ -44,7 +44,7 @@ function KickedOutScreen({ onContinue }: { onContinue: () => void }) {
           <span
             className="mb-8 block text-center text-[28px] font-bold tracking-[14px]"
             style={{
-              background: "linear-gradient(135deg, #ffffff 0%, #80ccee 40%, #00d4ff 100%)",
+              background: "linear-gradient(135deg, #ffffff 0%, #80c8ee 40%, #00d9ff 100%)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
               backgroundClip: "text",
@@ -63,33 +63,33 @@ function KickedOutScreen({ onContinue }: { onContinue: () => void }) {
             </svg>
           </div>
 
-          <div className="mb-2 text-[15px] font-semibold" style={{ color: "rgba(255,255,255,0.85)" }}>
+          <div className="mb-2 text-[15px] font-semibold" style={{ color: "#e0e6ff" }}>
             Sessão encerrada
           </div>
-          <p className="mb-7 text-[13px] leading-relaxed" style={{ color: "rgba(74,158,187,0.65)" }}>
+          <p className="mb-7 text-[13px] leading-relaxed" style={{ color: "#a0aac0" }}>
             Sua conta foi acessada em outro dispositivo. Você foi desconectado automaticamente.
           </p>
 
           <button
             onClick={onContinue}
-            className="w-full rounded-xl text-[13px] font-semibold"
+            className="w-full rounded-lg text-[13px] font-semibold"
             style={{
               height: "48px",
-              background: "linear-gradient(135deg, #1a44ff 0%, #0088cc 100%)",
+              background: "linear-gradient(135deg, #0066cc 0%, #0080ff 100%)",
               color: "#fff",
               cursor: "pointer",
-              boxShadow: "0 4px 20px rgba(0,100,255,0.35)",
-              transition: "all 0.2s ease",
+              boxShadow: "0 4px 20px rgba(0,128,255,0.3)",
+              transition: "all 0.2s ease-out",
             }}
             onMouseEnter={(e) =>
               Object.assign((e.currentTarget as HTMLElement).style, {
-                boxShadow: "0 6px 28px rgba(0,100,255,0.5)",
+                boxShadow: "0 6px 28px rgba(0,128,255,0.45)",
                 transform: "translateY(-1px)",
               })
             }
             onMouseLeave={(e) =>
               Object.assign((e.currentTarget as HTMLElement).style, {
-                boxShadow: "0 4px 20px rgba(0,100,255,0.35)",
+                boxShadow: "0 4px 20px rgba(0,128,255,0.3)",
                 transform: "translateY(0)",
               })
             }
@@ -107,7 +107,7 @@ function PendingScreen({ onRetry }: { onRetry: () => void }) {
   return (
     <div
       className="dot-grid relative flex min-h-screen w-full items-center justify-center overflow-hidden"
-      style={{ background: "#000814" }}
+      style={{ background: "#0a0e27" }}
     >
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="orb orb-1" />
@@ -117,24 +117,24 @@ function PendingScreen({ onRetry }: { onRetry: () => void }) {
 
       <div className="relative z-10 w-full max-w-sm px-4">
         <div
-          className="rounded-2xl p-8 text-center"
+          className="rounded-lg p-8 text-center"
           style={{
-            background: "rgba(0,12,30,0.7)",
-            backdropFilter: "blur(40px)",
-            WebkitBackdropFilter: "blur(40px)",
-            border: "1px solid rgba(255,255,255,0.08)",
-            boxShadow: "0 24px 64px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06)",
+            background: "rgba(15,21,53,0.82)",
+            backdropFilter: "blur(20px)",
+            WebkitBackdropFilter: "blur(20px)",
+            border: "1px solid rgba(26,37,85,0.9)",
+            boxShadow: "0 24px 64px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.04)",
           }}
         >
           {/* Logo */}
           <span
             className="mb-8 block text-center text-[28px] font-bold tracking-[14px]"
             style={{
-              background: "linear-gradient(135deg, #ffffff 0%, #80ccee 40%, #00d4ff 100%)",
+              background: "linear-gradient(135deg, #ffffff 0%, #80c8ee 40%, #00d9ff 100%)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
               backgroundClip: "text",
-              filter: "drop-shadow(0 0 20px rgba(0,212,255,0.3))",
+              filter: "drop-shadow(0 0 20px rgba(0,217,255,0.3))",
             }}
           >
             JARVIS
@@ -143,13 +143,13 @@ function PendingScreen({ onRetry }: { onRetry: () => void }) {
           {/* Icon */}
           <div
             className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full"
-            style={{ background: "rgba(0,212,255,0.08)", border: "1px solid rgba(0,212,255,0.2)" }}
+            style={{ background: "rgba(0,217,255,0.07)", border: "1px solid rgba(0,217,255,0.18)" }}
           >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <circle cx="12" cy="8" r="4" stroke="rgba(0,212,255,0.7)" strokeWidth="1.5" />
+              <circle cx="12" cy="8" r="4" stroke="rgba(0,217,255,0.7)" strokeWidth="1.5" />
               <path
                 d="M4 20c0-4 3.6-7 8-7s8 3 8 7"
-                stroke="rgba(0,212,255,0.7)"
+                stroke="rgba(0,217,255,0.7)"
                 strokeWidth="1.5"
                 strokeLinecap="round"
               />
@@ -163,16 +163,10 @@ function PendingScreen({ onRetry }: { onRetry: () => void }) {
             </svg>
           </div>
 
-          <div
-            className="mb-2 text-[15px] font-semibold"
-            style={{ color: "rgba(255,255,255,0.85)" }}
-          >
+          <div className="mb-2 text-[15px] font-semibold" style={{ color: "#e0e6ff" }}>
             Acesso em análise
           </div>
-          <p
-            className="mb-7 text-[13px] leading-relaxed"
-            style={{ color: "rgba(74,158,187,0.65)" }}
-          >
+          <p className="mb-7 text-[13px] leading-relaxed" style={{ color: "#a0aac0" }}>
             Sua conta foi criada e está aguardando aprovação do administrador. Você receberá acesso
             em breve.
           </p>
@@ -180,25 +174,25 @@ function PendingScreen({ onRetry }: { onRetry: () => void }) {
           {/* Retry */}
           <button
             onClick={onRetry}
-            className="mb-3 w-full rounded-xl text-[13px] font-semibold"
+            className="mb-3 w-full rounded-lg text-[13px] font-semibold"
             style={{
               height: "44px",
-              background: "rgba(0,212,255,0.08)",
-              border: "1px solid rgba(0,212,255,0.2)",
-              color: "rgba(0,212,255,0.7)",
+              background: "rgba(0,217,255,0.07)",
+              border: "1px solid rgba(0,217,255,0.18)",
+              color: "rgba(0,217,255,0.7)",
               cursor: "pointer",
-              transition: "all 0.15s ease",
+              transition: "all 0.15s ease-out",
             }}
             onMouseEnter={(e) =>
               Object.assign((e.currentTarget as HTMLElement).style, {
-                background: "rgba(0,212,255,0.15)",
-                color: "#00d4ff",
+                background: "rgba(0,217,255,0.12)",
+                color: "#00d9ff",
               })
             }
             onMouseLeave={(e) =>
               Object.assign((e.currentTarget as HTMLElement).style, {
-                background: "rgba(0,212,255,0.08)",
-                color: "rgba(0,212,255,0.7)",
+                background: "rgba(0,217,255,0.07)",
+                color: "rgba(0,217,255,0.7)",
               })
             }
           >
@@ -208,25 +202,25 @@ function PendingScreen({ onRetry }: { onRetry: () => void }) {
           {/* Sign out */}
           <button
             onClick={() => supabase.auth.signOut()}
-            className="w-full rounded-xl text-[13px] font-semibold"
+            className="w-full rounded-lg text-[13px] font-semibold"
             style={{
               height: "44px",
-              background: "rgba(255,255,255,0.04)",
-              border: "1px solid rgba(255,255,255,0.1)",
-              color: "rgba(255,255,255,0.4)",
+              background: "transparent",
+              border: "1px solid rgba(26,37,85,0.9)",
+              color: "rgba(160,170,192,0.4)",
               cursor: "pointer",
-              transition: "all 0.15s ease",
+              transition: "all 0.15s ease-out",
             }}
             onMouseEnter={(e) =>
               Object.assign((e.currentTarget as HTMLElement).style, {
-                background: "rgba(255,255,255,0.08)",
-                color: "rgba(255,255,255,0.6)",
+                background: "rgba(255,255,255,0.04)",
+                color: "rgba(160,170,192,0.7)",
               })
             }
             onMouseLeave={(e) =>
               Object.assign((e.currentTarget as HTMLElement).style, {
-                background: "rgba(255,255,255,0.04)",
-                color: "rgba(255,255,255,0.4)",
+                background: "transparent",
+                color: "rgba(160,170,192,0.4)",
               })
             }
           >

@@ -42,9 +42,9 @@ function Particles() {
         if (p.y < -4) { p.y = canvas.height + 4; p.x = Math.random() * canvas.width; }
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle   = `rgba(0,212,255,${p.op.toFixed(2)})`;
+        ctx.fillStyle   = `rgba(0,217,255,${p.op.toFixed(2)})`;
         ctx.shadowBlur  = 6;
-        ctx.shadowColor = "rgba(0,212,255,0.45)";
+        ctx.shadowColor = "rgba(0,217,255,0.4)";
         ctx.fill();
       }
       ctx.shadowBlur = 0;
@@ -84,7 +84,7 @@ function GlowRipple() {
           transform: "translate(-50%,-50%)",
           width: "8px", height: "8px",
           borderRadius: "50%",
-          border: "1.5px solid rgba(0,212,255,0.65)",
+          border: "1.5px solid rgba(0,217,255,0.6)",
           animation: "ripple-expand 0.7s ease-out forwards",
         }} />
       ))}

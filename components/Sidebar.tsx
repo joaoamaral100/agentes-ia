@@ -4,7 +4,7 @@ import { AGENTS, AgentId } from "@/lib/agents";
 
 // ─── SVG icons ────────────────────────────────────────────────────────────────
 
-function CameraIcon({ size = 20, style }: { size?: number; style?: React.CSSProperties }) {
+function CameraIcon({ size = 28, style }: { size?: number; style?: React.CSSProperties }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={style}>
       <rect x="2" y="6" width="20" height="14" rx="2" />
@@ -14,7 +14,7 @@ function CameraIcon({ size = 20, style }: { size?: number; style?: React.CSSProp
     </svg>
   );
 }
-function CopyIcon({ size = 20, style }: { size?: number; style?: React.CSSProperties }) {
+function CopyIcon({ size = 28, style }: { size?: number; style?: React.CSSProperties }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={style}>
       <path d="M12 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
@@ -24,7 +24,7 @@ function CopyIcon({ size = 20, style }: { size?: number; style?: React.CSSProper
     </svg>
   );
 }
-function VideoIcon({ size = 20, style }: { size?: number; style?: React.CSSProperties }) {
+function VideoIcon({ size = 28, style }: { size?: number; style?: React.CSSProperties }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={style}>
       <rect x="2" y="4" width="15" height="16" rx="2" />
@@ -33,7 +33,7 @@ function VideoIcon({ size = 20, style }: { size?: number; style?: React.CSSPrope
     </svg>
   );
 }
-function ShirtIcon({ size = 20, style }: { size?: number; style?: React.CSSProperties }) {
+function ShirtIcon({ size = 28, style }: { size?: number; style?: React.CSSProperties }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={style}>
       <path d="M20.38 3.46L16 2a4 4 0 01-8 0L3.62 3.46a2 2 0 00-1.34 2.23l.58 3.57a1 1 0 001 .84H6v10a1 1 0 001 1h10a1 1 0 001-1V10h2.14a1 1 0 001-.84l.58-3.57a2 2 0 00-1.34-2.23z" />
@@ -42,7 +42,7 @@ function ShirtIcon({ size = 20, style }: { size?: number; style?: React.CSSPrope
 }
 function PlusIcon() {
   return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
       <line x1="12" y1="5" x2="12" y2="19" />
       <line x1="5" y1="12" x2="19" y2="12" />
     </svg>
@@ -65,7 +65,7 @@ function SignOutIcon() {
     </svg>
   );
 }
-function AgentIcon({ id, size = 20, style }: { id: string; size?: number; style?: React.CSSProperties }) {
+function AgentIcon({ id, size = 28, style }: { id: string; size?: number; style?: React.CSSProperties }) {
   if (id === "imagens")     return <CameraIcon size={size} style={style} />;
   if (id === "copys")       return <CopyIcon   size={size} style={style} />;
   if (id === "mode-amaral") return <ShirtIcon  size={size} style={style} />;
@@ -87,7 +87,7 @@ export default function Sidebar({ activeAgent, onSelect, onNewChat, onSignOut, i
   return (
     <>
       {isOpen && (
-        <div className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm md:hidden" onClick={onClose} />
+        <div className="fixed inset-0 z-40 bg-black/70 backdrop-blur-sm md:hidden" onClick={onClose} />
       )}
 
       <aside
@@ -95,19 +95,25 @@ export default function Sidebar({ activeAgent, onSelect, onNewChat, onSignOut, i
           "flex h-full flex-col",
           "fixed inset-y-0 left-0 z-50 w-[280px] transition-transform duration-300 ease-out",
           isOpen ? "translate-x-0" : "-translate-x-full",
-          "md:relative md:w-[260px] md:shrink-0 md:translate-x-0",
+          "md:relative md:w-[280px] md:shrink-0 md:translate-x-0",
         ].join(" ")}
-        style={{ background: "#00070e", borderRight: "1px solid rgba(255,255,255,0.06)" }}
+        style={{
+          background: "rgba(10,14,39,0.85)",
+          backdropFilter: "blur(24px)",
+          WebkitBackdropFilter: "blur(24px)",
+          borderRight: "1px solid #1a2555",
+        }}
       >
         {/* Brand + close */}
-        <div className="flex items-center justify-between px-6 pt-8 pb-6">
+        <div className="flex items-center justify-between px-8 pt-8 pb-6">
           <span
             className="font-display text-xl font-bold tracking-[10px]"
             style={{
-              background: "linear-gradient(135deg, #fff 0%, #7cc8f0 45%, #00d4ff 100%)",
+              background: "linear-gradient(135deg, #fff 0%, #80c8ee 45%, #00d9ff 100%)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
               backgroundClip: "text",
+              filter: "drop-shadow(0 0 16px rgba(0,217,255,0.3))",
             }}
           >
             JARVIS
@@ -115,20 +121,20 @@ export default function Sidebar({ activeAgent, onSelect, onNewChat, onSignOut, i
           <button
             onClick={onClose}
             className="flex h-7 w-7 items-center justify-center rounded-md md:hidden"
-            style={{ color: "rgba(74,158,187,0.5)" }}
+            style={{ color: "rgba(160,170,192,0.5)" }}
           >
             <CloseIcon />
           </button>
         </div>
 
         {/* Separator */}
-        <div className="mx-6 mb-2 h-px" style={{ background: "rgba(255,255,255,0.05)" }} />
+        <div className="mx-8 mb-6 h-px" style={{ background: "#1a2555" }} />
 
         {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto px-3 py-6">
+        <nav className="flex-1 overflow-y-auto px-4 pb-6">
           <p
-            className="mb-3 px-3 text-[10px] font-semibold tracking-[3px]"
-            style={{ color: "rgba(74,158,187,0.3)", fontFamily: "monospace" }}
+            className="mb-4 px-3 text-[10px] font-semibold tracking-[3px]"
+            style={{ color: "rgba(0,217,255,0.28)", fontFamily: "monospace" }}
           >
             AGENTES
           </p>
@@ -142,55 +148,68 @@ export default function Sidebar({ activeAgent, onSelect, onNewChat, onSignOut, i
                   onClick={() => onSelect(agent.id)}
                   className="sidebar-btn relative flex w-full items-center gap-4 rounded-lg py-3 text-left"
                   style={{
-                    paddingLeft: active ? "9px" : "11px",
+                    paddingLeft: active ? "11px" : "13px",
                     paddingRight: "12px",
-                    background: active ? "rgba(0,212,255,0.07)" : "transparent",
-                    borderLeft: active ? "2px solid rgba(0,212,255,0.85)" : "2px solid transparent",
-                    transition: "all 0.15s ease-out",
+                    background: active ? "rgba(0,217,255,0.07)" : "transparent",
+                    borderLeft: active ? "2px solid rgba(0,217,255,0.8)" : "2px solid transparent",
+                    boxShadow: active ? "inset 0 0 24px rgba(0,217,255,0.04)" : "",
+                    transition: "all 0.2s ease-out",
                   }}
                   onMouseEnter={(e) => {
                     if (!active) Object.assign((e.currentTarget as HTMLElement).style, {
-                      background: "#334155",
-                      borderLeft: "2px solid rgba(0,212,255,0.3)",
-                      paddingLeft: "9px",
+                      background: "rgba(0,217,255,0.05)",
+                      borderLeft: "2px solid rgba(0,217,255,0.35)",
+                      paddingLeft: "11px",
+                      boxShadow: "inset 0 0 20px rgba(0,217,255,0.03), 0 0 12px rgba(0,217,255,0.04)",
                     });
                   }}
                   onMouseLeave={(e) => {
                     if (!active) Object.assign((e.currentTarget as HTMLElement).style, {
                       background: "transparent",
                       borderLeft: "2px solid transparent",
-                      paddingLeft: "11px",
+                      paddingLeft: "13px",
+                      boxShadow: "",
                     });
                   }}
                 >
+                  {/* Icon container */}
                   <span
-                    className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
+                    className="flex shrink-0 items-center justify-center rounded-lg"
                     style={{
-                      background: active ? "rgba(0,212,255,0.12)" : "rgba(255,255,255,0.04)",
-                      transition: "background 0.15s ease-out",
+                      width: "44px",
+                      height: "44px",
+                      background: active
+                        ? "rgba(0,217,255,0.1)"
+                        : "rgba(26,31,53,0.8)",
+                      border: active
+                        ? "1px solid rgba(0,217,255,0.25)"
+                        : "1px solid rgba(26,37,85,0.8)",
+                      transition: "all 0.2s ease-out",
                     }}
                   >
                     <AgentIcon
                       id={agent.id}
-                      size={20}
+                      size={24}
                       style={{
-                        color: active ? "#00d4ff" : "rgba(74,158,187,0.55)",
-                        transition: "color 0.15s ease-out",
+                        color: active ? "#00d9ff" : "rgba(160,170,192,0.45)",
+                        transition: "color 0.2s ease-out",
+                        filter: active ? "drop-shadow(0 0 6px rgba(0,217,255,0.5))" : "none",
                       }}
                     />
                   </span>
 
                   <span className="min-w-0 flex-1">
                     <span
-                      className="block truncate text-lg font-semibold"
+                      className="block truncate text-xl font-semibold"
                       style={{
-                        color: active ? "rgba(224,244,255,0.95)" : "rgba(180,210,230,0.65)",
-                        transition: "color 0.15s ease-out",
+                        color: active ? "#e0e6ff" : "rgba(160,170,192,0.6)",
+                        transition: "color 0.2s ease-out",
+                        lineHeight: "1.3",
                       }}
                     >
                       {agent.name}
                     </span>
-                    <span className="block truncate text-[13px]" style={{ color: "rgba(74,158,187,0.35)" }}>
+                    <span className="block truncate text-[12px]" style={{ color: "rgba(160,170,192,0.3)", marginTop: "2px" }}>
                       {agent.description}
                     </span>
                   </span>
@@ -200,30 +219,33 @@ export default function Sidebar({ activeAgent, onSelect, onNewChat, onSignOut, i
           </div>
         </nav>
 
-        {/* Footer: New chat + Sign out */}
-        <div className="p-6">
-          <div className="mb-4 h-px" style={{ background: "rgba(255,255,255,0.05)" }} />
+        {/* Footer */}
+        <div className="px-6 pb-8">
+          <div className="mb-6 h-px" style={{ background: "#1a2555" }} />
+
           <button
             onClick={() => onNewChat(activeAgent)}
             className="flex w-full items-center justify-center gap-2 rounded-lg px-3 py-3 text-sm font-semibold"
             style={{
-              border: "1px solid rgba(0,212,255,0.2)",
-              color: "rgba(0,212,255,0.75)",
+              border: "1px solid rgba(0,217,255,0.2)",
+              color: "rgba(0,217,255,0.7)",
               background: "transparent",
-              transition: "all 0.15s ease-out",
+              transition: "all 0.2s ease-out",
               letterSpacing: "0.3px",
             }}
             onMouseEnter={(e) => Object.assign((e.currentTarget as HTMLElement).style, {
-              background: "linear-gradient(135deg, #1a44ff, #0088cc)",
+              background: "linear-gradient(135deg, #0066cc, #0080ff)",
               border: "1px solid transparent",
               color: "#fff",
-              boxShadow: "0 2px 12px rgba(0,100,255,0.28)",
+              boxShadow: "0 4px 20px rgba(0,128,255,0.3), 0 0 12px rgba(0,217,255,0.15)",
+              transform: "translateY(-1px)",
             })}
             onMouseLeave={(e) => Object.assign((e.currentTarget as HTMLElement).style, {
               background: "transparent",
-              border: "1px solid rgba(0,212,255,0.2)",
-              color: "rgba(0,212,255,0.75)",
+              border: "1px solid rgba(0,217,255,0.2)",
+              color: "rgba(0,217,255,0.7)",
               boxShadow: "",
+              transform: "translateY(0)",
             })}
           >
             <PlusIcon />
@@ -235,17 +257,17 @@ export default function Sidebar({ activeAgent, onSelect, onNewChat, onSignOut, i
               onClick={onSignOut}
               className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg px-3 py-2 text-xs font-medium"
               style={{
-                color: "rgba(74,158,187,0.35)",
+                color: "rgba(160,170,192,0.3)",
                 background: "transparent",
-                transition: "all 0.15s ease-out",
+                transition: "all 0.2s ease-out",
                 letterSpacing: "0.3px",
               }}
               onMouseEnter={(e) => Object.assign((e.currentTarget as HTMLElement).style, {
                 color: "#f87171",
-                background: "rgba(248,113,113,0.06)",
+                background: "rgba(239,68,68,0.06)",
               })}
               onMouseLeave={(e) => Object.assign((e.currentTarget as HTMLElement).style, {
-                color: "rgba(74,158,187,0.35)",
+                color: "rgba(160,170,192,0.3)",
                 background: "transparent",
               })}
             >

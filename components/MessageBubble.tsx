@@ -59,9 +59,9 @@ function AgentAvatar({ agentId }: { agentId?: string }) {
     <div
       className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg"
       style={{
-        background: "linear-gradient(135deg, rgba(0,212,255,0.14), rgba(0,102,255,0.1))",
-        border: "1px solid rgba(0,212,255,0.18)",
-        color: "#00d4ff",
+        background: "linear-gradient(135deg, rgba(0,217,255,0.1), rgba(0,128,255,0.07))",
+        border: "1px solid rgba(0,217,255,0.18)",
+        color: "#00d9ff",
       }}
     >
       {icon}
@@ -95,31 +95,31 @@ function CenaBox({ title, body }: { title: string; body: string }) {
       className="my-3 overflow-hidden"
       style={{
         borderRadius: "10px",
-        border: "1px solid rgba(0,212,255,0.22)",
-        background: "rgba(0,10,24,0.9)",
+        border: "1px solid rgba(0,217,255,0.22)",
+        background: "rgba(15,21,53,0.9)",
       }}
     >
       <div
         className="flex items-center justify-between px-4 py-2.5"
-        style={{ background: "rgba(0,212,255,0.06)", borderBottom: "1px solid rgba(0,212,255,0.12)" }}
+        style={{ background: "rgba(0,217,255,0.05)", borderBottom: "1px solid rgba(0,217,255,0.12)" }}
       >
-        <span className="text-[13px] font-bold tracking-wide" style={{ color: "#00d4ff" }}>{title}</span>
+        <span className="text-[13px] font-bold tracking-wide" style={{ color: "#00d9ff" }}>{title}</span>
         <button
           onClick={copy}
           className="rounded-md px-3 py-1 text-[12px] font-semibold"
           style={{
             transition: "all 0.15s ease-out",
             ...(copied
-              ? { background: "#00d4ff", color: "#000814" }
-              : { border: "1px solid rgba(0,212,255,0.3)", color: "#00d4ff", background: "transparent" }),
+              ? { background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.35)", color: "#10b981" }
+              : { border: "1px solid rgba(0,217,255,0.28)", color: "#00d9ff", background: "transparent" }),
           }}
-          onMouseEnter={(e) => { if (!copied) Object.assign((e.currentTarget as HTMLElement).style, { background: "#00d4ff", color: "#000814" }); }}
-          onMouseLeave={(e) => { if (!copied) Object.assign((e.currentTarget as HTMLElement).style, { background: "transparent", color: "#00d4ff", border: "1px solid rgba(0,212,255,0.3)" }); }}
+          onMouseEnter={(e) => { if (!copied) Object.assign((e.currentTarget as HTMLElement).style, { background: "#00d9ff", color: "#0a0e27", borderColor: "#00d9ff" }); }}
+          onMouseLeave={(e) => { if (!copied) Object.assign((e.currentTarget as HTMLElement).style, { background: "transparent", color: "#00d9ff", borderColor: "rgba(0,217,255,0.28)" }); }}
         >
           {copied ? "Copiado ✓" : "Copiar"}
         </button>
       </div>
-      <pre className="p-4 text-[13px] leading-relaxed" style={{ color: "#ddeeff", fontFamily: "inherit", whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
+      <pre className="p-4 text-[13px] leading-relaxed" style={{ color: "#e0e6ff", fontFamily: "inherit", whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
         {body}
       </pre>
     </div>
@@ -150,29 +150,29 @@ function CodeBlock({ content }: { content: string }) {
   return (
     <div
       className="my-3 overflow-hidden"
-      style={{ borderRadius: "10px", border: "1px solid rgba(255,255,255,0.07)", background: "rgba(0,10,24,0.9)" }}
+      style={{ borderRadius: "10px", border: "1px solid rgba(26,37,85,0.9)", background: "rgba(10,14,39,0.95)" }}
     >
       <div
         className="flex items-center justify-between px-4 py-2"
-        style={{ background: "rgba(255,255,255,0.03)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}
+        style={{ background: "rgba(0,217,255,0.03)", borderBottom: "1px solid rgba(26,37,85,0.8)" }}
       >
-        <span className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: "rgba(0,212,255,0.6)" }}>output</span>
+        <span className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: "rgba(0,217,255,0.5)" }}>output</span>
         <button
           onClick={copy}
           className="rounded-md px-3 py-1 text-[12px] font-semibold"
           style={{
             transition: "all 0.15s ease-out",
             ...(copied
-              ? { background: "#00d4ff", color: "#000814" }
-              : { border: "1px solid rgba(0,212,255,0.25)", color: "#00d4ff", background: "transparent" }),
+              ? { background: "rgba(16,185,129,0.1)", border: "1px solid rgba(16,185,129,0.35)", color: "#10b981" }
+              : { border: "1px solid rgba(0,217,255,0.25)", color: "#00d9ff", background: "transparent" }),
           }}
-          onMouseEnter={(e) => { if (!copied) Object.assign((e.currentTarget as HTMLElement).style, { background: "#00d4ff", color: "#000814" }); }}
-          onMouseLeave={(e) => { if (!copied) Object.assign((e.currentTarget as HTMLElement).style, { background: "transparent", color: "#00d4ff", border: "1px solid rgba(0,212,255,0.25)" }); }}
+          onMouseEnter={(e) => { if (!copied) Object.assign((e.currentTarget as HTMLElement).style, { background: "#00d9ff", color: "#0a0e27", borderColor: "#00d9ff" }); }}
+          onMouseLeave={(e) => { if (!copied) Object.assign((e.currentTarget as HTMLElement).style, { background: "transparent", color: "#00d9ff", borderColor: "rgba(0,217,255,0.25)" }); }}
         >
           {copied ? "Copiado ✓" : "Copiar"}
         </button>
       </div>
-      <pre className="p-4 text-[13px] leading-relaxed" style={{ color: "#ddeeff", fontFamily: "inherit", whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
+      <pre className="p-4 text-[13px] leading-relaxed" style={{ color: "#e0e6ff", fontFamily: "inherit", whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
         {content}
       </pre>
     </div>
@@ -184,7 +184,7 @@ function CodeBlock({ content }: { content: string }) {
 function renderInline(text: string) {
   return text.split(/(\*\*[^*]+\*\*)/g).map((seg, i) => {
     if (seg.startsWith("**") && seg.endsWith("**")) {
-      return <strong key={i} style={{ color: "#e8f4ff", fontWeight: 600 }}>{seg.slice(2, -2)}</strong>;
+      return <strong key={i} style={{ color: "#e0e6ff", fontWeight: 600 }}>{seg.slice(2, -2)}</strong>;
     }
     return <Fragment key={i}>{seg}</Fragment>;
   });
@@ -252,7 +252,7 @@ function renderContent(raw: string) {
               <div
                 key={i}
                 className="mt-5 mb-1 text-[11px] font-bold tracking-widest uppercase"
-                style={{ color: "rgba(0,212,255,0.7)", borderBottom: "1px solid rgba(0,212,255,0.12)", paddingBottom: "6px" }}
+                style={{ color: "rgba(0,217,255,0.7)", borderBottom: "1px solid rgba(0,217,255,0.12)", paddingBottom: "6px" }}
               >
                 {seg.title}
               </div>
@@ -288,8 +288,8 @@ export default function MessageBubble({ message, agentId, isStreaming, animDelay
         <div
           className="max-w-[80%] rounded-[18px] rounded-br-sm text-[14px] leading-relaxed text-white"
           style={{
-            background: "linear-gradient(145deg, #0c307a 0%, #0a52a8 100%)",
-            boxShadow: "0 2px 16px rgba(0,40,140,0.4), inset 0 1px 0 rgba(255,255,255,0.08)",
+            background: "linear-gradient(145deg, #0a2e6e 0%, #0958b8 100%)",
+            boxShadow: "0 2px 16px rgba(0,60,180,0.35), inset 0 1px 0 rgba(255,255,255,0.08)",
             padding: hasImages ? "10px" : "14px 20px",
           }}
         >
@@ -305,7 +305,7 @@ export default function MessageBubble({ message, agentId, isStreaming, animDelay
                     maxHeight: "200px",
                     borderRadius: "10px",
                     objectFit: "cover",
-                    border: "1px solid rgba(255,255,255,0.15)",
+                    border: "1px solid rgba(255,255,255,0.12)",
                     display: "block",
                   }}
                 />
@@ -326,11 +326,11 @@ export default function MessageBubble({ message, agentId, isStreaming, animDelay
     <div className="message-in flex items-start gap-2.5 justify-start" style={animDelay ? { animationDelay: `${animDelay}ms` } : undefined}>
       <AgentAvatar agentId={agentId} />
       <div
-        className="max-w-[88%] rounded-xl px-5 py-4 text-[14px] leading-relaxed"
+        className="max-w-[88%] rounded-lg px-5 py-4 text-[14px] leading-relaxed"
         style={{
-          background: "rgba(4,12,28,0.65)",
-          border: "1px solid rgba(255,255,255,0.05)",
-          color: "#d8ecff",
+          background: "rgba(20,24,41,0.82)",
+          border: "1px solid rgba(26,37,85,0.8)",
+          color: "#c8d8f0",
         }}
       >
         {renderContent(message.content)}
@@ -341,12 +341,12 @@ export default function MessageBubble({ message, agentId, isStreaming, animDelay
               display: "inline-block",
               width: "2px",
               height: "14px",
-              background: "#00d4ff",
+              background: "#00d9ff",
               marginLeft: "3px",
               verticalAlign: "middle",
               borderRadius: "1px",
               animation: "boot-blink 0.75s step-end infinite",
-              boxShadow: "0 0 6px rgba(0,212,255,0.7)",
+              boxShadow: "0 0 6px rgba(0,217,255,0.6)",
             }}
           />
         )}

@@ -4,9 +4,9 @@ import { useEffect, useState } from "react";
 
 const TITLE = "JARVIS SYSTEM ONLINE";
 const STATUSES = [
-  { text: "CONNECTING...",     color: "#00d4ff" },
-  { text: "AUTHENTICATING...", color: "#00d4ff" },
-  { text: "LOADING AGENTS...", color: "#00d4ff" },
+  { text: "CONNECTING...",     color: "#00d9ff" },
+  { text: "AUTHENTICATING...", color: "#00d9ff" },
+  { text: "LOADING AGENTS...", color: "#00d9ff" },
   { text: "READY",             color: "#22c55e" },
 ] as const;
 
@@ -61,7 +61,7 @@ export default function BootScreen({ onDone }: { onDone: () => void }) {
     <div
       style={{
         position: "fixed", inset: 0, zIndex: 10000,
-        background: "#000208",
+        background: "#0a0e27",
         display: "flex", flexDirection: "column",
         alignItems: "center", justifyContent: "center",
         opacity: fading ? 0 : 1,
@@ -72,13 +72,13 @@ export default function BootScreen({ onDone }: { onDone: () => void }) {
       {/* CRT scanline texture */}
       <div style={{
         position: "absolute", inset: 0, pointerEvents: "none",
-        backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,212,255,0.012) 2px, rgba(0,212,255,0.012) 4px)",
+        backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,217,255,0.012) 2px, rgba(0,217,255,0.012) 4px)",
       }} />
 
       {/* Sub-brand */}
       <div style={{
         fontFamily: "monospace", fontSize: "clamp(10px, 1.5vw, 13px)",
-        letterSpacing: "10px", color: "rgba(0,212,255,0.25)",
+        letterSpacing: "10px", color: "rgba(0,217,255,0.22)",
         marginBottom: "14px", textTransform: "uppercase",
       }}>
         BEXT · PLATFORM
@@ -88,8 +88,8 @@ export default function BootScreen({ onDone }: { onDone: () => void }) {
       <div style={{
         fontFamily: "monospace", fontSize: "clamp(18px, 3.5vw, 36px)",
         fontWeight: 700, letterSpacing: "5px",
-        color: "#00d4ff",
-        textShadow: "0 0 28px rgba(0,212,255,0.65), 0 0 60px rgba(0,212,255,0.2)",
+        color: "#00d9ff",
+        textShadow: "0 0 28px rgba(0,217,255,0.6), 0 0 60px rgba(0,217,255,0.2)",
         minHeight: "1.4em", marginBottom: "44px",
       }}>
         {title}
@@ -131,7 +131,7 @@ export default function BootScreen({ onDone }: { onDone: () => void }) {
       <div style={{
         position: "absolute", bottom: "20px",
         fontFamily: "monospace", fontSize: "9px",
-        color: "rgba(0,212,255,0.15)", letterSpacing: "3px",
+        color: "rgba(0,217,255,0.14)", letterSpacing: "3px",
       }}>
         JARVIS AI © 2026 · TikTok Shopping Platform
       </div>

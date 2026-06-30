@@ -75,9 +75,9 @@ function ActionBtn({
         letterSpacing: "0.04em",
         cursor: disabled ? "not-allowed" : "pointer",
         transition: "background 0.15s ease",
-        background: disabled ? "rgba(255,255,255,0.04)" : c.bg,
-        border: `1px solid ${disabled ? "rgba(255,255,255,0.08)" : c.border}`,
-        color: disabled ? "rgba(255,255,255,0.2)" : c.text,
+        background: disabled ? "rgba(26,37,85,0.4)" : c.bg,
+        border: `1px solid ${disabled ? "rgba(26,37,85,0.8)" : c.border}`,
+        color: disabled ? "rgba(160,170,192,0.2)" : c.text,
       }}
       onMouseEnter={(e) => {
         if (!disabled) (e.currentTarget as HTMLElement).style.background = c.hover;
@@ -95,7 +95,7 @@ function CenterMessage({ children }: { children: React.ReactNode }) {
   return (
     <div
       className="flex min-h-screen items-center justify-center"
-      style={{ background: "#000814" }}
+      style={{ background: "#0a0e27" }}
     >
       <div style={{ textAlign: "center" }}>{children}</div>
     </div>
@@ -163,13 +163,13 @@ export default function AdminDashboard() {
             width: "32px",
             height: "32px",
             borderRadius: "50%",
-            border: "2px solid rgba(0,212,255,0.15)",
-            borderTop: "2px solid #00d4ff",
+            border: "2px solid rgba(0,217,255,0.12)",
+            borderTop: "2px solid #00d9ff",
             animation: "spin 0.8s linear infinite",
             margin: "0 auto 16px",
           }}
         />
-        <p style={{ color: "rgba(0,212,255,0.4)", fontSize: "12px", letterSpacing: "0.1em" }}>
+        <p style={{ color: "rgba(0,217,255,0.4)", fontSize: "12px", letterSpacing: "0.1em" }}>
           CARREGANDO...
         </p>
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
@@ -184,7 +184,7 @@ export default function AdminDashboard() {
         <p style={{ color: "#f87171", marginBottom: "12px", fontSize: "14px" }}>
           Faça login primeiro.
         </p>
-        <a href="/" style={{ color: "#00d4ff", fontSize: "13px" }}>
+        <a href="/" style={{ color: "#00d9ff", fontSize: "13px" }}>
           ← Voltar ao app
         </a>
       </CenterMessage>
@@ -198,7 +198,7 @@ export default function AdminDashboard() {
         <p style={{ color: "#f87171", marginBottom: "12px", fontSize: "14px" }}>
           Acesso negado. Você não tem permissão de administrador.
         </p>
-        <a href="/" style={{ color: "#00d4ff", fontSize: "13px" }}>
+        <a href="/" style={{ color: "#00d9ff", fontSize: "13px" }}>
           ← Voltar ao app
         </a>
       </CenterMessage>
@@ -220,7 +220,7 @@ export default function AdminDashboard() {
   return (
     <div
       className="dot-grid min-h-screen"
-      style={{ background: "#000814", padding: "32px 16px" }}
+      style={{ background: "#0a0e27", padding: "32px 16px" }}
     >
       <div className="mx-auto max-w-4xl">
 
@@ -230,7 +230,7 @@ export default function AdminDashboard() {
             <h1
               className="text-[22px] font-bold tracking-[6px]"
               style={{
-                background: "linear-gradient(135deg, #ffffff 0%, #80ccee 40%, #00d4ff 100%)",
+                background: "linear-gradient(135deg, #ffffff 0%, #80c8ee 40%, #00d9ff 100%)",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
                 backgroundClip: "text",
@@ -239,10 +239,10 @@ export default function AdminDashboard() {
               ADMINISTRAÇÃO
             </h1>
             <p style={{ marginTop: "6px", fontSize: "12px" }}>
-              <span style={{ color: "rgba(255,255,255,0.45)" }}>{total} usuários</span>
-              <span style={{ color: "rgba(255,255,255,0.2)" }}> · </span>
+              <span style={{ color: "rgba(160,170,192,0.55)" }}>{total} usuários</span>
+              <span style={{ color: "#1a2555" }}> · </span>
               <span style={{ color: "#4ade80" }}>{nApproved} aprovados</span>
-              <span style={{ color: "rgba(255,255,255,0.2)" }}> · </span>
+              <span style={{ color: "#1a2555" }}> · </span>
               <span style={{ color: "#fbbf24" }}>{nPending} pendentes</span>
             </p>
           </div>
@@ -250,15 +250,15 @@ export default function AdminDashboard() {
           <a
             href="/"
             style={{
-              color: "rgba(0,212,255,0.55)",
+              color: "rgba(0,217,255,0.5)",
               fontSize: "12px",
               letterSpacing: "0.05em",
               textDecoration: "none",
               paddingTop: "4px",
               transition: "color 0.15s ease",
             }}
-            onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "#00d4ff")}
-            onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "rgba(0,212,255,0.55)")}
+            onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "#00d9ff")}
+            onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "rgba(0,217,255,0.5)")}
           >
             ← Voltar ao app
           </a>
@@ -285,9 +285,9 @@ export default function AdminDashboard() {
                   letterSpacing: "0.06em",
                   cursor: "pointer",
                   transition: "all 0.15s ease",
-                  background: active ? "rgba(0,212,255,0.12)" : "rgba(255,255,255,0.03)",
-                  border: `1px solid ${active ? "rgba(0,212,255,0.35)" : "rgba(255,255,255,0.07)"}`,
-                  color: active ? "#00d4ff" : "rgba(255,255,255,0.35)",
+                  background: active ? "rgba(0,217,255,0.1)" : "rgba(26,31,53,0.6)",
+                  border: `1px solid ${active ? "rgba(0,217,255,0.35)" : "rgba(26,37,85,0.8)"}`,
+                  color: active ? "#00d9ff" : "rgba(160,170,192,0.4)",
                 }}
               >
                 {labels[f]}
@@ -299,11 +299,11 @@ export default function AdminDashboard() {
         {/* Table */}
         <div
           style={{
-            background: "rgba(0,12,30,0.7)",
-            backdropFilter: "blur(40px)",
-            WebkitBackdropFilter: "blur(40px)",
-            border: "1px solid rgba(0,212,255,0.2)",
-            borderRadius: "16px",
+            background: "rgba(15,21,53,0.82)",
+            backdropFilter: "blur(20px)",
+            WebkitBackdropFilter: "blur(20px)",
+            border: "1px solid rgba(0,217,255,0.14)",
+            borderRadius: "12px",
             overflow: "hidden",
           }}
         >
@@ -313,8 +313,8 @@ export default function AdminDashboard() {
               display: "grid",
               gridTemplateColumns: "1fr 130px 110px 160px",
               padding: "12px 20px",
-              borderBottom: "1px solid rgba(255,255,255,0.06)",
-              background: "rgba(0,212,255,0.03)",
+              borderBottom: "1px solid rgba(26,37,85,0.9)",
+              background: "rgba(0,217,255,0.03)",
             }}
           >
             {["E-mail", "Cadastrado em", "Status", "Ações"].map((h) => (
@@ -324,7 +324,7 @@ export default function AdminDashboard() {
                   fontSize: "10px",
                   fontWeight: 700,
                   letterSpacing: "0.12em",
-                  color: "rgba(0,212,255,0.4)",
+                  color: "rgba(0,217,255,0.38)",
                   textTransform: "uppercase",
                 }}
               >
@@ -339,7 +339,7 @@ export default function AdminDashboard() {
               style={{
                 padding: "48px 20px",
                 textAlign: "center",
-                color: "rgba(255,255,255,0.2)",
+                color: "rgba(160,170,192,0.25)",
                 fontSize: "13px",
               }}
             >
@@ -360,12 +360,12 @@ export default function AdminDashboard() {
                     alignItems: "center",
                     borderBottom:
                       i < filtered.length - 1
-                        ? "1px solid rgba(255,255,255,0.04)"
+                        ? "1px solid rgba(26,37,85,0.6)"
                         : "none",
                     transition: "background 0.15s ease",
                   }}
                   onMouseEnter={(e) =>
-                    ((e.currentTarget as HTMLElement).style.background = "rgba(0,212,255,0.025)")
+                    ((e.currentTarget as HTMLElement).style.background = "rgba(0,217,255,0.02)")
                   }
                   onMouseLeave={(e) =>
                     ((e.currentTarget as HTMLElement).style.background = "transparent")
@@ -375,7 +375,7 @@ export default function AdminDashboard() {
                   <div className="flex min-w-0 items-center gap-2">
                     <span
                       style={{
-                        color: "#e0f4ff",
+                        color: "#e0e6ff",
                         fontSize: "13px",
                         overflow: "hidden",
                         textOverflow: "ellipsis",
@@ -402,14 +402,14 @@ export default function AdminDashboard() {
                       </span>
                     )}
                     {isOwnAccount && (
-                      <span style={{ flexShrink: 0, fontSize: "10px", color: "rgba(255,255,255,0.25)" }}>
+                      <span style={{ flexShrink: 0, fontSize: "10px", color: "rgba(160,170,192,0.25)" }}>
                         (você)
                       </span>
                     )}
                   </div>
 
                   {/* Date */}
-                  <span style={{ color: "rgba(255,255,255,0.3)", fontSize: "12px" }}>
+                  <span style={{ color: "rgba(160,170,192,0.35)", fontSize: "12px" }}>
                     {formatDate(profile.created_at)}
                   </span>
 
@@ -420,7 +420,7 @@ export default function AdminDashboard() {
                   <div className="flex gap-2">
                     {isOwnAccount ? (
                       // Never let admin revoke their own access
-                      <span style={{ color: "rgba(255,255,255,0.15)", fontSize: "11px" }}>—</span>
+                      <span style={{ color: "rgba(160,170,192,0.15)", fontSize: "11px" }}>—</span>
                     ) : !profile.approved ? (
                       <ActionBtn
                         label={busy ? "..." : "Aprovar"}
@@ -446,7 +446,7 @@ export default function AdminDashboard() {
         <p
           style={{
             marginTop: "16px",
-            color: "rgba(255,255,255,0.12)",
+            color: "rgba(160,170,192,0.15)",
             fontSize: "11px",
             textAlign: "center",
           }}
