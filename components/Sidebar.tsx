@@ -1,46 +1,10 @@
 "use client";
 
-import { AGENTS, AgentId } from "@/lib/agents";
+import { AgentId } from "@/lib/agents";
 
 // ─── SVG icons ────────────────────────────────────────────────────────────────
 
-function CameraIcon({ size = 28, style }: { size?: number; style?: React.CSSProperties }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={style}>
-      <rect x="2" y="6" width="20" height="14" rx="2" />
-      <circle cx="12" cy="13" r="4" />
-      <path d="M8 6l2-3h4l2 3" />
-      <circle cx="18" cy="9" r="1" fill="currentColor" />
-    </svg>
-  );
-}
-function CopyIcon({ size = 28, style }: { size?: number; style?: React.CSSProperties }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={style}>
-      <path d="M12 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
-      <path d="M15 3h6v6" />
-      <path d="M10 14l9-9" />
-      <path d="M6 12h6M6 16h4" />
-    </svg>
-  );
-}
-function VideoIcon({ size = 28, style }: { size?: number; style?: React.CSSProperties }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={style}>
-      <rect x="2" y="4" width="15" height="16" rx="2" />
-      <path d="M17 8l5 4-5 4V8z" fill="currentColor" stroke="none" />
-      <path d="M6 9h6M6 12h8M6 15h5" />
-    </svg>
-  );
-}
-function ShirtIcon({ size = 28, style }: { size?: number; style?: React.CSSProperties }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={style}>
-      <path d="M20.38 3.46L16 2a4 4 0 01-8 0L3.62 3.46a2 2 0 00-1.34 2.23l.58 3.57a1 1 0 001 .84H6v10a1 1 0 001 1h10a1 1 0 001-1V10h2.14a1 1 0 001-.84l.58-3.57a2 2 0 00-1.34-2.23z" />
-    </svg>
-  );
-}
-function HomeIcon({ size = 24, style }: { size?: number; style?: React.CSSProperties }) {
+function HomeIcon({ size = 22, style }: { size?: number; style?: React.CSSProperties }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={style}>
       <path d="M3 12L5 10M5 10L12 3L19 10M5 10V20C5 20.55 5.45 21 6 21H9M19 10L21 12M19 10V20C19 20.55 18.55 21 18 21H15M9 21V15C9 14.45 9.45 14 10 14H14C14.55 14 15 14.45 15 15V21M9 21H15" />
@@ -72,11 +36,12 @@ function SignOutIcon() {
     </svg>
   );
 }
-function AgentIcon({ id, size = 28, style }: { id: string; size?: number; style?: React.CSSProperties }) {
-  if (id === "imagens")     return <CameraIcon size={size} style={style} />;
-  if (id === "copys")       return <CopyIcon   size={size} style={style} />;
-  if (id === "mode-amaral") return <ShirtIcon  size={size} style={style} />;
-  return                           <VideoIcon  size={size} style={style} />;
+function ChatIcon({ size = 22, style }: { size?: number; style?: React.CSSProperties }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" style={style}>
+      <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
+    </svg>
+  );
 }
 
 // ─── Sidebar ──────────────────────────────────────────────────────────────────
@@ -94,43 +59,67 @@ interface SidebarProps {
 
 export default function Sidebar({
   activeAgent, view = "chat",
-  onSelect, onNewChat, onGoHome, onSignOut,
+  onNewChat, onGoHome, onSignOut,
   isOpen = false, onClose,
 }: SidebarProps) {
+
+  const navItems = [
+    {
+      label: "Dashboard",
+      desc: "Selecionar agente",
+      icon: <HomeIcon size={22} />,
+      active: view === "home",
+      onClick: onGoHome ?? (() => {}),
+    },
+    {
+      label: "Chat atual",
+      desc: "Conversa em andamento",
+      icon: <ChatIcon size={22} />,
+      active: view === "chat",
+      onClick: () => {},
+    },
+  ];
+
   return (
     <>
       {isOpen && (
-        <div className="fixed inset-0 z-40 bg-black/70 backdrop-blur-sm md:hidden" onClick={onClose} />
+        <div
+          className="fixed inset-0 z-40 bg-black/70 backdrop-blur-sm md:hidden"
+          onClick={onClose}
+        />
       )}
 
       <aside
         className={[
           "flex h-full flex-col",
-          "fixed inset-y-0 left-0 z-50 w-[280px] transition-transform duration-300 ease-out",
+          "fixed inset-y-0 left-0 z-50 w-[260px] transition-transform duration-300 ease-out",
           isOpen ? "translate-x-0" : "-translate-x-full",
-          "md:relative md:w-[280px] md:shrink-0 md:translate-x-0",
+          "md:relative md:w-[260px] md:shrink-0 md:translate-x-0",
         ].join(" ")}
         style={{
-          background: "rgba(8,12,32,0.92)",
+          background: "rgba(8,12,32,0.95)",
           backdropFilter: "blur(28px)",
           WebkitBackdropFilter: "blur(28px)",
-          borderRight: "1px solid rgba(26,37,85,0.8)",
+          borderRight: "1px solid rgba(26,37,85,0.7)",
         }}
       >
-        {/* Brand + close */}
-        <div className="flex items-center justify-between px-8 pt-8 pb-6">
+        {/* Brand */}
+        <div className="flex items-center justify-between px-7 pt-8 pb-6">
           <button
             onClick={onGoHome}
-            style={{ background: "none", border: "none", padding: 0, cursor: onGoHome ? "pointer" : "default" }}
+            style={{ background: "none", border: "none", padding: 0, cursor: "pointer" }}
           >
             <span
-              className="font-display text-xl font-bold tracking-[10px]"
               style={{
+                fontFamily: "var(--font-display), system-ui, sans-serif",
+                fontSize: "18px",
+                fontWeight: 800,
+                letterSpacing: "10px",
                 background: "linear-gradient(135deg, #fff 0%, #80c8ee 45%, #00d9ff 100%)",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
                 backgroundClip: "text",
-                filter: "drop-shadow(0 0 16px rgba(0,217,255,0.35))",
+                filter: "drop-shadow(0 0 14px rgba(0,217,255,0.35))",
                 display: "block",
               }}
             >
@@ -146,179 +135,124 @@ export default function Sidebar({
           </button>
         </div>
 
-        {/* Separator */}
-        <div className="mx-8 mb-4 h-px" style={{ background: "rgba(26,37,85,0.8)" }} />
+        {/* Top separator */}
+        <div style={{ margin: "0 28px 20px", height: "1px", background: "rgba(26,37,85,0.7)" }} />
 
         {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto px-4 pb-6">
+        <nav className="flex-1 px-4">
+          <p style={{
+            fontSize: "9px",
+            fontWeight: 700,
+            letterSpacing: "3px",
+            color: "rgba(0,217,255,0.25)",
+            fontFamily: "monospace",
+            textTransform: "uppercase",
+            padding: "0 12px",
+            marginBottom: "12px",
+          }}>
+            NAVEGAÇÃO
+          </p>
 
-          {/* Home nav item */}
-          {onGoHome && (
-            <div className="mb-4">
+          <div className="space-y-1">
+            {navItems.map((item) => (
               <button
-                onClick={onGoHome}
-                className="sidebar-btn relative flex w-full items-center gap-4 rounded-lg py-3 text-left"
+                key={item.label}
+                onClick={item.onClick}
+                className="relative flex w-full items-center gap-4 rounded-lg py-3 text-left"
                 style={{
-                  paddingLeft: view === "home" ? "11px" : "13px",
+                  paddingLeft: item.active ? "11px" : "13px",
                   paddingRight: "12px",
-                  background: view === "home" ? "rgba(0,217,255,0.07)" : "transparent",
-                  borderLeft: view === "home" ? "2px solid rgba(0,217,255,0.8)" : "2px solid transparent",
-                  boxShadow: view === "home" ? "inset 0 0 24px rgba(0,217,255,0.04)" : "",
+                  background: item.active ? "rgba(0,217,255,0.07)" : "transparent",
+                  borderLeft: item.active ? "2px solid rgba(0,217,255,0.8)" : "2px solid transparent",
+                  boxShadow: item.active ? "inset 0 0 24px rgba(0,217,255,0.04)" : "",
                   transition: "all 0.2s ease-out",
+                  cursor: item.active ? "default" : "pointer",
+                  overflow: "hidden",
                 }}
                 onMouseEnter={(e) => {
-                  if (view !== "home") Object.assign((e.currentTarget as HTMLElement).style, {
-                    background: "rgba(0,217,255,0.05)",
-                    borderLeft: "2px solid rgba(0,217,255,0.35)",
+                  if (!item.active) Object.assign((e.currentTarget as HTMLElement).style, {
+                    background: "rgba(0,217,255,0.04)",
+                    borderLeft: "2px solid rgba(0,217,255,0.3)",
                     paddingLeft: "11px",
-                    boxShadow: "inset 0 0 20px rgba(0,217,255,0.03), 0 0 12px rgba(0,217,255,0.04)",
                   });
                 }}
                 onMouseLeave={(e) => {
-                  if (view !== "home") Object.assign((e.currentTarget as HTMLElement).style, {
+                  if (!item.active) Object.assign((e.currentTarget as HTMLElement).style, {
                     background: "transparent",
                     borderLeft: "2px solid transparent",
                     paddingLeft: "13px",
-                    boxShadow: "",
                   });
                 }}
               >
                 <span
-                  className="flex shrink-0 items-center justify-center rounded-lg"
                   style={{
-                    width: "44px", height: "44px",
-                    background: view === "home" ? "rgba(0,217,255,0.1)" : "rgba(26,31,53,0.8)",
-                    border: view === "home" ? "1px solid rgba(0,217,255,0.25)" : "1px solid rgba(26,37,85,0.8)",
+                    width: "42px", height: "42px",
+                    borderRadius: "11px",
+                    flexShrink: 0,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    background: item.active ? "rgba(0,217,255,0.1)" : "rgba(20,28,58,0.7)",
+                    border: item.active ? "1px solid rgba(0,217,255,0.25)" : "1px solid rgba(26,37,85,0.8)",
+                    color: item.active ? "#00d9ff" : "rgba(160,170,192,0.4)",
+                    filter: item.active ? "drop-shadow(0 0 6px rgba(0,217,255,0.45))" : "none",
                     transition: "all 0.2s ease-out",
                   }}
                 >
-                  <HomeIcon
-                    size={22}
-                    style={{
-                      color: view === "home" ? "#00d9ff" : "rgba(160,170,192,0.45)",
-                      filter: view === "home" ? "drop-shadow(0 0 6px rgba(0,217,255,0.5))" : "none",
-                      transition: "all 0.2s ease-out",
-                    }}
-                  />
+                  {item.icon}
                 </span>
-                <span className="min-w-0 flex-1">
-                  <span
-                    className="block truncate text-base font-semibold"
-                    style={{ color: view === "home" ? "#e0e6ff" : "rgba(160,170,192,0.6)", transition: "color 0.2s ease-out" }}
-                  >
-                    Dashboard
+                <span style={{ minWidth: 0, flex: 1 }}>
+                  <span style={{
+                    display: "block",
+                    fontSize: "15px",
+                    fontWeight: 600,
+                    color: item.active ? "#e0e6ff" : "rgba(160,170,192,0.55)",
+                    lineHeight: "1.3",
+                    transition: "color 0.2s ease-out",
+                  }}>
+                    {item.label}
                   </span>
-                  <span className="block truncate text-[12px]" style={{ color: "rgba(160,170,192,0.3)", marginTop: "2px" }}>
-                    Selecionar agente
+                  <span style={{
+                    display: "block",
+                    fontSize: "11px",
+                    color: "rgba(160,170,192,0.28)",
+                    marginTop: "2px",
+                  }}>
+                    {item.desc}
                   </span>
                 </span>
               </button>
-
-              <div className="mx-4 mt-4 mb-2 h-px" style={{ background: "rgba(26,37,85,0.7)" }} />
-            </div>
-          )}
-
-          <p
-            className="mb-4 px-3 text-[10px] font-semibold tracking-[3px]"
-            style={{ color: "rgba(0,217,255,0.28)", fontFamily: "monospace" }}
-          >
-            AGENTES
-          </p>
-
-          <div className="space-y-1">
-            {AGENTS.map((agent) => {
-              const active = agent.id === activeAgent && view === "chat";
-              return (
-                <button
-                  key={agent.id}
-                  onClick={() => onSelect(agent.id)}
-                  className="sidebar-btn relative flex w-full items-center gap-4 rounded-lg py-3 text-left"
-                  style={{
-                    paddingLeft: active ? "11px" : "13px",
-                    paddingRight: "12px",
-                    background: active ? "rgba(0,217,255,0.07)" : "transparent",
-                    borderLeft: active ? "2px solid rgba(0,217,255,0.8)" : "2px solid transparent",
-                    boxShadow: active ? "inset 0 0 24px rgba(0,217,255,0.04)" : "",
-                    transition: "all 0.2s ease-out",
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!active) Object.assign((e.currentTarget as HTMLElement).style, {
-                      background: "rgba(0,217,255,0.05)",
-                      borderLeft: "2px solid rgba(0,217,255,0.35)",
-                      paddingLeft: "11px",
-                      boxShadow: "inset 0 0 20px rgba(0,217,255,0.03), 0 0 12px rgba(0,217,255,0.04)",
-                    });
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!active) Object.assign((e.currentTarget as HTMLElement).style, {
-                      background: "transparent",
-                      borderLeft: "2px solid transparent",
-                      paddingLeft: "13px",
-                      boxShadow: "",
-                    });
-                  }}
-                >
-                  {/* Icon container */}
-                  <span
-                    className="flex shrink-0 items-center justify-center rounded-lg"
-                    style={{
-                      width: "44px", height: "44px",
-                      background: active ? "rgba(0,217,255,0.1)" : "rgba(26,31,53,0.8)",
-                      border: active ? "1px solid rgba(0,217,255,0.25)" : "1px solid rgba(26,37,85,0.8)",
-                      transition: "all 0.2s ease-out",
-                    }}
-                  >
-                    <AgentIcon
-                      id={agent.id}
-                      size={24}
-                      style={{
-                        color: active ? "#00d9ff" : "rgba(160,170,192,0.45)",
-                        transition: "color 0.2s ease-out",
-                        filter: active ? "drop-shadow(0 0 6px rgba(0,217,255,0.5))" : "none",
-                      }}
-                    />
-                  </span>
-
-                  <span className="min-w-0 flex-1">
-                    <span
-                      className="block truncate text-base font-semibold"
-                      style={{
-                        color: active ? "#e0e6ff" : "rgba(160,170,192,0.6)",
-                        transition: "color 0.2s ease-out",
-                        lineHeight: "1.3",
-                      }}
-                    >
-                      {agent.name}
-                    </span>
-                    <span className="block truncate text-[12px]" style={{ color: "rgba(160,170,192,0.3)", marginTop: "2px" }}>
-                      {agent.description}
-                    </span>
-                  </span>
-                </button>
-              );
-            })}
+            ))}
           </div>
         </nav>
 
         {/* Footer */}
-        <div className="px-6 pb-8">
-          <div className="mb-6 h-px" style={{ background: "rgba(26,37,85,0.8)" }} />
+        <div style={{ padding: "0 20px 32px" }}>
+          <div style={{ height: "1px", background: "rgba(26,37,85,0.7)", marginBottom: "20px" }} />
 
+          {/* Nova conversa */}
           <button
             onClick={() => onNewChat(activeAgent)}
-            className="flex w-full items-center justify-center gap-2 rounded-lg px-3 py-3 text-sm font-semibold"
             style={{
+              width: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "8px",
+              borderRadius: "10px",
+              padding: "12px 16px",
+              fontSize: "13px",
+              fontWeight: 600,
+              letterSpacing: "0.3px",
               border: "1px solid rgba(0,217,255,0.2)",
               color: "rgba(0,217,255,0.7)",
               background: "transparent",
+              cursor: "pointer",
               transition: "all 0.2s ease-out",
-              letterSpacing: "0.3px",
             }}
             onMouseEnter={(e) => Object.assign((e.currentTarget as HTMLElement).style, {
               background: "linear-gradient(135deg, #0066cc, #0080ff)",
               border: "1px solid transparent",
               color: "#fff",
-              boxShadow: "0 4px 20px rgba(0,128,255,0.3), 0 0 12px rgba(0,217,255,0.15)",
+              boxShadow: "0 4px 20px rgba(0,128,255,0.3)",
               transform: "translateY(-1px)",
             })}
             onMouseLeave={(e) => Object.assign((e.currentTarget as HTMLElement).style, {
@@ -333,13 +267,25 @@ export default function Sidebar({
             Nova conversa
           </button>
 
+          {/* Sign out */}
           {onSignOut && (
             <button
               onClick={onSignOut}
-              className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg px-3 py-2 text-xs font-medium"
               style={{
-                color: "rgba(160,170,192,0.3)",
+                width: "100%",
+                marginTop: "10px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "8px",
+                borderRadius: "10px",
+                padding: "10px 16px",
+                fontSize: "12px",
+                fontWeight: 500,
+                color: "rgba(160,170,192,0.28)",
                 background: "transparent",
+                border: "none",
+                cursor: "pointer",
                 transition: "all 0.2s ease-out",
               }}
               onMouseEnter={(e) => Object.assign((e.currentTarget as HTMLElement).style, {
@@ -347,7 +293,7 @@ export default function Sidebar({
                 background: "rgba(239,68,68,0.06)",
               })}
               onMouseLeave={(e) => Object.assign((e.currentTarget as HTMLElement).style, {
-                color: "rgba(160,170,192,0.3)",
+                color: "rgba(160,170,192,0.28)",
                 background: "transparent",
               })}
             >
