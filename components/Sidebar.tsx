@@ -104,7 +104,7 @@ export default function Sidebar({
         }}
       >
         {/* Brand */}
-        <div className="flex items-center justify-between px-7 pt-8 pb-6">
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "32px 28px 24px" }}>
           <button
             onClick={onGoHome}
             style={{ background: "none", border: "none", padding: 0, cursor: "pointer" }}
