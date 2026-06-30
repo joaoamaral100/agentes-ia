@@ -69,26 +69,50 @@ export default function LoginScreen({ onSuccess }: LoginScreenProps) {
         }
         onSuccess();
       } else if (mode === "signup") {
+        console.log("[Signup] tentando cadastro para:", email);
         const { data, error: err } = await supabase.auth.signUp({ email, password });
-        if (err) throw err;
+        console.log("[Signup] resposta →", {
+          user:    data?.user  ? { id: data.user.id, email: data.user.email, confirmed: data.user.email_confirmed_at } : null,
+          session: data?.session ? "presente" : "ausente",
+          error:   err ? { message: err.message, status: err.status, code: (err as any).code } : null,
+        });
+        if (err) {
+          console.error("[Signup] ERRO →", err.message, err);
+          throw err;
+        }
         if (data.session) {
+          console.log("[Signup] sessão criada direto — confirmação de e-mail desativada no Supabase");
           onSuccess();
         } else {
-          setInfo(
-            "Conta criada! Verifique seu e-mail para confirmar. " +
-            "Se não chegar, acesse Supabase Dashboard → Authentication → Users " +
-            "e confirme manualmente ou reenvie o link de confirmação."
-          );
-          setMode("signin");
+          console.log("[Signup] sem sessão — e-mail de confirmação enviado (ou usuário já existia silencioso)");
+          console.log("[Signup] data.user.identities:", data.user?.identities);
+          if (data.user?.identities?.length === 0) {
+            console.warn("[Signup] identities vazio → usuário JÁ EXISTE mas Supabase não retornou erro (modo silencioso)");
+            setError("Este e-mail já está cadastrado. Tente fazer login.");
+          } else {
+            setInfo(
+              "Conta criada! Verifique seu e-mail para confirmar. " +
+              "Se não chegar, acesse Supabase Dashboard → Authentication → Users " +
+              "e confirme manualmente ou reenvie o link de confirmação."
+            );
+            setMode("signin");
+          }
         }
       } else {
+        console.log("[ForgotPassword] enviando link para:", email);
         const { error: err } = await supabase.auth.resetPasswordForEmail(email);
-        if (err) throw err;
+        if (err) {
+          console.error("[ForgotPassword] ERRO →", err.message, err);
+          throw err;
+        }
+        console.log("[ForgotPassword] link enviado com sucesso");
         setInfo("Enviamos um link de redefinição para seu e-mail.");
         setMode("signin");
       }
     } catch (err: unknown) {
-      setError(translateError(err instanceof Error ? err.message : "Erro desconhecido."));
+      const msg = err instanceof Error ? err.message : "Erro desconhecido.";
+      console.error("[Auth] catch final →", msg, err);
+      setError(translateError(msg));
     } finally {
       setLoading(false);
     }
