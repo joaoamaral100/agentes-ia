@@ -8,13 +8,13 @@ import { supabase, setActiveSession } from "@/lib/supabase";
 function JarvisWordmark() {
   return (
     <span
-      className="block text-center text-[28px] font-bold tracking-[14px]"
+      className="block text-center text-3xl font-bold tracking-[14px]"
       style={{
         background: "linear-gradient(135deg, #ffffff 0%, #80ccee 40%, #00d4ff 100%)",
         WebkitBackgroundClip: "text",
         WebkitTextFillColor: "transparent",
         backgroundClip: "text",
-        filter: "drop-shadow(0 0 20px rgba(0,212,255,0.3))",
+        filter: "drop-shadow(0 0 24px rgba(0,212,255,0.35))",
       }}
     >
       JARVIS
@@ -55,21 +55,29 @@ function Field({
 }) {
   return (
     <div className="mb-4">
-      <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-widest"
-        style={{ color: "rgba(0,212,255,0.5)" }}>
+      <label
+        className="mb-1 block text-xs font-semibold uppercase"
+        style={{ color: "rgba(0,212,255,0.5)", letterSpacing: "0.12em" }}
+      >
         {label}
       </label>
       <div
-        className="flex items-center rounded-xl transition-all"
-        style={{ background: "rgba(0,212,255,0.05)", border: "1px solid rgba(0,212,255,0.2)", height: "52px" }}
+        className="flex items-center rounded-md transition duration-200"
+        style={{
+          background: "rgba(255,255,255,0.03)",
+          border: "1px solid rgba(255,255,255,0.08)",
+          height: "50px",
+        }}
         onFocusCapture={(e) => {
           const el = e.currentTarget as HTMLElement;
-          el.style.border = "1px solid rgba(0,212,255,0.5)";
-          el.style.boxShadow = "0 0 0 1px rgba(0,212,255,0.12), 0 0 16px rgba(0,212,255,0.08)";
+          el.style.border = "1px solid rgba(0,212,255,0.4)";
+          el.style.background = "rgba(0,212,255,0.04)";
+          el.style.boxShadow = "0 0 0 3px rgba(0,212,255,0.06)";
         }}
         onBlurCapture={(e) => {
           const el = e.currentTarget as HTMLElement;
-          el.style.border = "1px solid rgba(0,212,255,0.2)";
+          el.style.border = "1px solid rgba(255,255,255,0.08)";
+          el.style.background = "rgba(255,255,255,0.03)";
           el.style.boxShadow = "";
         }}
       >
@@ -77,8 +85,14 @@ function Field({
           type={type} value={value} onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder} autoComplete={autoComplete}
           autoCapitalize="none" autoCorrect="off" spellCheck={false}
-          className="flex-1 bg-transparent outline-none"
-          style={{ color: "#e0f4ff", fontSize: "16px", padding: "0 16px", height: "100%", WebkitAppearance: "none", borderRadius: "12px" }}
+          className="flex-1 bg-transparent text-base outline-none"
+          style={{
+            color: "#e0f4ff",
+            padding: "0 16px",
+            height: "100%",
+            WebkitAppearance: "none",
+            borderRadius: "8px",
+          }}
         />
         {suffix}
       </div>
@@ -118,7 +132,6 @@ export default function LoginScreen({ onSuccess }: LoginScreenProps) {
         const { data, error: err } = await supabase.auth.signInWithPassword({ email, password });
         if (err) throw err;
 
-        // Register this device as the sole active session
         if (data.user) {
           const token = crypto.randomUUID();
           console.log("[Session] token gerado:", token.slice(0, 8) + "...");
@@ -132,15 +145,13 @@ export default function LoginScreen({ onSuccess }: LoginScreenProps) {
           }
         }
 
-        onSuccess(); // onAuthStateChange no AppWrapper detecta automaticamente
+        onSuccess();
       } else if (mode === "signup") {
         const { data, error: err } = await supabase.auth.signUp({ email, password });
         if (err) throw err;
         if (data.session) {
-          // Confirmação de e-mail desabilitada → usuário já está logado
           onSuccess();
         } else {
-          // Confirmação necessária → orienta o usuário
           setInfo(
             "Conta criada! Verifique seu e-mail para confirmar. " +
             "Se não chegar, acesse Supabase Dashboard → Authentication → Users " +
@@ -164,126 +175,231 @@ export default function LoginScreen({ onSuccess }: LoginScreenProps) {
   const canSubmit = !loading && email.trim().length > 0 && (mode === "forgot" || password.trim().length > 0);
 
   const titles: Record<Mode, { heading: string; sub: string; btn: string }> = {
-    signin: { heading: "Acesso Restrito",    sub: "Entre com sua conta",              btn: "ENTRAR"      },
-    signup: { heading: "Criar Conta",        sub: "Cadastre-se para continuar",       btn: "CRIAR CONTA" },
-    forgot: { heading: "Recuperar Acesso",   sub: "Enviaremos um link ao seu e-mail", btn: "ENVIAR LINK" },
+    signin: { heading: "Bem-vindo de volta",   sub: "Entre com sua conta para continuar",  btn: "ENTRAR"      },
+    signup: { heading: "Criar conta",          sub: "Preencha os dados para se cadastrar", btn: "CRIAR CONTA" },
+    forgot: { heading: "Recuperar acesso",     sub: "Enviaremos um link ao seu e-mail",    btn: "ENVIAR LINK" },
   };
   const { heading, sub, btn } = titles[mode];
 
   const eyeToggle = (
-    <button type="button" onClick={() => setShowPassword((v) => !v)}
-      style={{ color: showPassword ? "#00d4ff" : "#4a9ebb", padding: "0 14px", height: "100%",
-               WebkitTapHighlightColor: "transparent", touchAction: "manipulation", flexShrink: 0 }}>
+    <button
+      type="button"
+      onClick={() => setShowPassword((v) => !v)}
+      className="transition duration-200"
+      style={{
+        color: showPassword ? "#00d4ff" : "rgba(74,158,187,0.5)",
+        padding: "0 14px",
+        height: "100%",
+        flexShrink: 0,
+        WebkitTapHighlightColor: "transparent",
+        touchAction: "manipulation",
+      }}
+    >
       <EyeIcon open={showPassword} />
     </button>
   );
 
   return (
-    <div className="dot-grid relative flex min-h-screen w-full items-center justify-center overflow-hidden"
-      style={{ background: "#000814" }}>
+    <div
+      className="dot-grid relative flex min-h-screen w-full flex-col items-center justify-center overflow-hidden"
+      style={{ background: "#000814" }}
+    >
+      {/* Background orbs */}
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="orb orb-1" /><div className="orb orb-2" /><div className="orb orb-3" />
+        <div className="orb orb-1" />
+        <div className="orb orb-2" />
+        <div className="orb orb-3" />
       </div>
 
-      <form onSubmit={handleSubmit} className="relative z-10 w-full max-w-sm px-4">
-        <div className="rounded-2xl p-8"
-          style={{
-            background: "rgba(0,12,30,0.7)", backdropFilter: "blur(40px)", WebkitBackdropFilter: "blur(40px)",
-            border: "1px solid rgba(255,255,255,0.08)",
-            boxShadow: "0 24px 64px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06)",
-          }}>
+      <div className="relative z-10 w-full max-w-sm px-4">
 
-          {/* Logo */}
-          <div className="mb-8 flex justify-center"><JarvisWordmark /></div>
-
-          {/* Title */}
-          <div className="mb-6 text-center">
-            <h1 className="mb-1 text-[15px] font-semibold" style={{ color: "rgba(255,255,255,0.85)" }}>{heading}</h1>
-            <p className="text-[13px]" style={{ color: "rgba(74,158,187,0.65)" }}>{sub}</p>
-          </div>
-
-          {/* Feedback */}
-          {info && (
-            <p className="mb-4 rounded-lg px-4 py-2.5 text-[12px]"
-              style={{ background: "rgba(0,212,255,0.08)", color: "#7dd3fc", border: "1px solid rgba(0,212,255,0.15)" }}>
-              {info}
-            </p>
-          )}
-          {error && (
-            <p className="mb-4 rounded-lg px-4 py-2.5 text-[12px]"
-              style={{ background: "rgba(248,113,113,0.08)", color: "#f87171", border: "1px solid rgba(248,113,113,0.2)" }}>
-              {error}
-            </p>
-          )}
-
-          {/* Email */}
-          <Field label="E-mail" type="email" value={email}
-            onChange={(v) => { setEmail(v); reset(); }}
-            placeholder="seu@email.com" autoComplete="email" />
-
-          {/* Password */}
-          {mode !== "forgot" && (
-            <Field label="Senha" type={showPassword ? "text" : "password"} value={password}
-              onChange={(v) => { setPassword(v); reset(); }}
-              placeholder={mode === "signup" ? "Mínimo 6 caracteres" : "Senha de acesso"}
-              autoComplete={mode === "signup" ? "new-password" : "current-password"}
-              suffix={eyeToggle} />
-          )}
-
-          {/* Forgot link */}
-          {mode === "signin" && (
-            <div className="mb-4 text-right">
-              <button type="button" onClick={() => { setMode("forgot"); reset(); }}
-                className="text-[12px] transition-colors" style={{ color: "rgba(0,212,255,0.5)" }}
-                onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "rgba(0,212,255,0.85)")}
-                onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "rgba(0,212,255,0.5)")}>
-                Esqueceu a senha?
-              </button>
-            </div>
-          )}
-
-          {/* Submit */}
-          <button type="submit" disabled={!canSubmit}
-            className="flex w-full items-center justify-center gap-2 rounded-xl font-semibold tracking-widest"
-            style={{
-              height: "52px", fontSize: "14px",
-              touchAction: "manipulation", WebkitTapHighlightColor: "transparent", transition: "all 0.2s ease",
-              ...(canSubmit
-                ? { background: "linear-gradient(135deg, #1a44ff 0%, #0088cc 100%)", color: "#fff", boxShadow: "0 4px 20px rgba(0,100,255,0.35)" }
-                : { background: "rgba(255,255,255,0.04)", color: "rgba(255,255,255,0.2)", cursor: "not-allowed" }),
-            }}
-            onMouseEnter={(e) => { if (canSubmit) Object.assign((e.currentTarget as HTMLElement).style, { boxShadow: "0 6px 28px rgba(0,100,255,0.5)", transform: "translateY(-1px)" }); }}
-            onMouseLeave={(e) => { if (canSubmit) Object.assign((e.currentTarget as HTMLElement).style, { boxShadow: "0 4px 20px rgba(0,100,255,0.35)", transform: "translateY(0)" }); }}
+        {/* Hero */}
+        <div className="mb-8 text-center">
+          <JarvisWordmark />
+          <p
+            className="mt-3 text-xs uppercase"
+            style={{ color: "rgba(0,212,255,0.35)", letterSpacing: "0.22em" }}
           >
-            {loading ? <Spinner /> : btn}
-          </button>
-
-          {/* Mode switcher */}
-          <div className="mt-5 text-center text-[12px]" style={{ color: "rgba(255,255,255,0.3)" }}>
-            {mode === "signin" ? (
-              <>
-                Não tem conta?{" "}
-                <button type="button" onClick={() => { setMode("signup"); reset(); }}
-                  className="font-semibold transition-colors" style={{ color: "rgba(0,212,255,0.7)" }}
-                  onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "#00d4ff")}
-                  onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "rgba(0,212,255,0.7)")}>
-                  Criar conta
-                </button>
-              </>
-            ) : (
-              <>
-                Já tem conta?{" "}
-                <button type="button" onClick={() => { setMode("signin"); reset(); }}
-                  className="font-semibold transition-colors" style={{ color: "rgba(0,212,255,0.7)" }}
-                  onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "#00d4ff")}
-                  onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "rgba(0,212,255,0.7)")}>
-                  Entrar
-                </button>
-              </>
-            )}
-          </div>
+            TikTok Shopping
+          </p>
         </div>
-      </form>
+
+        {/* Card */}
+        <form
+          onSubmit={handleSubmit}
+          className="rounded-lg"
+          style={{
+            background: "rgba(0,12,30,0.72)",
+            backdropFilter: "blur(40px)",
+            WebkitBackdropFilter: "blur(40px)",
+            border: "1px solid rgba(255,255,255,0.07)",
+            boxShadow: "0 24px 64px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05)",
+          }}
+        >
+          <div className="p-8">
+
+            {/* Heading */}
+            <div className="mb-6">
+              <h1 className="text-lg font-semibold" style={{ color: "rgba(255,255,255,0.9)" }}>
+                {heading}
+              </h1>
+              <p className="mt-1 text-sm" style={{ color: "rgba(74,158,187,0.55)" }}>
+                {sub}
+              </p>
+            </div>
+
+            {/* Feedback banners */}
+            {info && (
+              <div
+                className="mb-4 rounded-md px-4 py-3 text-xs"
+                style={{
+                  background: "rgba(0,212,255,0.06)",
+                  border: "1px solid rgba(0,212,255,0.12)",
+                  color: "#7dd3fc",
+                  lineHeight: "1.6",
+                }}
+              >
+                {info}
+              </div>
+            )}
+            {error && (
+              <div
+                className="mb-4 rounded-md px-4 py-3 text-xs"
+                style={{
+                  background: "rgba(239,68,68,0.07)",
+                  border: "1px solid rgba(239,68,68,0.18)",
+                  color: "#f87171",
+                  lineHeight: "1.6",
+                }}
+              >
+                {error}
+              </div>
+            )}
+
+            {/* Email field */}
+            <Field
+              label="E-mail" type="email" value={email}
+              onChange={(v) => { setEmail(v); reset(); }}
+              placeholder="seu@email.com" autoComplete="email"
+            />
+
+            {/* Password field */}
+            {mode !== "forgot" && (
+              <Field
+                label="Senha" type={showPassword ? "text" : "password"} value={password}
+                onChange={(v) => { setPassword(v); reset(); }}
+                placeholder={mode === "signup" ? "Mínimo 6 caracteres" : "Senha de acesso"}
+                autoComplete={mode === "signup" ? "new-password" : "current-password"}
+                suffix={eyeToggle}
+              />
+            )}
+
+            {/* Forgot password link */}
+            {mode === "signin" && (
+              <div className="mb-4 text-right">
+                <button
+                  type="button"
+                  onClick={() => { setMode("forgot"); reset(); }}
+                  className="text-xs transition duration-200"
+                  style={{ color: "rgba(0,212,255,0.4)" }}
+                  onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "rgba(0,212,255,0.8)")}
+                  onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "rgba(0,212,255,0.4)")}
+                >
+                  Esqueceu a senha?
+                </button>
+              </div>
+            )}
+
+            {/* Submit button */}
+            <button
+              type="submit"
+              disabled={!canSubmit}
+              className="flex w-full items-center justify-center gap-2 rounded-lg text-sm font-semibold tracking-widest transition duration-200"
+              style={{
+                height: "50px",
+                WebkitTapHighlightColor: "transparent",
+                touchAction: "manipulation",
+                ...(canSubmit
+                  ? {
+                      background: "linear-gradient(135deg, #1a44ff 0%, #0088cc 100%)",
+                      color: "#ffffff",
+                      boxShadow: "0 4px 20px rgba(0,100,255,0.3)",
+                      cursor: "pointer",
+                    }
+                  : {
+                      background: "rgba(255,255,255,0.04)",
+                      color: "rgba(255,255,255,0.2)",
+                      cursor: "not-allowed",
+                    }),
+              }}
+              onMouseEnter={(e) => {
+                if (canSubmit)
+                  Object.assign((e.currentTarget as HTMLElement).style, {
+                    boxShadow: "0 6px 28px rgba(0,100,255,0.45)",
+                    transform: "translateY(-1px)",
+                  });
+              }}
+              onMouseLeave={(e) => {
+                if (canSubmit)
+                  Object.assign((e.currentTarget as HTMLElement).style, {
+                    boxShadow: "0 4px 20px rgba(0,100,255,0.3)",
+                    transform: "translateY(0)",
+                  });
+              }}
+            >
+              {loading ? <Spinner /> : btn}
+            </button>
+
+            {/* Divider */}
+            <div className="my-6 flex items-center gap-3">
+              <div className="h-px flex-1" style={{ background: "rgba(255,255,255,0.06)" }} />
+              <span className="text-xs" style={{ color: "rgba(255,255,255,0.18)" }}>ou</span>
+              <div className="h-px flex-1" style={{ background: "rgba(255,255,255,0.06)" }} />
+            </div>
+
+            {/* Mode switcher */}
+            <div className="text-center text-sm" style={{ color: "rgba(255,255,255,0.35)" }}>
+              {mode === "signin" ? (
+                <>
+                  Não tem conta?{" "}
+                  <button
+                    type="button"
+                    onClick={() => { setMode("signup"); reset(); }}
+                    className="font-semibold transition duration-200"
+                    style={{ color: "rgba(0,212,255,0.7)" }}
+                    onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "#00d4ff")}
+                    onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "rgba(0,212,255,0.7)")}
+                  >
+                    Criar conta
+                  </button>
+                </>
+              ) : (
+                <>
+                  Já tem conta?{" "}
+                  <button
+                    type="button"
+                    onClick={() => { setMode("signin"); reset(); }}
+                    className="font-semibold transition duration-200"
+                    style={{ color: "rgba(0,212,255,0.7)" }}
+                    onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "#00d4ff")}
+                    onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "rgba(0,212,255,0.7)")}
+                  >
+                    Entrar
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </form>
+
+        {/* Security footnote */}
+        <p
+          className="mt-6 text-center text-xs"
+          style={{ color: "rgba(255,255,255,0.12)", letterSpacing: "0.05em" }}
+        >
+          Acesso restrito · Apenas contas autorizadas
+        </p>
+      </div>
     </div>
   );
 }
