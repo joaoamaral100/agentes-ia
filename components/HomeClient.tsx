@@ -379,11 +379,11 @@ function HeroHome({ chats, onSelectAgent, onMenuClick }: {
         {/* ── HERO ── */}
         <div style={{ textAlign: "center", marginBottom: "clamp(48px,6vw,72px)", animation: "hero-text-in 0.7s cubic-bezier(0.16,1,0.3,1) both" }}>
 
-          {/* Icon disc */}
-          <div style={{ display: "inline-flex", position: "relative", marginBottom: "22px" }}>
+          {/* Icon disc — padding absorbs the ring so it never clips left */}
+          <div style={{ display: "inline-flex", position: "relative", marginBottom: "22px", padding: "24px" }}>
             {/* Outer ring */}
             <div style={{
-              position: "absolute", inset: "-24px", borderRadius: "50%",
+              position: "absolute", inset: "0", borderRadius: "50%",
               border: "1px solid rgba(0,217,255,0.1)",
               borderTopColor: "rgba(0,217,255,0.45)",
               animation: "ring-cw 12s linear infinite",
