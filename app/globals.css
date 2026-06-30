@@ -355,3 +355,13 @@ body::after {
   background: rgba(0, 217, 255, 0.2);
   color: #fff;
 }
+
+/* ── Extra keyframes ────────────────────────────────────────────────────────── */
+@keyframes title-glow {
+  0%, 100% { filter: drop-shadow(0 0 20px rgba(0, 217, 255, 0.3)); }
+  50%       { filter: drop-shadow(0 0 40px rgba(0, 217, 255, 0.6)); }
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.6; }
+}
