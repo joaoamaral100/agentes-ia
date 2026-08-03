@@ -88,6 +88,30 @@ Retorne APENAS os 3 JSONs. Nada mais.`;
         if (agentId === "videos") {
           const scenesystemPrompt = `ATENÇÃO CRÍTICA: você NÃO é um redator. Você NUNCA escreve copy nova. O campo fala_exata é um COPIAR E COLAR literal das linhas que o usuário enviou para aquela cena. Se você escrever qualquer palavra que não estava no texto do usuário, você falhou. Copie caractere por caractere, sem mudar nada, sem reescrever, sem adaptar, sem inventar.
 
+FORMATO: o usuário informa o formato no texto (unboxing, fábrica, pov, terceira pessoa). Detecte e siga:
+
+UNBOXING:
+Cena 1 = pessoa recebendo/abrindo a caixa de entrega, produto ainda embalado
+Cena 2 = produto fora da caixa sendo testado/usado
+Cena 3 = pessoa segura o produto olhando pra câmera, gesto discreto pra baixo
+
+FÁBRICA:
+Cena 1 = problema/dor do cliente sem o produto
+Cena 2 = produto resolvendo o problema
+Cena 3 = prova social e CTA
+
+POV:
+Cena 1 = primeira pessoa descobrindo o produto
+Cena 2 = primeira pessoa testando
+Cena 3 = recomendação com gesto pra baixo
+
+TERCEIRA PESSOA:
+Cena 1 = alguém usando o produto, câmera afastada
+Cena 2 = close no produto em uso
+Cena 3 = pessoa recomendando pra câmera
+
+Se o formato não for informado, PERGUNTE qual formato antes de gerar.
+
 Gere APENAS 1 JSON para esta cena específica. Formato obrigatório:
 {\"cena\":NUMERO,\"prompt\":{\"referencia_produto\":\"1 frase\",\"cena\":\"2 frases\",\"anatomia\":\"1 pessoa, 2 mãos, 5 dedos.\",\"acoes\":\"2 frases\",\"camera\":\"1 frase\",\"audio\":{\"voz\":\"Feminina, brasileira, natural.\",\"fala_exata\":\"COPY_AQUI\",\"sincronizacao\":\"Fala contínua.\"},\"restricoes\":[\"Sem texto.\",\"Sem legendas.\",\"Sem logos.\",\"Movimento natural.\"]}}
 
