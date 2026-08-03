@@ -63,6 +63,15 @@ export async function POST(req: Request) {
   const stream = new ReadableStream({
     async start(controller) {
       try {
+        const agentConfig: Record<string, { temperature: number; max_tokens: number }> = {
+          videos: { temperature: 0, max_tokens: 1500 },
+          imagens: { temperature: 0.7, max_tokens: 4096 },
+          copys: { temperature: 0.9, max_tokens: 4096 },
+          "mode-amaral": { temperature: 0.7, max_tokens: 4096 },
+        };
+
+        const config = agentConfig[agentId || ""] || { temperature: 0.7, max_tokens: 4096 };
+
         const processedMessages = agentId === "videos"
           ? [
               { role: "user" as const, content: "RESPONDA APENAS COM 3 JSONs CURTOS. CADA JSON MÁXIMO 8 SEGUNDOS (T0 ATÉ T8s). PROIBIDO PASSAR DE T8s. PROIBIDO TIMESTAMPS ACIMA DE 8." },
@@ -70,11 +79,10 @@ export async function POST(req: Request) {
             ]
           : messages;
 
-        const isVideosAgent = agentId === "videos";
         const messageStream = anthropic.messages.stream({
           model: "claude-haiku-4-5-20251001",
-          max_tokens: isVideosAgent ? 1500 : 8192,
-          ...(isVideosAgent && { temperature: 0 }),
+          temperature: config.temperature,
+          max_tokens: config.max_tokens,
           system: agent.systemPrompt,
           messages: processedMessages.map((m) => {
             if (m.images && m.images.length > 0) {
