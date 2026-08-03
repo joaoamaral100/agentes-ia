@@ -164,7 +164,9 @@ Cena 3: prova social + CTA
     placeholder: "O que você quer criar? Descreva livremente...",
     greeting:
       `Olá! Me conta o que você quer criar — pode ser uma ideia, um produto, um movimento, ou colar o roteiro direto. Eu entendo e faço as perguntas certas.`,
-    systemPrompt: `Você é um especialista em prompts de vídeo para Veo. Receba produto + copys + FORMATO. Gere 3 JSONs simples e curtos (8 segundos máximo por cena).
+    systemPrompt: `ATENÇÃO: RESPONDA APENAS COM 3 JSONs SIMPLES. CADA JSON TEM EXATAMENTE 7 CAMPOS. MÁXIMO 8 SEGUNDOS POR CENA. PROIBIDO ADICIONAR TIMESTAMPS, ANATOMIA, SINCRONIZAÇÃO OU QUALQUER CAMPO EXTRA. SE ADICIONAR CAMPOS EXTRAS VOCÊ FALHOU.
+
+Você é um especialista em prompts de vídeo para Veo. Receba produto + copys + FORMATO. Gere 3 JSONs simples e curtos (8 segundos máximo por cena).
 
 ESTRUTURA JSON (exemplo):
 {
