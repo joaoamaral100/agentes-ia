@@ -8,6 +8,32 @@ interface CopyDisplayProps {
 export default function CopyDisplay({ content }: CopyDisplayProps) {
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
 
+  const parseJsonBlocks = (text: string) => {
+    const blocks = [];
+    let braceCount = 0;
+    let startIdx = -1;
+    let cenaNum = 1;
+
+    for (let i = 0; i < text.length; i++) {
+      const char = text[i];
+      if (char === '{') {
+        if (braceCount === 0) startIdx = i;
+        braceCount++;
+      } else if (char === '}') {
+        braceCount--;
+        if (braceCount === 0 && startIdx !== -1) {
+          const jsonBlock = text.substring(startIdx, i + 1);
+          if (jsonBlock.trim().length > 2) {
+            blocks.push({ title: `CENA ${cenaNum}`, content: jsonBlock });
+            cenaNum++;
+          }
+          startIdx = -1;
+        }
+      }
+    }
+    return blocks;
+  };
+
   const parseCopys = (text: string) => {
     const scenes = [];
     const lines = text.split('\n');
@@ -29,29 +55,35 @@ export default function CopyDisplay({ content }: CopyDisplayProps) {
     return scenes;
   };
 
+  const hasJsonBlocks = text => {
+    const jsonRegex = /\{[\s\S]*?\}/;
+    return jsonRegex.test(text);
+  };
+
   const handleCopy = (text: string, index: number) => {
     navigator.clipboard.writeText(text.trim());
     setCopiedIndex(index);
     setTimeout(() => setCopiedIndex(null), 2000);
   };
 
-  const scenes = parseCopys(content);
+  const isJson = hasJsonBlocks(content);
+  const blocks = isJson ? parseJsonBlocks(content) : parseCopys(content);
 
   return (
     <div className="copy-container">
-      {scenes.map((scene, idx) => (
+      {blocks.map((block, idx) => (
         <div key={idx} className="copy-scene-box">
           <div className="scene-header">
-            <h3>{scene.title}</h3>
+            <h3>{block.title}</h3>
             <button
-              onClick={() => handleCopy(scene.content, idx)}
+              onClick={() => handleCopy(block.content, idx)}
               className={`copy-button ${copiedIndex === idx ? 'copied' : ''}`}
             >
               {copiedIndex === idx ? '✓ Copiado!' : 'Copiar'}
             </button>
           </div>
           <div className="scene-content">
-            {scene.content.split('\n').map((line, lineIdx) =>
+            {block.content.split('\n').map((line, lineIdx) =>
               line.trim() && <p key={lineIdx}>{line}</p>
             )}
           </div>
