@@ -70,9 +70,11 @@ export async function POST(req: Request) {
             ]
           : messages;
 
+        const isVideosAgent = agentId === "videos";
         const messageStream = anthropic.messages.stream({
           model: "claude-haiku-4-5-20251001",
-          max_tokens: 8192,
+          max_tokens: isVideosAgent ? 1500 : 8192,
+          ...(isVideosAgent && { temperature: 0 }),
           system: agent.systemPrompt,
           messages: processedMessages.map((m) => {
             if (m.images && m.images.length > 0) {
