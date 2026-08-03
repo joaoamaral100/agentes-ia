@@ -1,25 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { supabase, getProfile } from "@/lib/supabase";
+import { supabase, setActiveSession } from "@/lib/supabase";
 
-function JarvisWordmark() {
-  return (
-    <span
-      className="block text-center text-[28px] font-bold tracking-[14px]"
-      style={{
-        background: "linear-gradient(135deg, #ffffff 0%, #80ccee 40%, #00d4ff 100%)",
-        WebkitBackgroundClip: "text",
-        WebkitTextFillColor: "transparent",
-        backgroundClip: "text",
-        filter: "drop-shadow(0 0 20px rgba(0,212,255,0.3))",
-      }}
-    >
-      JARVIS
-    </span>
-  );
-}
-
+// ─── Eye icon ─────────────────────────────────────────────────────────────────
 function EyeIcon({ open }: { open: boolean }) {
   return open ? (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -37,80 +21,14 @@ function EyeIcon({ open }: { open: boolean }) {
 
 function Spinner() {
   return (
-    <svg className="animate-spin" width="18" height="18" viewBox="0 0 24 24" fill="none">
+    <svg className="animate-spin" width="20" height="20" viewBox="0 0 24 24" fill="none">
       <circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,0.2)" strokeWidth="3" />
       <path d="M12 2a10 10 0 0110 10" stroke="white" strokeWidth="3" strokeLinecap="round" />
     </svg>
   );
 }
 
-function Field({
-  label,
-  type,
-  value,
-  onChange,
-  placeholder,
-  autoComplete,
-  suffix,
-}: {
-  label: string;
-  type: string;
-  value: string;
-  onChange: (v: string) => void;
-  placeholder: string;
-  autoComplete?: string;
-  suffix?: React.ReactNode;
-}) {
-  return (
-    <div className="mb-4">
-      <label
-        className="mb-1.5 block text-[11px] font-semibold uppercase tracking-widest"
-        style={{ color: "rgba(0,212,255,0.5)" }}
-      >
-        {label}
-      </label>
-      <div
-        className="flex items-center rounded-xl transition-all"
-        style={{
-          background: "rgba(0,212,255,0.05)",
-          border: "1px solid rgba(0,212,255,0.2)",
-          height: "52px",
-        }}
-        onFocusCapture={(e) => {
-          const el = e.currentTarget as HTMLElement;
-          el.style.border = "1px solid rgba(0,212,255,0.5)";
-          el.style.boxShadow = "0 0 0 1px rgba(0,212,255,0.12), 0 0 16px rgba(0,212,255,0.08)";
-        }}
-        onBlurCapture={(e) => {
-          const el = e.currentTarget as HTMLElement;
-          el.style.border = "1px solid rgba(0,212,255,0.2)";
-          el.style.boxShadow = "";
-        }}
-      >
-        <input
-          type={type}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={placeholder}
-          autoComplete={autoComplete}
-          autoCapitalize="none"
-          autoCorrect="off"
-          spellCheck={false}
-          className="flex-1 bg-transparent outline-none"
-          style={{
-            color: "#e0f4ff",
-            fontSize: "16px",
-            padding: "0 16px",
-            height: "100%",
-            WebkitAppearance: "none",
-            borderRadius: "12px",
-          }}
-        />
-        {suffix}
-      </div>
-    </div>
-  );
-}
+// ─── Main component ───────────────────────────────────────────────────────────
 
 interface LoginScreenProps {
   onSuccess: () => void;
@@ -119,18 +37,17 @@ interface LoginScreenProps {
 type Mode = "signin" | "signup" | "forgot";
 
 export default function LoginScreen({ onSuccess }: LoginScreenProps) {
-  const [mode, setMode] = useState<Mode>("signin");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [mode, setMode]                 = useState<Mode>("signin");
+  const [email, setEmail]               = useState("");
+  const [password, setPassword]         = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState("");
-  const [info, setInfo] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [error, setError]               = useState("");
+  const [info, setInfo]                 = useState("");
+  const [loading, setLoading]           = useState(false);
+  const [emailFocused, setEmailFocused] = useState(false);
+  const [passFocused, setPassFocused]   = useState(false);
 
-  function reset() {
-    setError("");
-    setInfo("");
-  }
+  function reset() { setError(""); setInfo(""); }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -142,235 +59,679 @@ export default function LoginScreen({ onSuccess }: LoginScreenProps) {
 
     try {
       if (mode === "signin") {
-        const { data: authData, error: err } = await supabase.auth.signInWithPassword({ email, password });
+        const { data, error: err } = await supabase.auth.signInWithPassword({ email, password });
         if (err) throw err;
 
-        const profile = await getProfile(authData.user.id);
-        if (profile && !profile.approved && !profile.is_admin) {
-          await supabase.auth.signOut();
-          setError("Sua conta está aguardando aprovação. Você será notificado quando for aprovado.");
-          setLoading(false);
-          return;
+        if (data.user) {
+          const token = crypto.randomUUID();
+          const saved = await setActiveSession(token);
+          if (saved) localStorage.setItem("jarvis_session_token", token);
         }
         onSuccess();
       } else if (mode === "signup") {
-        const { error: err } = await supabase.auth.signUp({ email, password });
-        if (err) throw err;
-        setInfo("Conta criada! Verifique seu e-mail para confirmar o cadastro. Após confirmação, aguarde aprovação do administrador para acessar o sistema.");
-        setMode("signin");
+        console.log("[Signup] tentando cadastro para:", email);
+        const { data, error: err } = await supabase.auth.signUp({ email, password });
+        console.log("[Signup] resposta →", {
+          user:    data?.user  ? { id: data.user.id, email: data.user.email, confirmed: data.user.email_confirmed_at } : null,
+          session: data?.session ? "presente" : "ausente",
+          error:   err ? { message: err.message, status: err.status, code: (err as any).code } : null,
+        });
+        if (err) {
+          console.error("[Signup] ERRO →", err.message, err);
+          throw err;
+        }
+        if (data.session) {
+          console.log("[Signup] sessão criada direto — confirmação de e-mail desativada no Supabase");
+          onSuccess();
+        } else {
+          console.log("[Signup] sem sessão — e-mail de confirmação enviado (ou usuário já existia silencioso)");
+          console.log("[Signup] data.user.identities:", data.user?.identities);
+          if (data.user?.identities?.length === 0) {
+            console.warn("[Signup] identities vazio → usuário JÁ EXISTE mas Supabase não retornou erro (modo silencioso)");
+            setError("Este e-mail já está cadastrado. Tente fazer login.");
+          } else {
+            setInfo(
+              "Conta criada! Verifique seu e-mail para confirmar. " +
+              "Se não chegar, acesse Supabase Dashboard → Authentication → Users " +
+              "e confirme manualmente ou reenvie o link de confirmação."
+            );
+            setMode("signin");
+          }
+        }
       } else {
+        console.log("[ForgotPassword] enviando link para:", email);
         const { error: err } = await supabase.auth.resetPasswordForEmail(email);
-        if (err) throw err;
+        if (err) {
+          console.error("[ForgotPassword] ERRO →", err.message, err);
+          throw err;
+        }
+        console.log("[ForgotPassword] link enviado com sucesso");
         setInfo("Enviamos um link de redefinição para seu e-mail.");
         setMode("signin");
       }
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Erro desconhecido.";
-      setError(translateError(msg));
+      console.error("[Auth] catch final →", err);
+      setError(translateError(err));
     } finally {
       setLoading(false);
     }
   }
 
-  const canSubmit =
-    !loading &&
-    email.trim().length > 0 &&
-    (mode === "forgot" || password.trim().length > 0);
+  const canSubmit = !loading && email.trim().length > 0 && (mode === "forgot" || password.trim().length > 0);
 
   const titles: Record<Mode, { heading: string; sub: string; btn: string }> = {
-    signin:  { heading: "Acesso Restrito",    sub: "Entre com sua conta",              btn: "ENTRAR" },
-    signup:  { heading: "Criar Conta",        sub: "Cadastre-se para continuar",       btn: "CRIAR CONTA" },
-    forgot:  { heading: "Recuperar Acesso",   sub: "Enviaremos um link ao seu e-mail", btn: "ENVIAR LINK" },
+    signin: { heading: "Bem-vindo de volta",   sub: "Entre com sua conta para continuar",  btn: "ENTRAR"      },
+    signup: { heading: "Criar conta",          sub: "Preencha os dados para se cadastrar", btn: "CRIAR CONTA" },
+    forgot: { heading: "Recuperar acesso",     sub: "Enviaremos um link ao seu e-mail",    btn: "ENVIAR LINK" },
   };
   const { heading, sub, btn } = titles[mode];
 
-  const eyeToggle = (
-    <button
-      type="button"
-      onClick={() => setShowPassword((v) => !v)}
-      style={{
-        color: showPassword ? "#00d4ff" : "#4a9ebb",
-        padding: "0 14px",
-        height: "100%",
-        WebkitTapHighlightColor: "transparent",
-        touchAction: "manipulation",
-        flexShrink: 0,
-      }}
-    >
-      <EyeIcon open={showPassword} />
-    </button>
-  );
-
   return (
     <div
-      className="dot-grid relative flex min-h-screen w-full items-center justify-center overflow-hidden"
-      style={{ background: "#000814" }}
+      style={{
+        position: "relative",
+        minHeight: "100vh",
+        width: "100%",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        overflow: "hidden",
+        background: "#0a0e27",
+        animation: "page-in 0.8s cubic-bezier(0.16, 1, 0.3, 1) both",
+      }}
     >
-      <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="orb orb-1" />
-        <div className="orb orb-2" />
-        <div className="orb orb-3" />
+      <style>{`
+        @keyframes page-in {
+          from { opacity: 0; }
+          to   { opacity: 1; }
+        }
+        @keyframes card-rise {
+          from { opacity: 0; transform: translateY(32px) scale(0.97); }
+          to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes logo-glow {
+          0%, 100% { filter: drop-shadow(0 0 20px rgba(0,217,255,0.5)) drop-shadow(0 0 60px rgba(0,217,255,0.15)); }
+          50%       { filter: drop-shadow(0 0 30px rgba(0,217,255,0.8)) drop-shadow(0 0 80px rgba(0,217,255,0.25)); }
+        }
+        @keyframes orb-a {
+          0%, 100% { transform: translate(0,0) scale(1); }
+          40%       { transform: translate(40px,-30px) scale(1.08); }
+          70%       { transform: translate(-20px,35px) scale(0.95); }
+        }
+        @keyframes orb-b {
+          0%, 100% { transform: translate(0,0) scale(1); }
+          35%       { transform: translate(-50px,25px) scale(1.06); }
+          65%       { transform: translate(30px,-40px) scale(0.96); }
+        }
+        @keyframes dot-grid-scroll {
+          from { background-position: 0 0; }
+          to   { background-position: 28px 28px; }
+        }
+        @keyframes input-appear {
+          from { opacity: 0; transform: translateX(-8px); }
+          to   { opacity: 1; transform: translateX(0); }
+        }
+        .login-input-wrap:focus-within .login-label {
+          color: rgba(0,217,255,0.8) !important;
+        }
+      `}</style>
+
+      {/* Dot grid */}
+      <div style={{
+        position: "absolute", inset: 0, pointerEvents: "none",
+        backgroundImage: "radial-gradient(circle, rgba(0,217,255,0.06) 1px, transparent 1px)",
+        backgroundSize: "28px 28px",
+        animation: "dot-grid-scroll 12s linear infinite",
+        zIndex: 0,
+      }} />
+
+      {/* Ambient orbs */}
+      <div style={{ position: "absolute", inset: 0, pointerEvents: "none", overflow: "hidden", zIndex: 0 }}>
+        {/* Big blue orb top-left */}
+        <div style={{
+          position: "absolute", top: "-220px", left: "-220px",
+          width: "700px", height: "700px", borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(0,80,200,0.18) 0%, transparent 65%)",
+          filter: "blur(80px)",
+          animation: "orb-a 28s ease-in-out infinite",
+        }} />
+        {/* Cyan orb bottom-right */}
+        <div style={{
+          position: "absolute", bottom: "-200px", right: "-200px",
+          width: "650px", height: "650px", borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(0,217,255,0.12) 0%, transparent 65%)",
+          filter: "blur(80px)",
+          animation: "orb-b 32s ease-in-out infinite",
+        }} />
+        {/* Subtle teal center */}
+        <div style={{
+          position: "absolute", top: "40%", left: "50%",
+          width: "500px", height: "500px",
+          transform: "translate(-50%, -50%)",
+          borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(0,150,255,0.06) 0%, transparent 60%)",
+          filter: "blur(60px)",
+          pointerEvents: "none",
+        }} />
       </div>
 
-      <form onSubmit={handleSubmit} className="relative z-10 w-full max-w-sm px-4">
-        <div
-          className="rounded-2xl p-8"
-          style={{
-            background: "rgba(0,12,30,0.7)",
-            backdropFilter: "blur(40px)",
-            WebkitBackdropFilter: "blur(40px)",
-            border: "1px solid rgba(255,255,255,0.08)",
-            boxShadow: "0 24px 64px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.06)",
-          }}
-        >
-          {/* Logo */}
-          <div className="mb-8 flex justify-center">
-            <JarvisWordmark />
-          </div>
+      {/* Scan line */}
+      <div className="scan-line" />
 
-          {/* Title */}
-          <div className="mb-6 text-center">
-            <h1 className="mb-1 text-[15px] font-semibold" style={{ color: "rgba(255,255,255,0.85)" }}>
-              {heading}
-            </h1>
-            <p className="text-[13px]" style={{ color: "rgba(74,158,187,0.65)" }}>
-              {sub}
-            </p>
-          </div>
+      {/* Card wrapper */}
+      <div
+        style={{
+          position: "relative", zIndex: 10,
+          width: "100%", maxWidth: "420px",
+          padding: "20px 16px",
+          animation: "card-rise 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both",
+        }}
+      >
 
-          {/* Feedback */}
-          {info && (
-            <p className="mb-4 rounded-lg px-4 py-2.5 text-[12px]"
-               style={{ background: "rgba(0,212,255,0.08)", color: "#7dd3fc", border: "1px solid rgba(0,212,255,0.15)" }}>
-              {info}
-            </p>
-          )}
-          {error && (
-            <p className="mb-4 rounded-lg px-4 py-2.5 text-[12px]"
-               style={{ background: "rgba(248,113,113,0.08)", color: "#f87171", border: "1px solid rgba(248,113,113,0.2)" }}>
-              {error}
-            </p>
-          )}
+        {/* ── HERO ── */}
+        <div style={{ textAlign: "center", marginBottom: "40px" }}>
 
-          {/* Email */}
-          <Field
-            label="E-mail"
-            type="email"
-            value={email}
-            onChange={(v) => { setEmail(v); reset(); }}
-            placeholder="seu@email.com"
-            autoComplete="email"
-          />
+          {/* Decorative ring behind logo */}
+          <div style={{ position: "relative", display: "inline-flex", alignItems: "center", justifyContent: "center", marginBottom: "16px" }}>
+            <div style={{
+              position: "absolute",
+              width: "96px", height: "96px",
+              borderRadius: "50%",
+              border: "1px solid rgba(0,217,255,0.15)",
+              borderTopColor: "rgba(0,217,255,0.5)",
+              animation: "ring-cw 10s linear infinite",
+            }} />
+            <div style={{
+              position: "absolute",
+              width: "116px", height: "116px",
+              borderRadius: "50%",
+              border: "1px solid rgba(0,217,255,0.07)",
+              borderBottomColor: "rgba(0,217,255,0.25)",
+              animation: "ring-ccw 16s linear infinite",
+            }} />
 
-          {/* Password (hidden in forgot mode) */}
-          {mode !== "forgot" && (
-            <Field
-              label="Senha"
-              type={showPassword ? "text" : "password"}
-              value={password}
-              onChange={(v) => { setPassword(v); reset(); }}
-              placeholder={mode === "signup" ? "Mínimo 6 caracteres" : "Senha de acesso"}
-              autoComplete={mode === "signup" ? "new-password" : "current-password"}
-              suffix={eyeToggle}
-            />
-          )}
-
-          {/* Forgot link */}
-          {mode === "signin" && (
-            <div className="mb-4 text-right">
-              <button
-                type="button"
-                onClick={() => { setMode("forgot"); reset(); }}
-                className="text-[12px] transition-colors"
-                style={{ color: "rgba(0,212,255,0.5)" }}
-                onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "rgba(0,212,255,0.85)")}
-                onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "rgba(0,212,255,0.5)")}
-              >
-                Esqueceu a senha?
-              </button>
+            {/* Logo glow disc */}
+            <div style={{
+              width: "72px", height: "72px",
+              borderRadius: "18px",
+              background: "linear-gradient(135deg, rgba(0,128,255,0.12), rgba(0,217,255,0.06))",
+              border: "1px solid rgba(0,217,255,0.18)",
+              boxShadow: "0 0 30px rgba(0,217,255,0.1), inset 0 0 20px rgba(0,217,255,0.05)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}>
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" style={{ filter: "drop-shadow(0 0 8px rgba(0,217,255,0.6))" }}>
+                <circle cx="12" cy="12" r="3" fill="#00d9ff" />
+                <circle cx="12" cy="12" r="6" stroke="rgba(0,217,255,0.4)" strokeWidth="1" fill="none" />
+                <circle cx="12" cy="12" r="10" stroke="rgba(0,217,255,0.15)" strokeWidth="0.5" fill="none" />
+                <line x1="12" y1="2" x2="12" y2="6"  stroke="#00d9ff" strokeWidth="1.5" strokeLinecap="round" />
+                <line x1="12" y1="18" x2="12" y2="22" stroke="#00d9ff" strokeWidth="1.5" strokeLinecap="round" />
+                <line x1="2" y1="12" x2="6" y2="12"  stroke="#00d9ff" strokeWidth="1.5" strokeLinecap="round" />
+                <line x1="18" y1="12" x2="22" y2="12" stroke="#00d9ff" strokeWidth="1.5" strokeLinecap="round" />
+              </svg>
             </div>
-          )}
+          </div>
 
-          {/* Submit */}
-          <button
-            type="submit"
-            disabled={!canSubmit}
-            className="flex w-full items-center justify-center gap-2 rounded-xl font-semibold tracking-widest"
+          {/* JARVIS wordmark */}
+          <div
             style={{
-              height: "52px",
-              fontSize: "14px",
-              touchAction: "manipulation",
-              WebkitTapHighlightColor: "transparent",
-              transition: "all 0.2s ease",
-              ...(canSubmit
-                ? {
-                    background: "linear-gradient(135deg, #1a44ff 0%, #0088cc 100%)",
-                    color: "#fff",
-                    boxShadow: "0 4px 20px rgba(0,100,255,0.35)",
-                  }
-                : { background: "rgba(255,255,255,0.04)", color: "rgba(255,255,255,0.2)", cursor: "not-allowed" }),
-            }}
-            onMouseEnter={(e) => {
-              if (canSubmit)
-                Object.assign((e.currentTarget as HTMLElement).style, {
-                  boxShadow: "0 6px 28px rgba(0,100,255,0.5)",
-                  transform: "translateY(-1px)",
-                });
-            }}
-            onMouseLeave={(e) => {
-              if (canSubmit)
-                Object.assign((e.currentTarget as HTMLElement).style, {
-                  boxShadow: "0 4px 20px rgba(0,100,255,0.35)",
-                  transform: "translateY(0)",
-                });
+              fontSize: "clamp(40px, 8vw, 64px)",
+              fontWeight: 800,
+              letterSpacing: "16px",
+              lineHeight: 1,
+              background: "linear-gradient(135deg, #ffffff 0%, #c0e0ff 35%, #00d9ff 70%, #00f0ff 100%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+              animation: "logo-glow 4s ease-in-out infinite",
+              marginBottom: "10px",
+              fontFamily: "var(--font-display), system-ui, sans-serif",
             }}
           >
-            {loading ? <Spinner /> : btn}
-          </button>
+            JARVIS
+          </div>
 
-          {/* Mode switcher */}
-          <div className="mt-5 text-center text-[12px]" style={{ color: "rgba(255,255,255,0.3)" }}>
-            {mode === "signin" ? (
-              <>
-                Não tem conta?{" "}
-                <button
-                  type="button"
-                  onClick={() => { setMode("signup"); reset(); }}
-                  className="font-semibold transition-colors"
-                  style={{ color: "rgba(0,212,255,0.7)" }}
-                  onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "#00d4ff")}
-                  onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "rgba(0,212,255,0.7)")}
-                >
-                  Criar conta
-                </button>
-              </>
-            ) : (
-              <>
-                Já tem conta?{" "}
-                <button
-                  type="button"
-                  onClick={() => { setMode("signin"); reset(); }}
-                  className="font-semibold transition-colors"
-                  style={{ color: "rgba(0,212,255,0.7)" }}
-                  onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "#00d4ff")}
-                  onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "rgba(0,212,255,0.7)")}
-                >
-                  Entrar
-                </button>
-              </>
-            )}
+          <div style={{
+            fontSize: "11px",
+            letterSpacing: "4px",
+            color: "rgba(0,217,255,0.35)",
+            fontFamily: "monospace",
+            textTransform: "uppercase",
+            marginBottom: "6px",
+          }}>
+            TikTok Shopping · AI Platform
+          </div>
+
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+            <div style={{ height: "1px", width: "48px", background: "linear-gradient(90deg, transparent, rgba(0,217,255,0.25))" }} />
+            <div style={{ width: "4px", height: "4px", borderRadius: "50%", background: "rgba(0,217,255,0.5)", boxShadow: "0 0 6px rgba(0,217,255,0.8)" }} />
+            <div style={{ height: "1px", width: "48px", background: "linear-gradient(90deg, rgba(0,217,255,0.25), transparent)" }} />
           </div>
         </div>
-      </form>
+
+        {/* ── CARD ── */}
+        <div
+          style={{
+            background: "rgba(10,14,39,0.88)",
+            backdropFilter: "blur(24px)",
+            WebkitBackdropFilter: "blur(24px)",
+            border: "1px solid rgba(26,37,85,0.9)",
+            borderRadius: "16px",
+            boxShadow: "0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(0,217,255,0.04), inset 0 1px 0 rgba(255,255,255,0.05), 0 0 60px rgba(0,80,200,0.08)",
+            overflow: "hidden",
+          }}
+        >
+          {/* Top accent line */}
+          <div style={{
+            height: "2px",
+            background: "linear-gradient(90deg, transparent 0%, rgba(0,128,255,0.6) 30%, rgba(0,217,255,0.9) 50%, rgba(0,128,255,0.6) 70%, transparent 100%)",
+          }} />
+
+          <div style={{ padding: "40px 40px 36px" }}>
+
+            {/* Heading */}
+            <div style={{ marginBottom: "28px" }}>
+              <h1 style={{
+                fontSize: "20px",
+                fontWeight: 700,
+                color: "#e0e6ff",
+                marginBottom: "6px",
+                letterSpacing: "-0.2px",
+              }}>
+                {heading}
+              </h1>
+              <p style={{ fontSize: "13px", color: "rgba(160,170,192,0.6)", lineHeight: "1.5" }}>
+                {sub}
+              </p>
+            </div>
+
+            {/* Feedback banners */}
+            {info && (
+              <div style={{
+                marginBottom: "20px",
+                padding: "14px 16px",
+                borderRadius: "10px",
+                background: "rgba(0,217,255,0.05)",
+                border: "1px solid rgba(0,217,255,0.14)",
+                color: "#7dd3fc",
+                fontSize: "12px",
+                lineHeight: "1.65",
+              }}>
+                {info}
+              </div>
+            )}
+            {error && (
+              <div style={{
+                marginBottom: "20px",
+                padding: "14px 16px",
+                borderRadius: "10px",
+                background: "rgba(239,68,68,0.1)",
+                border: "1.5px solid rgba(239,68,68,0.4)",
+                color: "#fca5a5",
+                fontSize: "13px",
+                fontWeight: 500,
+                lineHeight: "1.6",
+                display: "flex",
+                alignItems: "flex-start",
+                gap: "10px",
+                boxShadow: "0 0 16px rgba(239,68,68,0.08)",
+              }}>
+                <span style={{ flexShrink: 0, marginTop: "1px" }}>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12" r="9" stroke="#f87171" strokeWidth="1.5" />
+                    <path d="M12 8v4M12 16h.01" stroke="#f87171" strokeWidth="1.5" strokeLinecap="round" />
+                  </svg>
+                </span>
+                {error}
+              </div>
+            )}
+
+            {/* ── Email field ── */}
+            <div style={{ marginBottom: "16px", animation: "input-appear 0.5s 0.2s both" }}>
+              <label className="login-label" style={{
+                display: "block",
+                fontSize: "11px",
+                fontWeight: 700,
+                letterSpacing: "0.14em",
+                textTransform: "uppercase",
+                color: emailFocused ? "rgba(0,217,255,0.8)" : "rgba(0,217,255,0.4)",
+                marginBottom: "8px",
+                transition: "color 0.2s ease",
+              }}>
+                E-mail
+              </label>
+              <div
+                className="login-input-wrap"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  height: "52px",
+                  borderRadius: "10px",
+                  background: emailFocused ? "rgba(0,20,60,0.9)" : "rgba(15,21,53,0.7)",
+                  border: emailFocused
+                    ? "1.5px solid rgba(0,217,255,0.6)"
+                    : "1.5px solid rgba(26,37,85,0.9)",
+                  boxShadow: emailFocused
+                    ? "0 0 0 3px rgba(0,217,255,0.08), 0 0 20px rgba(0,217,255,0.1)"
+                    : "none",
+                  transition: "all 0.25s ease",
+                }}
+              >
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => { setEmail(e.target.value); reset(); }}
+                  onFocus={() => setEmailFocused(true)}
+                  onBlur={() => setEmailFocused(false)}
+                  placeholder="seu@email.com"
+                  autoComplete="email"
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  spellCheck={false}
+                  style={{
+                    flex: 1,
+                    height: "100%",
+                    background: "transparent",
+                    border: "none",
+                    outline: "none",
+                    padding: "0 18px",
+                    fontSize: "15px",
+                    color: "#e0e6ff",
+                    WebkitAppearance: "none",
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* ── Password field ── */}
+            {mode !== "forgot" && (
+              <div style={{ marginBottom: "20px", animation: "input-appear 0.5s 0.3s both" }}>
+                <label style={{
+                  display: "block",
+                  fontSize: "11px",
+                  fontWeight: 700,
+                  letterSpacing: "0.14em",
+                  textTransform: "uppercase",
+                  color: passFocused ? "rgba(0,217,255,0.8)" : "rgba(0,217,255,0.4)",
+                  marginBottom: "8px",
+                  transition: "color 0.2s ease",
+                }}>
+                  Senha
+                </label>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    height: "52px",
+                    borderRadius: "10px",
+                    background: passFocused ? "rgba(0,20,60,0.9)" : "rgba(15,21,53,0.7)",
+                    border: passFocused
+                      ? "1.5px solid rgba(0,217,255,0.6)"
+                      : "1.5px solid rgba(26,37,85,0.9)",
+                    boxShadow: passFocused
+                      ? "0 0 0 3px rgba(0,217,255,0.08), 0 0 20px rgba(0,217,255,0.1)"
+                      : "none",
+                    transition: "all 0.25s ease",
+                  }}
+                >
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => { setPassword(e.target.value); reset(); }}
+                    onFocus={() => setPassFocused(true)}
+                    onBlur={() => setPassFocused(false)}
+                    placeholder={mode === "signup" ? "Mínimo 6 caracteres" : "Senha de acesso"}
+                    autoComplete={mode === "signup" ? "new-password" : "current-password"}
+                    style={{
+                      flex: 1,
+                      height: "100%",
+                      background: "transparent",
+                      border: "none",
+                      outline: "none",
+                      padding: "0 0 0 18px",
+                      fontSize: "15px",
+                      color: "#e0e6ff",
+                      WebkitAppearance: "none",
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((v) => !v)}
+                    style={{
+                      height: "100%",
+                      padding: "0 16px",
+                      flexShrink: 0,
+                      background: "transparent",
+                      border: "none",
+                      color: showPassword ? "#00d9ff" : "rgba(160,170,192,0.4)",
+                      cursor: "pointer",
+                      transition: "color 0.2s ease",
+                    }}
+                  >
+                    <EyeIcon open={showPassword} />
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Forgot link */}
+            {mode === "signin" && (
+              <div style={{ textAlign: "right", marginBottom: "24px", marginTop: "-8px" }}>
+                <button
+                  type="button"
+                  onClick={() => { setMode("forgot"); reset(); }}
+                  style={{
+                    fontSize: "12px",
+                    color: "rgba(0,217,255,0.4)",
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    transition: "color 0.2s ease",
+                  }}
+                  onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "rgba(0,217,255,0.85)")}
+                  onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "rgba(0,217,255,0.4)")}
+                >
+                  Esqueceu a senha?
+                </button>
+              </div>
+            )}
+
+            {/* ── Submit button ── */}
+            <button
+              type="button"
+              onClick={handleSubmit as unknown as React.MouseEventHandler}
+              disabled={!canSubmit}
+              style={{
+                width: "100%",
+                height: "54px",
+                borderRadius: "10px",
+                border: "none",
+                fontSize: "13px",
+                fontWeight: 700,
+                letterSpacing: "2px",
+                cursor: canSubmit ? "pointer" : "not-allowed",
+                transition: "all 0.25s cubic-bezier(0.16, 1, 0.3, 1)",
+                position: "relative",
+                overflow: "hidden",
+                ...(canSubmit
+                  ? {
+                      background: "linear-gradient(135deg, #0055cc 0%, #0080ff 45%, #00bfff 100%)",
+                      color: "#ffffff",
+                      boxShadow: "0 4px 24px rgba(0,128,255,0.35), 0 0 0 1px rgba(0,217,255,0.12), inset 0 1px 0 rgba(255,255,255,0.15)",
+                    }
+                  : {
+                      background: "rgba(20,28,58,0.7)",
+                      color: "rgba(255,255,255,0.2)",
+                      boxShadow: "none",
+                    }),
+              }}
+              onMouseEnter={(e) => {
+                if (!canSubmit) return;
+                Object.assign((e.currentTarget as HTMLElement).style, {
+                  background: "linear-gradient(135deg, #0066dd 0%, #0090ff 45%, #00d0ff 100%)",
+                  boxShadow: "0 8px 40px rgba(0,128,255,0.55), 0 0 0 1px rgba(0,217,255,0.25), 0 0 30px rgba(0,217,255,0.2), inset 0 1px 0 rgba(255,255,255,0.2)",
+                  transform: "translateY(-2px)",
+                });
+              }}
+              onMouseLeave={(e) => {
+                if (!canSubmit) return;
+                Object.assign((e.currentTarget as HTMLElement).style, {
+                  background: "linear-gradient(135deg, #0055cc 0%, #0080ff 45%, #00bfff 100%)",
+                  boxShadow: "0 4px 24px rgba(0,128,255,0.35), 0 0 0 1px rgba(0,217,255,0.12), inset 0 1px 0 rgba(255,255,255,0.15)",
+                  transform: "translateY(0)",
+                });
+              }}
+              onMouseDown={(e) => {
+                if (!canSubmit) return;
+                (e.currentTarget as HTMLElement).style.transform = "translateY(0) scale(0.98)";
+              }}
+              onMouseUp={(e) => {
+                if (!canSubmit) return;
+                (e.currentTarget as HTMLElement).style.transform = "translateY(-2px) scale(1)";
+              }}
+            >
+              {loading ? (
+                <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "10px" }}>
+                  <Spinner /> Aguarde...
+                </span>
+              ) : btn}
+            </button>
+
+            {/* Divider */}
+            <div style={{ display: "flex", alignItems: "center", gap: "12px", margin: "28px 0" }}>
+              <div style={{ flex: 1, height: "1px", background: "rgba(26,37,85,0.9)" }} />
+              <span style={{ fontSize: "11px", color: "rgba(160,170,192,0.3)", letterSpacing: "0.05em" }}>ou</span>
+              <div style={{ flex: 1, height: "1px", background: "rgba(26,37,85,0.9)" }} />
+            </div>
+
+            {/* Mode switcher */}
+            <p style={{ textAlign: "center", fontSize: "13px", color: "rgba(160,170,192,0.5)" }}>
+              {mode === "signin" ? (
+                <>
+                  Não tem conta?{" "}
+                  <button
+                    type="button"
+                    onClick={() => { setMode("signup"); reset(); }}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      fontSize: "13px",
+                      fontWeight: 700,
+                      color: "rgba(0,217,255,0.75)",
+                      cursor: "pointer",
+                      transition: "color 0.2s ease",
+                    }}
+                    onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "#00d9ff")}
+                    onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "rgba(0,217,255,0.75)")}
+                  >
+                    Criar conta
+                  </button>
+                </>
+              ) : (
+                <>
+                  Já tem conta?{" "}
+                  <button
+                    type="button"
+                    onClick={() => { setMode("signin"); reset(); }}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      fontSize: "13px",
+                      fontWeight: 700,
+                      color: "rgba(0,217,255,0.75)",
+                      cursor: "pointer",
+                      transition: "color 0.2s ease",
+                    }}
+                    onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.color = "#00d9ff")}
+                    onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.color = "rgba(0,217,255,0.75)")}
+                  >
+                    Entrar
+                  </button>
+                </>
+              )}
+            </p>
+          </div>
+
+          {/* Bottom accent line */}
+          <div style={{
+            height: "1px",
+            background: "linear-gradient(90deg, transparent, rgba(0,217,255,0.08), transparent)",
+          }} />
+
+          <div style={{
+            padding: "12px 40px",
+            textAlign: "center",
+            background: "rgba(0,217,255,0.015)",
+          }}>
+            <p style={{
+              fontSize: "10px",
+              letterSpacing: "1.5px",
+              color: "rgba(160,170,192,0.2)",
+              fontFamily: "monospace",
+            }}>
+              ACESSO RESTRITO · APENAS CONTAS AUTORIZADAS
+            </p>
+          </div>
+        </div>
+
+        {/* Below-card status */}
+        <div style={{ textAlign: "center", marginTop: "24px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+          <div className="status-online" style={{ width: "6px", height: "6px", borderRadius: "50%" }} />
+          <span style={{ fontSize: "10px", letterSpacing: "2.5px", color: "rgba(34,197,94,0.5)", fontFamily: "monospace" }}>
+            SISTEMA ONLINE
+          </span>
+        </div>
+      </div>
     </div>
   );
 }
 
-function translateError(msg: string): string {
-  if (msg.includes("Invalid login credentials")) return "E-mail ou senha incorretos.";
-  if (msg.includes("Email not confirmed")) return "Confirme seu e-mail antes de entrar.";
-  if (msg.includes("User already registered")) return "Este e-mail já está cadastrado.";
-  if (msg.includes("Password should be at least")) return "A senha precisa ter pelo menos 6 caracteres.";
-  if (msg.includes("Unable to validate email")) return "E-mail inválido.";
-  return msg;
+function translateError(raw: unknown): string {
+  // Accept Error objects, Supabase AuthError, plain strings, or anything else
+  const msg: string =
+    raw instanceof Error          ? raw.message :
+    typeof raw === "string"       ? raw :
+    typeof (raw as any)?.message === "string" ? (raw as any).message :
+    JSON.stringify(raw) ?? "Erro desconhecido.";
+
+  const m = msg.toLowerCase();
+
+  // Auth errors
+  if (m.includes("invalid login credentials") || m.includes("invalid_credentials"))
+    return "E-mail ou senha incorretos.";
+  if (m.includes("email not confirmed"))
+    return "Confirme seu e-mail antes de entrar.";
+  if (m.includes("user already registered") || m.includes("already registered"))
+    return "Este e-mail já está cadastrado.";
+  if (m.includes("password should be at least") || m.includes("weak_password"))
+    return "A senha precisa ter pelo menos 6 caracteres.";
+  if (m.includes("unable to validate email") || m.includes("invalid email"))
+    return "E-mail inválido. Verifique o formato.";
+
+  // Rate limits
+  if (m.includes("email rate limit") || m.includes("over_email_send_rate_limit"))
+    return "Muitas tentativas de envio. Aguarde 1 minuto.";
+  if (m.includes("too many requests") || m.includes("request rate limit"))
+    return "Muitas tentativas. Aguarde alguns minutos.";
+  if (m.includes("for security purposes"))
+    return "Aguarde alguns segundos antes de tentar novamente.";
+
+  // Account / token
+  if (m.includes("signup_disabled"))
+    return "Cadastro desativado pelo administrador.";
+  if (m.includes("token has expired") || m.includes("otp expired"))
+    return "Link expirado. Solicite um novo.";
+  if (m.includes("user not found"))
+    return "Conta não encontrada.";
+  if (m.includes("anonymous") || m.includes("not authorized"))
+    return "Acesso não autorizado.";
+
+  // Network / infra
+  if (m.includes("network") || m.includes("fetch") || m.includes("failed to fetch"))
+    return "Falha de conexão. Verifique sua internet.";
+  if (m.includes("timeout"))
+    return "Tempo esgotado. Tente novamente.";
+
+  // Raw message fallback — strip Supabase internal jargon if present
+  const cleaned = msg.replace(/^\[.*?\]\s*/, "").trim();
+  return cleaned.length > 0 && cleaned.length < 120 ? cleaned : "Ocorreu um erro. Tente novamente.";
 }

@@ -370,50 +370,48 @@ export default function ChatView({ agent, messages, onMessagesChange, onMenuClic
   return (
     <div
       className="relative flex h-full flex-1 flex-col overflow-hidden"
-      style={{ background: "radial-gradient(ellipse at 50% 30%, #000e22 0%, #000814 55%, #000208 100%)" }}
+      style={{ background: "#0a0e27" }}
     >
-      {/* HUD background layer: grid + orbs */}
+      {/* HUD grid */}
       <div aria-hidden="true" className="pointer-events-none absolute inset-0 hud-grid" style={{ zIndex: 0 }} />
       <div aria-hidden="true" className="pointer-events-none absolute inset-0" style={{ zIndex: 0 }}>
-        {/* Top-right orb */}
-        <div style={{ position: "absolute", top: "-200px", right: "-200px", width: "560px", height: "560px", borderRadius: "50%", background: "radial-gradient(circle, rgba(0,120,255,0.07) 0%, transparent 70%)", filter: "blur(150px)", animation: "orb-drift 28s ease-in-out infinite" }} />
-        {/* Bottom-left orb */}
-        <div style={{ position: "absolute", bottom: "-200px", left: "-200px", width: "540px", height: "540px", borderRadius: "50%", background: "radial-gradient(circle, rgba(0,200,255,0.06) 0%, transparent 70%)", filter: "blur(150px)", animation: "orb-drift 32s ease-in-out infinite reverse", animationDelay: "-14s" }} />
+        <div style={{ position: "absolute", top: "-200px", right: "-200px", width: "560px", height: "560px", borderRadius: "50%", background: "radial-gradient(circle, rgba(0,80,200,0.08) 0%, transparent 70%)", filter: "blur(140px)", animation: "orb-drift 28s ease-in-out infinite" }} />
+        <div style={{ position: "absolute", bottom: "-200px", left: "-200px", width: "540px", height: "540px", borderRadius: "50%", background: "radial-gradient(circle, rgba(0,150,255,0.06) 0%, transparent 70%)", filter: "blur(140px)", animation: "orb-drift 32s ease-in-out infinite reverse", animationDelay: "-14s" }} />
       </div>
 
       {/* Header */}
       <header
-        className="relative z-10 flex items-center gap-3 px-4 py-3.5 md:px-6"
+        className="relative z-10 flex items-center gap-3 px-4 py-3 md:px-6"
         style={{
-          background: "rgba(0,8,20,0.88)",
+          background: "rgba(10,14,39,0.92)",
           backdropFilter: "blur(24px)",
           WebkitBackdropFilter: "blur(24px)",
-          borderBottom: "1px solid rgba(0,212,255,0.1)",
+          borderBottom: "1px solid #1a2555",
         }}
       >
         <button
           onClick={onMenuClick}
           className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg md:hidden"
-          style={{ color: "#4a9ebb", transition: "all 0.2s ease-out" }}
+          style={{ color: "#a0aac0", transition: "all 0.2s ease-out" }}
         >
           <HamburgerIcon />
         </button>
 
         <div
-          className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-xl md:flex"
+          className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-lg md:flex"
           style={{
-            background: "linear-gradient(135deg, rgba(0,212,255,0.12), rgba(0,102,255,0.1))",
-            border: "1px solid rgba(0,212,255,0.22)",
+            background: "rgba(0,217,255,0.07)",
+            border: "1px solid rgba(0,217,255,0.18)",
           }}
         >
-          <AgentIcon id={agent.id} size={19} style={{ color: "#00d4ff" }} />
+          <AgentIcon id={agent.id} size={19} style={{ color: "#00d9ff" }} />
         </div>
 
         <div className="min-w-0 flex-1">
           <h2
             className="font-display text-[16px] font-bold leading-tight"
             style={{
-              background: "linear-gradient(135deg, #ffffff, #b0d8f0)",
+              background: "linear-gradient(135deg, #e0e6ff, #a0c4e0)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
               backgroundClip: "text",
@@ -421,15 +419,14 @@ export default function ChatView({ agent, messages, onMessagesChange, onMenuClic
           >
             {agent.name}
           </h2>
-          <p className="truncate text-[11px]" style={{ color: "rgba(74,158,187,0.45)" }}>
+          <p className="truncate text-[11px]" style={{ color: "rgba(160,170,192,0.45)" }}>
             {agent.description}
           </p>
         </div>
 
-        {/* ONLINE indicator */}
         <div className="hidden items-center gap-1.5 md:flex">
           <div className="status-online h-1.5 w-1.5 rounded-full" />
-          <span style={{ color: "rgba(34,197,94,0.65)", fontSize: "9px", letterSpacing: "2px", fontFamily: "monospace" }}>
+          <span style={{ color: "rgba(34,197,94,0.6)", fontSize: "9px", letterSpacing: "2px", fontFamily: "monospace" }}>
             ONLINE
           </span>
         </div>
@@ -439,9 +436,9 @@ export default function ChatView({ agent, messages, onMessagesChange, onMenuClic
             onClick={() => onMessagesChange([])}
             title="Limpar conversa"
             className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
-            style={{ color: "rgba(74,158,187,0.35)", background: "transparent", transition: "all 0.15s ease-out" }}
-            onMouseEnter={(e) => Object.assign((e.currentTarget as HTMLElement).style, { color: "#f87171", background: "rgba(239,68,68,0.08)" })}
-            onMouseLeave={(e) => Object.assign((e.currentTarget as HTMLElement).style, { color: "rgba(74,158,187,0.35)", background: "transparent" })}
+            style={{ color: "rgba(160,170,192,0.3)", background: "transparent", transition: "all 0.2s ease-out" }}
+            onMouseEnter={(e) => Object.assign((e.currentTarget as HTMLElement).style, { color: "#f87171", background: "rgba(239,68,68,0.07)" })}
+            onMouseLeave={(e) => Object.assign((e.currentTarget as HTMLElement).style, { color: "rgba(160,170,192,0.3)", background: "transparent" })}
           >
             <TrashIcon size={14} />
           </button>
@@ -458,51 +455,42 @@ export default function ChatView({ agent, messages, onMessagesChange, onMenuClic
       >
         {chatDragOver && (
           <div
-            className="pointer-events-none absolute inset-4 z-50 flex items-center justify-center rounded-xl"
-            style={{ border: "1px dashed rgba(0,212,255,0.3)", background: "rgba(0,212,255,0.02)" }}
+            className="pointer-events-none absolute inset-4 z-50 flex items-center justify-center rounded-lg"
+            style={{ border: "1px dashed rgba(0,217,255,0.35)", background: "rgba(0,217,255,0.02)" }}
           >
-            <p className="text-sm font-medium" style={{ color: "#00d4ff" }}>Solte as imagens aqui</p>
+            <p className="text-sm font-medium" style={{ color: "#00d9ff" }}>Solte as imagens aqui</p>
           </div>
         )}
 
         <div className="mx-auto w-full max-w-2xl px-5 py-8">
           {isEmpty ? (
-            /* ── Empty state ── */
             <div className="flex flex-col items-center justify-center pt-12 text-center">
 
-              {/* Single ring + large icon */}
+              {/* Icon ring */}
               <div className="relative mb-8 flex h-36 w-36 items-center justify-center">
-                {/* Ambient glow */}
                 <div style={{
-                  position: "absolute",
-                  inset: "-24px",
-                  borderRadius: "50%",
-                  background: "radial-gradient(circle, rgba(0,212,255,0.08) 0%, transparent 65%)",
+                  position: "absolute", inset: "-24px", borderRadius: "50%",
+                  background: "radial-gradient(circle, rgba(0,217,255,0.07) 0%, transparent 65%)",
                   filter: "blur(20px)",
                 }} />
-                {/* Single subtle ring */}
                 <div style={{
-                  position: "absolute",
-                  width: "136px",
-                  height: "136px",
-                  borderRadius: "50%",
-                  border: "1px solid rgba(0,212,255,0.12)",
-                  borderTopColor: "rgba(0,212,255,0.5)",
+                  position: "absolute", width: "136px", height: "136px", borderRadius: "50%",
+                  border: "1px solid rgba(0,217,255,0.1)",
+                  borderTopColor: "rgba(0,217,255,0.45)",
                   animation: "ring-cw 12s linear infinite",
                 }} />
-                {/* Center icon h-28 w-28 */}
                 <div
                   className="relative flex h-28 w-28 items-center justify-center rounded-3xl"
                   style={{
-                    background: "linear-gradient(135deg, rgba(0,212,255,0.08), rgba(0,102,255,0.05))",
-                    border: "1px solid rgba(0,212,255,0.15)",
-                    boxShadow: "0 0 24px rgba(0,212,255,0.08), inset 0 0 16px rgba(0,212,255,0.03)",
+                    background: "linear-gradient(135deg, rgba(0,217,255,0.07), rgba(0,128,255,0.05))",
+                    border: "1px solid rgba(0,217,255,0.12)",
+                    boxShadow: "0 0 32px rgba(0,217,255,0.06), inset 0 0 20px rgba(0,217,255,0.03)",
                   }}
                 >
                   <AgentIcon
                     id={agent.id}
                     size={52}
-                    style={{ color: "#00d4ff", filter: "drop-shadow(0 0 8px rgba(0,212,255,0.6))" }}
+                    style={{ color: "#00d9ff", filter: "drop-shadow(0 0 10px rgba(0,217,255,0.55))" }}
                   />
                 </div>
               </div>
@@ -510,37 +498,33 @@ export default function ChatView({ agent, messages, onMessagesChange, onMenuClic
               <h3
                 className="font-display mb-3 text-4xl font-bold tracking-tight"
                 style={{
-                  background: "linear-gradient(135deg, #ffffff 0%, #b0d8ef 40%, #00d4ff 100%)",
+                  background: "linear-gradient(135deg, #ffffff 0%, #a0c8ef 40%, #00d9ff 100%)",
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
                   backgroundClip: "text",
-                  filter: "drop-shadow(0 0 16px rgba(0,212,255,0.18))",
+                  filter: "drop-shadow(0 0 20px rgba(0,217,255,0.15))",
                 }}
               >
                 {agent.name}
               </h3>
-              <p className="mx-auto mb-6 max-w-xs text-[14px] leading-relaxed" style={{ color: "rgba(160,200,220,0.5)" }}>
+              <p className="mx-auto mb-6 max-w-xs text-[14px] leading-relaxed" style={{ color: "rgba(160,170,192,0.5)" }}>
                 {agent.description}
               </p>
 
-              {/* Decorative line */}
               <div style={{
-                width: "200px",
-                height: "1px",
-                background: "linear-gradient(90deg, transparent, rgba(0,212,255,0.3), transparent)",
+                width: "200px", height: "1px",
+                background: "linear-gradient(90deg, transparent, rgba(0,217,255,0.25), transparent)",
                 marginBottom: "20px",
               }} />
 
-              {/* Sistema online badge */}
               <div className="flex items-center gap-2">
                 <div className="status-online h-1.5 w-1.5 rounded-full" />
-                <span style={{ color: "rgba(34,197,94,0.6)", fontSize: "10px", letterSpacing: "2.5px", fontFamily: "monospace" }}>
+                <span style={{ color: "rgba(34,197,94,0.55)", fontSize: "10px", letterSpacing: "2.5px", fontFamily: "monospace" }}>
                   SISTEMA ONLINE
                 </span>
               </div>
             </div>
           ) : (
-            /* ── Messages ── */
             <div className="space-y-5">
               {messages.map((m, i) =>
                 agent.id === "copys" && m.role === "assistant" && m.content
@@ -555,9 +539,9 @@ export default function ChatView({ agent, messages, onMessagesChange, onMenuClic
               )}
               {lastIsEmpty && (
                 <div className="flex items-end gap-1.5 px-1 pb-1">
-                  <span className="typing-dot h-1.5 w-1.5 rounded-full" style={{ background: "#00d4ff" }} />
-                  <span className="typing-dot h-1.5 w-1.5 rounded-full" style={{ background: "#00d4ff" }} />
-                  <span className="typing-dot h-1.5 w-1.5 rounded-full" style={{ background: "#00d4ff" }} />
+                  <span className="typing-dot h-1.5 w-1.5 rounded-full" style={{ background: "#00d9ff" }} />
+                  <span className="typing-dot h-1.5 w-1.5 rounded-full" style={{ background: "#00d9ff" }} />
+                  <span className="typing-dot h-1.5 w-1.5 rounded-full" style={{ background: "#00d9ff" }} />
                 </div>
               )}
             </div>
@@ -575,10 +559,10 @@ export default function ChatView({ agent, messages, onMessagesChange, onMenuClic
               value={price}
               onChange={(e) => setPrice(e.target.value)}
               placeholder="Preço do produto (ex: R$ 89,90)"
-              className="w-full rounded-xl px-3.5 py-2.5 text-[13px] outline-none"
-              style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", color: "#e0f4ff", transition: "border-color 0.2s ease-out" }}
-              onFocus={(e) => { e.currentTarget.style.borderColor = "rgba(0,212,255,0.35)"; }}
-              onBlur={(e)  => { e.currentTarget.style.borderColor = "rgba(255,255,255,0.07)"; }}
+              className="w-full rounded-lg px-4 py-2 text-[13px] outline-none"
+              style={{ background: "rgba(15,21,53,0.8)", border: "1px solid #1a2555", color: "#e0e6ff", transition: "border-color 0.2s ease-out" }}
+              onFocus={(e) => { e.currentTarget.style.borderColor = "rgba(0,217,255,0.4)"; }}
+              onBlur={(e)  => { e.currentTarget.style.borderColor = "#1a2555"; }}
             />
           )}
 
@@ -586,11 +570,11 @@ export default function ChatView({ agent, messages, onMessagesChange, onMenuClic
             <div className="flex items-center gap-2">
               {attachedImages.map((img, i) => (
                 <div key={i} className="relative h-12 w-12 shrink-0">
-                  <img src={img.previewUrl} alt={img.name} className="h-12 w-12 rounded-lg object-cover" style={{ border: "1px solid rgba(0,212,255,0.22)" }} />
+                  <img src={img.previewUrl} alt={img.name} className="h-12 w-12 rounded-lg object-cover" style={{ border: "1px solid rgba(0,217,255,0.2)" }} />
                   <button
                     onClick={() => removeImage(i)}
                     className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-bold"
-                    style={{ background: "#000814", border: "1px solid rgba(0,212,255,0.4)", color: "#00d4ff" }}
+                    style={{ background: "#0a0e27", border: "1px solid rgba(0,217,255,0.35)", color: "#00d9ff" }}
                   >
                     ×
                   </button>
@@ -600,13 +584,13 @@ export default function ChatView({ agent, messages, onMessagesChange, onMenuClic
                 <button
                   onClick={() => fileInputRef.current?.click()}
                   className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg text-lg"
-                  style={{ border: "1px dashed rgba(0,212,255,0.22)", color: "#4a9ebb", background: "rgba(0,212,255,0.03)", transition: "all 0.2s ease-out" }}
+                  style={{ border: "1px dashed rgba(0,217,255,0.2)", color: "#a0aac0", background: "rgba(0,217,255,0.02)", transition: "all 0.2s ease-out" }}
                   title="Adicionar imagem"
                 >
                   +
                 </button>
               )}
-              <span className="text-[11px]" style={{ color: "#4a9ebb" }}>
+              <span className="text-[11px]" style={{ color: "#a0aac0" }}>
                 {attachedImages.length}/{maxImages(agent.id)} imagem{maxImages(agent.id) > 1 ? "ns" : ""}
               </span>
             </div>
@@ -614,17 +598,17 @@ export default function ChatView({ agent, messages, onMessagesChange, onMenuClic
 
           {/* Main input bar */}
           <div
-            className={["flex items-end gap-1.5 rounded-2xl p-2", listening ? "input-listening" : ""].join(" ")}
+            className={["flex items-end gap-1.5 rounded-lg p-2", listening ? "input-listening" : ""].join(" ")}
             style={{
-              background: "rgba(4,12,28,0.96)",
-              backdropFilter: "blur(24px)",
-              WebkitBackdropFilter: "blur(24px)",
+              background: "rgba(15,21,53,0.96)",
+              backdropFilter: "blur(20px)",
+              WebkitBackdropFilter: "blur(20px)",
               border: listening
                 ? "1px solid rgba(239,68,68,0.4)"
                 : inputFocused
-                ? "1px solid rgba(0,212,255,0.35)"
-                : "1px solid rgba(255,255,255,0.07)",
-              boxShadow: inputFocused && !listening ? "0 0 0 3px rgba(0,212,255,0.05)" : undefined,
+                ? "1px solid rgba(0,217,255,0.4)"
+                : "1px solid #1a2555",
+              boxShadow: inputFocused && !listening ? "0 0 0 3px rgba(0,217,255,0.05), 0 0 16px rgba(0,217,255,0.06)" : undefined,
               transition: "border-color 0.2s ease-out, box-shadow 0.2s ease-out",
             }}
           >
@@ -633,9 +617,9 @@ export default function ChatView({ agent, messages, onMessagesChange, onMenuClic
               disabled={!canAttachMore}
               title="Anexar imagem"
               className="mb-0.5 flex h-8 w-8 items-center justify-center rounded-lg"
-              style={{ color: canAttachMore ? "#4a9ebb" : "rgba(255,255,255,0.15)", background: "transparent", transition: "all 0.15s ease-out" }}
-              onMouseEnter={(e) => { if (canAttachMore) Object.assign((e.currentTarget as HTMLElement).style, { background: "rgba(0,212,255,0.08)", color: "#00d4ff" }); }}
-              onMouseLeave={(e) => { if (canAttachMore) Object.assign((e.currentTarget as HTMLElement).style, { background: "transparent", color: "#4a9ebb" }); }}
+              style={{ color: canAttachMore ? "#a0aac0" : "rgba(255,255,255,0.12)", background: "transparent", transition: "all 0.2s ease-out" }}
+              onMouseEnter={(e) => { if (canAttachMore) Object.assign((e.currentTarget as HTMLElement).style, { background: "rgba(0,217,255,0.07)", color: "#00d9ff" }); }}
+              onMouseLeave={(e) => { if (canAttachMore) Object.assign((e.currentTarget as HTMLElement).style, { background: "transparent", color: "#a0aac0" }); }}
             >
               <UploadIcon size={16} />
             </button>
@@ -659,7 +643,7 @@ export default function ChatView({ agent, messages, onMessagesChange, onMenuClic
               rows={1}
               placeholder={listening ? "Ouvindo..." : agent.placeholder}
               className="max-h-40 flex-1 resize-none bg-transparent px-2 py-2 text-[14px] leading-relaxed focus:outline-none"
-              style={{ color: "#e0f4ff" }}
+              style={{ color: "#e0e6ff" }}
             />
 
             <button
@@ -668,26 +652,25 @@ export default function ChatView({ agent, messages, onMessagesChange, onMenuClic
               title={listening ? "Parar gravação" : "Gravar voz (pt-BR)"}
               className={["mb-0.5 flex h-8 w-8 items-center justify-center rounded-lg", listening ? "mic-listening" : ""].join(" ")}
               style={{
-                ...(listening ? { background: "rgba(239,68,68,0.12)", color: "#f87171" } : { background: "transparent", color: "#4a9ebb" }),
-                transition: "all 0.15s ease-out",
+                ...(listening ? { background: "rgba(239,68,68,0.1)", color: "#f87171" } : { background: "transparent", color: "#a0aac0" }),
+                transition: "all 0.2s ease-out",
               }}
-              onMouseEnter={(e) => { if (!listening) Object.assign((e.currentTarget as HTMLElement).style, { background: "rgba(0,212,255,0.08)", color: "#00d4ff" }); }}
-              onMouseLeave={(e) => { if (!listening) Object.assign((e.currentTarget as HTMLElement).style, { background: "transparent", color: "#4a9ebb" }); }}
+              onMouseEnter={(e) => { if (!listening) Object.assign((e.currentTarget as HTMLElement).style, { background: "rgba(0,217,255,0.07)", color: "#00d9ff" }); }}
+              onMouseLeave={(e) => { if (!listening) Object.assign((e.currentTarget as HTMLElement).style, { background: "transparent", color: "#a0aac0" }); }}
             >
               <MicIcon size={16} />
             </button>
 
-            {/* Send — white icon, spring hover */}
             <button
               onClick={sendMessage}
               disabled={!canSend()}
               className="send-btn mb-0.5 mr-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full"
               style={{
                 background: canSend()
-                  ? "linear-gradient(145deg, #1a44ff, #0077cc)"
-                  : "rgba(255,255,255,0.04)",
+                  ? "linear-gradient(145deg, #0066cc, #0088ff)"
+                  : "rgba(26,31,53,0.8)",
                 boxShadow: canSend()
-                  ? "0 2px 8px rgba(0,60,200,0.4), inset 0 1px 0 rgba(255,255,255,0.12)"
+                  ? "0 2px 8px rgba(0,80,200,0.4), inset 0 1px 0 rgba(255,255,255,0.1)"
                   : undefined,
               }}
               aria-label="Enviar"
@@ -696,14 +679,14 @@ export default function ChatView({ agent, messages, onMessagesChange, onMenuClic
                 size={16}
                 style={{
                   opacity: canSend() ? 1 : 0.2,
-                  filter: "drop-shadow(0 0 4px rgba(255,255,255,0.5))",
+                  filter: "drop-shadow(0 0 4px rgba(255,255,255,0.4))",
                 }}
               />
             </button>
           </div>
         </div>
 
-        <p className="mt-2.5 text-center text-[10px]" style={{ color: "rgba(255,255,255,0.1)" }}>
+        <p className="mt-2 text-center text-[10px]" style={{ color: "rgba(255,255,255,0.08)" }}>
           Enter envia · Shift+Enter quebra linha · 📎 anexa imagens
         </p>
       </div>
