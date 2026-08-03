@@ -64,7 +64,7 @@ export async function POST(req: Request) {
     async start(controller) {
       try {
         const agentConfig: Record<string, { temperature: number; max_tokens: number }> = {
-          videos: { temperature: 0, max_tokens: 1500 },
+          videos: { temperature: 0, max_tokens: 800 },
           imagens: { temperature: 0.7, max_tokens: 4096 },
           copys: { temperature: 0.9, max_tokens: 4096 },
           "mode-amaral": { temperature: 0.7, max_tokens: 4096 },
@@ -74,7 +74,7 @@ export async function POST(req: Request) {
 
         const processedMessages = agentId === "videos"
           ? [
-              { role: "user" as const, content: "RESPONDA APENAS COM 3 JSONs CURTOS. CADA JSON MÁXIMO 8 SEGUNDOS (T0 ATÉ T8s). PROIBIDO PASSAR DE T8s. PROIBIDO TIMESTAMPS ACIMA DE 8." },
+              { role: "assistant" as const, content: '[\n{' },
               ...messages
             ]
           : messages;
