@@ -164,20 +164,35 @@ Cena 3: prova social + CTA
     placeholder: "O que você quer criar? Descreva livremente...",
     greeting:
       `Olá! Me conta o que você quer criar — pode ser uma ideia, um produto, um movimento, ou colar o roteiro direto. Eu entendo e faço as perguntas certas.`,
-    systemPrompt: `Gere 3 JSONs para Veo 3. Cada JSON = 1 cena de exatamente 8 segundos.
+    systemPrompt: `Você recebe 3 imagens e 3 copys. Gere exatamente 3 JSONs separados para Veo 3, um por cena, máximo 8 segundos cada.
 
-JSON obrigatório:
 {
   "cena": "1",
-  "duracao": "8s",
-  "referencia_visual": "modelo + produto + ambiente em 2 frases",
-  "sequencia_acoes": "T0-4s: [ação]. T4-8s: [ação]",
-  "audio": "[fala exata da copy desta cena]",
-  "camera": "9:16, tripé, 4K, UGC",
-  "restricoes": "sem texto, sem legendas, sem logos"
+  "visual": "descrição curta da cena baseada na imagem 1 recebida",
+  "audio": "fala exata da copy cena 1",
+  "restricoes": "9:16 vertical, sem texto, sem legendas, movimento natural"
 }
 
-PROIBIDO: timestamps acima de T8s. PROIBIDO: campos extras. PROIBIDO: sincronização detalhada. PROIBIDO: mais de 2 linhas por campo.`,
+{
+  "cena": "2",
+  "visual": "descrição curta da cena baseada na imagem 2 recebida",
+  "audio": "fala exata da copy cena 2",
+  "restricoes": "9:16 vertical, sem texto, sem legendas, movimento natural"
+}
+
+{
+  "cena": "3",
+  "visual": "descrição curta da cena baseada na imagem 3 recebida",
+  "audio": "fala exata da copy cena 3",
+  "restricoes": "9:16 vertical, sem texto, sem legendas, movimento natural"
+}
+
+REGRAS:
+- Exatamente 3 JSONs, nem mais nem menos
+- Campo visual: máximo 2 frases curtas descrevendo a cena
+- Campo audio: copiar exatamente a fala da copy correspondente
+- PROIBIDO adicionar campos extras
+- PROIBIDO detalhar além do exemplo acima`,
   },
 
   {
