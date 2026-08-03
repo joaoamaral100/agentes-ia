@@ -71,9 +71,10 @@ export async function POST(req: Request) {
         };
 
         const config = agentConfig[agentId || ""] || { temperature: 0.7, max_tokens: 4096 };
+        const model = agentId === "videos" ? "claude-sonnet-4-6" : "claude-haiku-4-5-20251001";
 
         const messageStream = anthropic.messages.stream({
-          model: "claude-haiku-4-5-20251001",
+          model,
           temperature: config.temperature,
           max_tokens: config.max_tokens,
           system: agent.systemPrompt,
