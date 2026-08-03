@@ -1,13 +1,9 @@
 "use client";
 import { useState } from "react";
 
-interface Scene {
+interface BlockItem {
   title: string;
   content: string;
-}
-
-interface Copy {
-  scenes: Scene[];
 }
 
 interface CopyDisplayProps {
@@ -17,72 +13,101 @@ interface CopyDisplayProps {
 export default function CopyDisplay({ content }: CopyDisplayProps) {
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
 
-  const parseCopys = (text: string) => {
-    const scenes: Scene[] = [];
-    const lines = text.split('\n');
-    let currentScene = { title: '', content: '' };
-
-    for (const line of lines) {
-      if (line.includes('CENA') && line.includes('—')) {
-        if (currentScene.content) scenes.push(currentScene);
-        currentScene = {
-          title: line.trim(),
-          content: ''
-        };
-      } else if (line.trim() && !line.startsWith('#') && !line.includes('---')) {
-        currentScene.content += line + '\n';
-      }
-    }
-    if (currentScene.content) scenes.push(currentScene);
-    return scenes;
+  const detectContentType = (text: string): 'copys' | 'videos' => {
+    return text.includes('COPY') && text.match(/COPY\s+\d+/i) ? 'copys' : 'videos';
   };
 
-  const groupScenesCopys = (scenes: Scene[]): Copy[] => {
-    const copys: Copy[] = [];
-    for (let i = 0; i < scenes.length; i += 3) {
-      copys.push({
-        scenes: scenes.slice(i, i + 3)
+  const parseJsonBlocks = (text: string): BlockItem[] => {
+    const blocks: BlockItem[] = [];
+    const jsonRegex = /\{[\s\S]*?\n\}/g;
+    const matches = text.match(jsonRegex);
+
+    if (matches) {
+      matches.forEach((json, idx) => {
+        blocks.push({
+          title: `CENA ${idx + 1}`,
+          content: json
+        });
       });
     }
-    return copys;
+
+    return blocks;
   };
 
-  const handleCopy = (copy: Copy, index: number) => {
-    const copyText = copy.scenes
-      .map(scene => `${scene.title}\n${scene.content}`)
-      .join('\n');
-    navigator.clipboard.writeText(copyText.trim());
+  const parseCopyBlocks = (text: string): BlockItem[] => {
+    const blocks: BlockItem[] = [];
+    const copyRegex = /COPY\s+(\d+)([\s\S]*?)(?=COPY\s+\d+|$)/gi;
+    let match;
+    let copyNum = 1;
+
+    while ((match = copyRegex.exec(text)) !== null) {
+      const copyContent = match[0];
+      blocks.push({
+        title: `COPY ${copyNum}`,
+        content: copyContent.trim()
+      });
+      copyNum++;
+    }
+
+    if (blocks.length === 0) {
+      const lines = text.split('\n');
+      let currentCopy = '';
+      let copyNumber = 1;
+
+      for (const line of lines) {
+        if (line.match(/COPY\s+\d+/i)) {
+          if (currentCopy) {
+            blocks.push({
+              title: `COPY ${copyNumber}`,
+              content: currentCopy.trim()
+            });
+            copyNumber++;
+          }
+          currentCopy = line + '\n';
+        } else {
+          currentCopy += line + '\n';
+        }
+      }
+
+      if (currentCopy) {
+        blocks.push({
+          title: `COPY ${copyNumber}`,
+          content: currentCopy.trim()
+        });
+      }
+    }
+
+    return blocks;
+  };
+
+  const handleCopy = (text: string, index: number) => {
+    navigator.clipboard.writeText(text.trim());
     setCopiedIndex(index);
     setTimeout(() => setCopiedIndex(null), 2000);
   };
 
-  const scenes = parseCopys(content);
-  const copys = groupScenesCopys(scenes);
+  const contentType = detectContentType(content);
+  const blocks = contentType === 'copys'
+    ? parseCopyBlocks(content)
+    : parseJsonBlocks(content);
 
   return (
     <div className="copy-container">
-      {copys.map((copy, copyIdx) => (
-        <div key={copyIdx} className="copy-box">
-          <div className="copy-header">
-            <h2>COPY {copyIdx + 1}</h2>
+      {blocks.map((block, idx) => (
+        <div key={idx} className="block-box">
+          <div className="block-header">
+            <h2>{block.title}</h2>
             <button
-              onClick={() => handleCopy(copy, copyIdx)}
-              className={`copy-button ${copiedIndex === copyIdx ? 'copied' : ''}`}
+              onClick={() => handleCopy(block.content, idx)}
+              className={`copy-button ${copiedIndex === idx ? 'copied' : ''}`}
             >
-              {copiedIndex === copyIdx ? '✓ Copiado!' : 'Copiar'}
+              {copiedIndex === idx ? '✓ Copiado!' : 'Copiar'}
             </button>
           </div>
-          <div className="copy-scenes">
-            {copy.scenes.map((scene, sceneIdx) => (
-              <div key={sceneIdx} className="scene-content">
-                <h3>{scene.title}</h3>
-                <div className="scene-text">
-                  {scene.content.split('\n').map((line, lineIdx) =>
-                    line.trim() && <p key={lineIdx}>{line}</p>
-                  )}
-                </div>
-              </div>
-            ))}
+          <div className="block-content">
+            {block.content.split('\n').map((line, lineIdx) =>
+              line.trim() && <p key={lineIdx}>{line}</p>
+            )}
           </div>
         </div>
       ))}
