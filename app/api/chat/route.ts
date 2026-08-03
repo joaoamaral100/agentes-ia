@@ -63,11 +63,18 @@ export async function POST(req: Request) {
   const stream = new ReadableStream({
     async start(controller) {
       try {
+        const processedMessages = agentId === "videos"
+          ? [
+              { role: "user" as const, content: "RESPONDA APENAS COM 3 JSONs CURTOS. CADA JSON MÁXIMO 8 SEGUNDOS (T0 ATÉ T8s). PROIBIDO PASSAR DE T8s. PROIBIDO TIMESTAMPS ACIMA DE 8." },
+              ...messages
+            ]
+          : messages;
+
         const messageStream = anthropic.messages.stream({
           model: "claude-haiku-4-5-20251001",
-          max_tokens: 8192,
+          max_tokens: 4096,
           system: agent.systemPrompt,
-          messages: messages.map((m) => {
+          messages: processedMessages.map((m) => {
             if (m.images && m.images.length > 0) {
               return {
                 role: m.role,
