@@ -105,6 +105,16 @@ PROIBIDO NO UNBOXING: mencionar rosto, expressão facial, olhar para a câmera, 
 
 REGRA DE CONTINUIDADE: as 3 cenas acontecem no MESMO ambiente, com as MESMAS mãos.
 
+TRAVAS OBRIGATÓRIAS DA CENA 1 (UNBOXING):
+
+ANATOMIA: escreva sempre exatamente 'Apenas 1 pessoa, exatamente 2 mãos com 5 dedos cada. Nunca criar mãos, dedos ou braços extras. A mão esquerda estabiliza a caixa, a mão direita abre a aba.' Nada além disso.
+
+CAIXA: existe UMA única caixa de entrega. Ao abrir, aparece o produto embalado dentro dela. NUNCA descreva uma segunda caixa, caixa dentro de caixa, ou embalagem adicional que não esteja na imagem.
+
+PRODUTO: na cena 1 o produto NÃO sai da caixa. NÃO é levantado. NÃO é segurado. NÃO é apresentado à câmera. As mãos apenas abrem as abas e o produto aparece visível lá dentro, parado. Retirar o produto só acontece na cena 2.
+
+O campo acoes da cena 1 deve conter apenas: abrir as abas da caixa e revelar o produto dentro. Nada mais.
+
 FÁBRICA:
 Cena 1 = problema/dor do cliente sem o produto
 Cena 2 = produto resolvendo o problema
