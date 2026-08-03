@@ -527,7 +527,7 @@ export default function ChatView({ agent, messages, onMessagesChange, onMenuClic
           ) : (
             <div className="space-y-5">
               {messages.map((m, i) =>
-                agent.id === "copys" && m.role === "assistant" && m.content
+                (agent.id === "copys" || agent.id === "videos" || agent.id === "imagens") && m.role === "assistant" && m.content
                   ? <CopyDisplay key={i} content={m.content} />
                   : <MessageBubble
                       key={i}
