@@ -164,21 +164,21 @@ Cena 3: prova social + CTA
     placeholder: "O que você quer criar? Descreva livremente...",
     greeting:
       `Olá! Me conta o que você quer criar — pode ser uma ideia, um produto, um movimento, ou colar o roteiro direto. Eu entendo e faço as perguntas certas.`,
-    systemPrompt: `Você recebe imagens do produto e copys das cenas. Gere exatamente 3 JSONs separados, 1 por cena, seguindo EXATAMENTE esta estrutura:
+    systemPrompt: `Você recebe imagens do produto e as copys das 3 cenas. Gere exatamente 3 JSONs separados seguindo EXATAMENTE esta estrutura, sem adicionar campos extras:
 
 {
   "cena": 1,
   "prompt": {
-    "formato": "Vídeo vertical 9:16, UGC realista, gravação doméstica autêntica.",
+    "formato": "Vídeo vertical 9:16, UGC realista e natural, aparência de gravação doméstica autêntica.",
     "referencia_produto": "Manter produto fiel à imagem enviada. Não alterar cores, formato, proporções ou componentes.",
-    "cena": "[o que acontece nesta cena em 2-3 frases]",
-    "anatomia": "Apenas 1 pessoa, exatamente 2 mãos e 5 dedos em cada mão, sem duplicações.",
-    "acoes": "[sequência de ações naturais em 2-3 frases]",
-    "camera": "[enquadramento e movimento básico]",
+    "cena": "[descrição em 2-3 frases do que acontece nesta cena]",
+    "anatomia": "Apenas 1 pessoa, exatamente 2 mãos e 5 dedos em cada mão, sem mãos extras ou dedos duplicados.",
+    "acoes": "[sequência de ações em 2-3 frases, SEM timestamps]",
+    "camera": "[enquadramento simples em 1-2 frases]",
     "audio": {
       "voz": "Feminina, brasileira, natural, espontânea e contínua.",
       "fala_exata": "[copy exata desta cena]",
-      "sincronizacao": "Fala contínua e sincronizada com as ações, sem cortes."
+      "sincronizacao": "A fala deve ser contínua e sincronizada com a ação, sem cortes."
     },
     "restricoes": [
       "Sem texto na tela.",
@@ -191,16 +191,16 @@ Cena 3: prova social + CTA
   }
 }
 
-CENA 1: Unboxing - pessoa abrindo/recebendo produto
-CENA 2: Demonstração - pessoa usando/testando produto
+CENA 1: unboxing - pessoa abrindo/recebendo produto
+CENA 2: demonstração - pessoa usando/testando produto
 CENA 3: CTA - pessoa segura produto, olha câmera, gesto discreto pra baixo
 
-REGRAS:
-- Exatamente 3 JSONs separados
-- Nunca juntar em 1 JSON só
-- Nunca adicionar campos extras
-- Nunca adicionar timestamps
-- Adaptar cena, acoes e audio para o produto recebido`,
+PROIBIDO:
+- Timestamps (T0-2s, T2-4s etc)
+- Sincronização palavra por palavra
+- Campos extras além dos listados
+- referencia_visual, composicao_frame, iluminacao, camera_tecnica, sincronizacao_PERFEITA
+- Juntar os 3 JSONs em um só`,
   },
 
   {
