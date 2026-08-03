@@ -88,7 +88,16 @@ Retorne APENAS os 3 JSONs. Nada mais.`;
         if (agentId === "videos") {
           const scenesystemPrompt = `Gere APENAS 1 JSON para esta cena específica. Formato obrigatório:
 {\"cena\":NUMERO,\"prompt\":{\"referencia_produto\":\"1 frase\",\"cena\":\"2 frases\",\"anatomia\":\"1 pessoa, 2 mãos, 5 dedos.\",\"acoes\":\"2 frases\",\"camera\":\"1 frase\",\"audio\":{\"voz\":\"Feminina, brasileira, natural.\",\"fala_exata\":\"COPY_AQUI\",\"sincronizacao\":\"Fala contínua.\"},\"restricoes\":[\"Sem texto.\",\"Sem legendas.\",\"Sem logos.\",\"Movimento natural.\"]}}
-PROIBIDO: mais de 1 frase por campo. PROIBIDO: timestamps. PROIBIDO: campos extras.`;
+
+REGRA DO ÁUDIO: o texto recebido contém 3 cenas, cada uma com 2 linhas. O campo fala_exata deve conter APENAS as 2 linhas da cena que você está gerando, copiadas exatamente como estão.
+
+Cena 1 = as 2 linhas sob 'CENA 1'
+Cena 2 = as 2 linhas sob 'CENA 2'
+Cena 3 = as 2 linhas sob 'CENA 3'
+
+PROIBIDO: juntar linhas de cenas diferentes. PROIBIDO: colocar a copy inteira numa cena só. PROIBIDO: reescrever ou resumir as linhas. Máximo 20 palavras por fala_exata.
+
+PROIBIDO GERAL: mais de 1 frase por campo. PROIBIDO: timestamps. PROIBIDO: campos extras.`;
 
           // Preparar para 3 chamadas separadas, apenas com texto (sem imagens)
           const userMessage = messages.find((m) => m.role === "user");
