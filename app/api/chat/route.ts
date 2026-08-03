@@ -90,9 +90,9 @@ Retorne APENAS os 3 JSONs. Nada mais.`;
 {\"cena\":NUMERO,\"prompt\":{\"referencia_produto\":\"1 frase\",\"cena\":\"2 frases\",\"anatomia\":\"1 pessoa, 2 mãos, 5 dedos.\",\"acoes\":\"2 frases\",\"camera\":\"1 frase\",\"audio\":{\"voz\":\"Feminina, brasileira, natural.\",\"fala_exata\":\"COPY_AQUI\",\"sincronizacao\":\"Fala contínua.\"},\"restricoes\":[\"Sem texto.\",\"Sem legendas.\",\"Sem logos.\",\"Movimento natural.\"]}}
 PROIBIDO: mais de 1 frase por campo. PROIBIDO: timestamps. PROIBIDO: campos extras.`;
 
-          // Extrair imagens e preparar para 3 chamadas
+          // Preparar para 3 chamadas separadas, apenas com texto (sem imagens)
           const userMessage = messages.find((m) => m.role === "user");
-          const imageData = userMessage?.images || [];
+          const userText = userMessage?.apiText ?? userMessage?.content ?? "";
 
           // Fazer 3 chamadas separadas, uma por cena
           const responses: string[] = [];
@@ -106,23 +106,7 @@ PROIBIDO: mais de 1 frase por campo. PROIBIDO: timestamps. PROIBIDO: campos extr
               messages: [
                 {
                   role: "user",
-                  content:
-                    imageData.length > 0
-                      ? [
-                          {
-                            type: "image" as const,
-                            source: {
-                              type: "base64" as const,
-                              media_type: imageData[sceneNum - 1]?.mediaType as "image/jpeg" | "image/png" | "image/gif" | "image/webp",
-                              data: imageData[sceneNum - 1]?.base64 || "",
-                            },
-                          },
-                          {
-                            type: "text" as const,
-                            text: `Cena ${sceneNum}: ${userMessage?.apiText ?? userMessage?.content}`,
-                          },
-                        ]
-                      : `Cena ${sceneNum}: ${userMessage?.apiText ?? userMessage?.content}`,
+                  content: `Cena ${sceneNum}: ${userText}`,
                 },
               ],
             });
