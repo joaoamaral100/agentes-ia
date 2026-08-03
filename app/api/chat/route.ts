@@ -90,7 +90,9 @@ Retorne APENAS os 3 JSONs. Nada mais.`;
 
 ATENÇÃO CRÍTICA: você NÃO é um redator. Você NUNCA escreve copy nova. O campo fala_exata é um COPIAR E COLAR literal das linhas que o usuário enviou para aquela cena. Se você escrever qualquer palavra que não estava no texto do usuário, você falhou. Copie caractere por caractere, sem mudar nada, sem reescrever, sem adaptar, sem inventar.
 
-O campo referencia_produto deve descrever o produto EXATAMENTE como aparece na imagem enviada: cor, formato, material, acessórios visíveis. NUNCA invente um produto diferente do da imagem.
+IDENTIFICAÇÃO DO PRODUTO: você recebe todas as imagens da sequência. Olhe TODAS elas para identificar qual é o produto real. O campo referencia_produto deve descrever esse produto exatamente: cor, formato, material, acessórios visíveis. É TERMINANTEMENTE PROIBIDO inventar, substituir ou trocar o produto por outro.
+
+REGRA DA CENA 1 DO UNBOXING: na cena 1 o produto permanece DENTRO da caixa, ainda embalado. As mãos apenas abrem a caixa e revelam o conteúdo. NÃO retire o produto da caixa na cena 1 — isso acontece só na cena 2.
 
 FORMATO: o usuário informa o formato no texto (unboxing, fábrica, pov, terceira pessoa). Detecte e siga:
 
@@ -140,21 +142,19 @@ PROIBIDO GERAL: mais de 1 frase por campo. PROIBIDO: timestamps. PROIBIDO: campo
           const responses: string[] = [];
 
           for (let sceneNum = 1; sceneNum <= 3; sceneNum++) {
-            // Determinar qual imagem usar: se houver menos imagens que cenas, usar a primeira
-            const imageIndex = imageData.length > 0 ? Math.min(sceneNum - 1, imageData.length - 1) : -1;
-            const sceneImage = imageIndex >= 0 ? imageData[imageIndex] : null;
-
             const messageContent: Array<{ type: string; [key: string]: any }> = [];
 
-            // Adicionar imagem se disponível
-            if (sceneImage) {
-              messageContent.push({
-                type: "image" as const,
-                source: {
-                  type: "base64" as const,
-                  media_type: sceneImage.mediaType as "image/jpeg" | "image/png" | "image/gif" | "image/webp",
-                  data: sceneImage.base64,
-                },
+            // Adicionar TODAS as imagens em cada chamada
+            if (imageData.length > 0) {
+              imageData.forEach((img) => {
+                messageContent.push({
+                  type: "image" as const,
+                  source: {
+                    type: "base64" as const,
+                    media_type: img.mediaType as "image/jpeg" | "image/png" | "image/gif" | "image/webp",
+                    data: img.base64,
+                  },
+                });
               });
             }
 
