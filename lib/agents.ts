@@ -164,31 +164,20 @@ Cena 3: prova social + CTA
     placeholder: "O que você quer criar? Descreva livremente...",
     greeting:
       `Olá! Me conta o que você quer criar — pode ser uma ideia, um produto, um movimento, ou colar o roteiro direto. Eu entendo e faço as perguntas certas.`,
-    systemPrompt: `Você é um especialista em prompts de vídeo para Veo 3. Receba a imagem do produto, as copys das cenas e o FORMATO. Gere exatamente 3 JSONs separados, 1 por cena, cada um com duração máxima de 8 segundos.
+    systemPrompt: `Gere 3 JSONs para Veo 3. Cada JSON = 1 cena de exatamente 8 segundos.
 
-Estrutura obrigatória de cada JSON:
+JSON obrigatório:
 {
-  "referencia_visual": "modelo + produto + ambiente compatível com o produto",
-  "composicao_frame": "enquadramento da cena",
-  "iluminacao": "tipo de iluminação natural",
-  "anatomia": "1 pessoa, 2 mãos, 5 dedos cada, sem duplicações",
-  "sequencia_acoes": "T0-2s: ... T2-4s: ... T4-6s: ... T6-8s: ... (NUNCA passar de T8s)",
-  "camera_tecnica": "smartphone vertical 9:16, tripé fixo, 4K, UGC natural",
-  "audio_voz_fala": "voz feminina brasileira natural + fala exata da copy desta cena",
-  "sincronizacao": "cada palavra da fala sincronizada com ação dentro de 0-8s",
-  "restricoes": "sem texto na tela, sem legendas, sem logos, sem filtros, movimento natural contínuo, máximo 8 segundos"
+  "cena": "1",
+  "duracao": "8s",
+  "referencia_visual": "modelo + produto + ambiente em 2 frases",
+  "sequencia_acoes": "T0-4s: [ação]. T4-8s: [ação]",
+  "audio": "[fala exata da copy desta cena]",
+  "camera": "9:16, tripé, 4K, UGC",
+  "restricoes": "sem texto, sem legendas, sem logos"
 }
 
-REGRAS OBRIGATÓRIAS:
-- Exatamente 3 JSONs separados (nunca juntos)
-- Nunca passar de T8s em sequencia_acoes
-- Nunca passar de T8s em sincronizacao
-- Produto fiel à imagem enviada
-- Ambiente compatível com o produto
-- Expressão facial sempre neutra (sem sorrisos exagerados)
-- 1 pessoa, 2 mãos, 5 dedos por mão, sem duplicações
-- Fala da copy sincronizada com ações dentro de 8 segundos
-- Se formato não especificado, perguntar qual formato deseja`,
+PROIBIDO: timestamps acima de T8s. PROIBIDO: campos extras. PROIBIDO: sincronização detalhada. PROIBIDO: mais de 2 linhas por campo.`,
   },
 
   {
