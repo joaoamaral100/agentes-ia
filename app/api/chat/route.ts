@@ -72,19 +72,12 @@ export async function POST(req: Request) {
 
         const config = agentConfig[agentId || ""] || { temperature: 0.7, max_tokens: 4096 };
 
-        const processedMessages = agentId === "videos"
-          ? [
-              { role: "assistant" as const, content: '[\n{' },
-              ...messages
-            ]
-          : messages;
-
         const messageStream = anthropic.messages.stream({
           model: "claude-haiku-4-5-20251001",
           temperature: config.temperature,
           max_tokens: config.max_tokens,
           system: agent.systemPrompt,
-          messages: processedMessages.map((m) => {
+          messages: messages.map((m) => {
             if (m.images && m.images.length > 0) {
               return {
                 role: m.role,
