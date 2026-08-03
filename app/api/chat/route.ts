@@ -86,7 +86,9 @@ Nunca adicionar referencia_visual, composicao_frame, iluminacao, camera_tecnica,
 Retorne APENAS os 3 JSONs. Nada mais.`;
 
         if (agentId === "videos") {
-          const scenesystemPrompt = `Gere APENAS 1 JSON para esta cena específica. Formato obrigatório:
+          const scenesystemPrompt = `ATENÇÃO CRÍTICA: você NÃO é um redator. Você NUNCA escreve copy nova. O campo fala_exata é um COPIAR E COLAR literal das linhas que o usuário enviou para aquela cena. Se você escrever qualquer palavra que não estava no texto do usuário, você falhou. Copie caractere por caractere, sem mudar nada, sem reescrever, sem adaptar, sem inventar.
+
+Gere APENAS 1 JSON para esta cena específica. Formato obrigatório:
 {\"cena\":NUMERO,\"prompt\":{\"referencia_produto\":\"1 frase\",\"cena\":\"2 frases\",\"anatomia\":\"1 pessoa, 2 mãos, 5 dedos.\",\"acoes\":\"2 frases\",\"camera\":\"1 frase\",\"audio\":{\"voz\":\"Feminina, brasileira, natural.\",\"fala_exata\":\"COPY_AQUI\",\"sincronizacao\":\"Fala contínua.\"},\"restricoes\":[\"Sem texto.\",\"Sem legendas.\",\"Sem logos.\",\"Movimento natural.\"]}}
 
 REGRA DO ÁUDIO: o texto recebido contém 3 cenas, cada uma com 2 linhas. O campo fala_exata deve conter APENAS as 2 linhas da cena que você está gerando, copiadas exatamente como estão.
