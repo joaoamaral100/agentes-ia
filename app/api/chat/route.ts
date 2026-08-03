@@ -90,6 +90,8 @@ Retorne APENAS os 3 JSONs. Nada mais.`;
 
 ATENÇÃO CRÍTICA: você NÃO é um redator. Você NUNCA escreve copy nova. O campo fala_exata é um COPIAR E COLAR literal das linhas que o usuário enviou para aquela cena. Se você escrever qualquer palavra que não estava no texto do usuário, você falhou. Copie caractere por caractere, sem mudar nada, sem reescrever, sem adaptar, sem inventar.
 
+O campo referencia_produto deve descrever o produto EXATAMENTE como aparece na imagem enviada: cor, formato, material, acessórios visíveis. NUNCA invente um produto diferente do da imagem.
+
 FORMATO: o usuário informa o formato no texto (unboxing, fábrica, pov, terceira pessoa). Detecte e siga:
 
 UNBOXING (sempre POV — apenas mãos, NUNCA rosto ou corpo):
@@ -129,14 +131,39 @@ PROIBIDO: juntar linhas de cenas diferentes. PROIBIDO: colocar a copy inteira nu
 
 PROIBIDO GERAL: mais de 1 frase por campo. PROIBIDO: timestamps. PROIBIDO: campos extras.`;
 
-          // Preparar para 3 chamadas separadas, apenas com texto (sem imagens)
+          // Preparar para 3 chamadas separadas, com imagens correspondentes
           const userMessage = [...messages].reverse().find((m) => m.role === "user");
           const userText = userMessage?.apiText ?? userMessage?.content ?? "";
+          const imageData = userMessage?.images || [];
 
           // Fazer 3 chamadas separadas, uma por cena
           const responses: string[] = [];
 
           for (let sceneNum = 1; sceneNum <= 3; sceneNum++) {
+            // Determinar qual imagem usar: se houver menos imagens que cenas, usar a primeira
+            const imageIndex = imageData.length > 0 ? Math.min(sceneNum - 1, imageData.length - 1) : -1;
+            const sceneImage = imageIndex >= 0 ? imageData[imageIndex] : null;
+
+            const messageContent: Array<{ type: string; [key: string]: any }> = [];
+
+            // Adicionar imagem se disponível
+            if (sceneImage) {
+              messageContent.push({
+                type: "image" as const,
+                source: {
+                  type: "base64" as const,
+                  media_type: sceneImage.mediaType as "image/jpeg" | "image/png" | "image/gif" | "image/webp",
+                  data: sceneImage.base64,
+                },
+              });
+            }
+
+            // Adicionar texto
+            messageContent.push({
+              type: "text" as const,
+              text: `Cena ${sceneNum}: ${userText}`,
+            });
+
             const sceneMessage = await anthropic.messages.create({
               model,
               temperature: 0,
@@ -145,7 +172,7 @@ PROIBIDO GERAL: mais de 1 frase por campo. PROIBIDO: timestamps. PROIBIDO: campo
               messages: [
                 {
                   role: "user",
-                  content: `Cena ${sceneNum}: ${userText}`,
+                  content: messageContent,
                 },
               ],
             });
