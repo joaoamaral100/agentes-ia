@@ -105,15 +105,19 @@ PROIBIDO NO UNBOXING: mencionar rosto, expressão facial, olhar para a câmera, 
 
 REGRA DE CONTINUIDADE: as 3 cenas acontecem no MESMO ambiente, com as MESMAS mãos.
 
-TRAVAS OBRIGATÓRIAS DA CENA 1 (UNBOXING):
+CENA 1 DO UNBOXING — CAIXA FECHADA (regra absoluta):
 
-ANATOMIA: escreva sempre exatamente 'Apenas 1 pessoa, exatamente 2 mãos com 5 dedos cada. Nunca criar mãos, dedos ou braços extras. A mão esquerda estabiliza a caixa, a mão direita abre a aba.' Nada além disso.
+A caixa permanece FECHADA durante toda a cena 1. Ninguém abre nada. Ninguém revela nada. O objetivo é criar mistério e curiosidade.
 
-CAIXA: existe UMA única caixa de entrega. Ao abrir, aparece o produto embalado dentro dela. NUNCA descreva uma segunda caixa, caixa dentro de caixa, ou embalagem adicional que não esteja na imagem.
+O campo cena deve descrever apenas: mãos segurando ou girando uma caixa de entrega fechada do TikTok Shop sobre uma mesa, com a etiqueta de envio visível.
 
-PRODUTO: na cena 1 o produto NÃO sai da caixa. NÃO é levantado. NÃO é segurado. NÃO é apresentado à câmera. As mãos apenas abrem as abas e o produto aparece visível lá dentro, parado. Retirar o produto só acontece na cena 2.
+O campo acoes deve conter apenas movimentos com a caixa fechada: segurar, girar levemente, apoiar na mesa, deslizar o dedo pela etiqueta, chacoalhar de leve. NADA MAIS.
 
-O campo acoes da cena 1 deve conter apenas: abrir as abas da caixa e revelar o produto dentro. Nada mais.
+PROIBIDO NA CENA 1: abrir a caixa, rasgar a fita, levantar abas, mostrar o interior, retirar produto, segurar produto, descrever o produto fora da caixa, mencionar qualquer objeto além da própria caixa.
+
+O campo referencia_produto na cena 1 deve descrever APENAS a caixa de papelão do TikTok Shop com etiqueta de envio — nunca o produto.
+
+O produto só aparece a partir da CENA 2.
 
 FÁBRICA:
 Cena 1 = problema/dor do cliente sem o produto
