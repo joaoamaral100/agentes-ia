@@ -55,7 +55,7 @@ export default function CopyDisplay({ content }: CopyDisplayProps) {
     return scenes;
   };
 
-  const hasJsonBlocks = text => {
+  const hasJsonBlocks = (text: string) => {
     const jsonRegex = /\{[\s\S]*?\}/;
     return jsonRegex.test(text);
   };
