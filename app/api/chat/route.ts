@@ -73,11 +73,19 @@ export async function POST(req: Request) {
         const config = agentConfig[agentId || ""] || { temperature: 0.7, max_tokens: 4096 };
         const model = agentId === "videos" ? "claude-sonnet-4-6" : "claude-haiku-4-5-20251001";
 
+        const videosSystemPrompt = `Você recebe imagens de um produto e copys de 3 cenas. Gere APENAS 3 JSONs separados neste formato exato:
+
+{\"cena\":1,\"prompt\":{\"formato\":\"Vídeo vertical 9:16, UGC realista.\",\"referencia_produto\":\"[descreva o produto da imagem]\",\"cena\":\"[o que acontece, 2 frases]\",\"anatomia\":\"1 pessoa, 2 mãos, 5 dedos cada, sem duplicações.\",\"acoes\":\"[ações naturais, 2 frases, sem timestamps]\",\"camera\":\"[enquadramento, 1 frase]\",\"audio\":{\"voz\":\"Feminina, brasileira, natural.\",\"fala_exata\":\"[copy exata]\",\"sincronizacao\":\"Fala contínua e sincronizada.\"},\"restricoes\":[\"Sem texto.\",\"Sem legendas.\",\"Sem logos.\",\"Movimento natural.\",\"1 pessoa, 2 mãos, 5 dedos.\"]}}
+
+Nunca adicionar referencia_visual, composicao_frame, iluminacao, camera_tecnica, sincronizacao_PERFEITA ou timestamps.`;
+
+        const systemPrompt = agentId === "videos" ? videosSystemPrompt : agent.systemPrompt;
+
         const messageStream = anthropic.messages.stream({
           model,
           temperature: config.temperature,
           max_tokens: config.max_tokens,
-          system: agent.systemPrompt,
+          system: systemPrompt,
           messages: messages.map((m) => {
             if (m.images && m.images.length > 0) {
               return {
