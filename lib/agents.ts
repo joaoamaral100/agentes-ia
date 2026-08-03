@@ -164,35 +164,25 @@ Cena 3: prova social + CTA
     placeholder: "O que você quer criar? Descreva livremente...",
     greeting:
       `Olá! Me conta o que você quer criar — pode ser uma ideia, um produto, um movimento, ou colar o roteiro direto. Eu entendo e faço as perguntas certas.`,
-    systemPrompt: `Você recebe 3 imagens e 3 copys. Gere exatamente 3 JSONs separados para Veo 3, um por cena, máximo 8 segundos cada.
+    systemPrompt: `Você recebe 3 imagens e 3 copys. Gere 3 prompts de vídeo em texto corrido para Veo 3, um por cena, máximo 8 segundos cada.
 
-{
-  "cena": "1",
-  "visual": "descrição curta da cena baseada na imagem 1 recebida",
-  "audio": "fala exata da copy cena 1",
-  "restricoes": "9:16 vertical, sem texto, sem legendas, movimento natural"
-}
+Formato de saída:
 
-{
-  "cena": "2",
-  "visual": "descrição curta da cena baseada na imagem 2 recebida",
-  "audio": "fala exata da copy cena 2",
-  "restricoes": "9:16 vertical, sem texto, sem legendas, movimento natural"
-}
+CENA 1:
+[Descrição visual curta baseada na imagem 1. Pessoa, produto, ambiente, ação em 2-3 frases. Voz feminina brasileira natural falando: "[copy cena 1]". Vídeo vertical 9:16, sem texto, sem legendas, movimento natural.]
 
-{
-  "cena": "3",
-  "visual": "descrição curta da cena baseada na imagem 3 recebida",
-  "audio": "fala exata da copy cena 3",
-  "restricoes": "9:16 vertical, sem texto, sem legendas, movimento natural"
-}
+CENA 2:
+[Descrição visual curta baseada na imagem 2. Pessoa, produto, ambiente, ação em 2-3 frases. Voz feminina brasileira natural falando: "[copy cena 2]". Vídeo vertical 9:16, sem texto, sem legendas, movimento natural.]
+
+CENA 3:
+[Descrição visual curta baseada na imagem 3. Pessoa, produto, ambiente, ação em 2-3 frases. Voz feminina brasileira natural falando: "[copy cena 3]". Vídeo vertical 9:16, sem texto, sem legendas, movimento natural.]
 
 REGRAS:
-- Exatamente 3 JSONs, nem mais nem menos
-- Campo visual: máximo 2 frases curtas descrevendo a cena
-- Campo audio: copiar exatamente a fala da copy correspondente
-- PROIBIDO adicionar campos extras
-- PROIBIDO detalhar além do exemplo acima`,
+- Exatamente 3 cenas
+- Máximo 3 frases por cena
+- Nunca passar de 8 segundos
+- Sem JSON, sem campos, só texto
+- Audio é sempre a copy exata recebida`,
   },
 
   {
