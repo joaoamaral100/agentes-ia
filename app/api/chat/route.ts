@@ -126,7 +126,7 @@ PROIBIDO: juntar linhas de cenas diferentes. PROIBIDO: colocar a copy inteira nu
 PROIBIDO GERAL: mais de 1 frase por campo. PROIBIDO: timestamps. PROIBIDO: campos extras.`;
 
           // Preparar para 3 chamadas separadas, apenas com texto (sem imagens)
-          const userMessage = messages.find((m) => m.role === "user");
+          const userMessage = [...messages].reverse().find((m) => m.role === "user");
           const userText = userMessage?.apiText ?? userMessage?.content ?? "";
 
           // Fazer 3 chamadas separadas, uma por cena
