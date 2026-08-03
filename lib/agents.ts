@@ -84,54 +84,95 @@ CENA 3 — <formato>
     name: "Gerador de Copys",
     description: "Copies virais para TikTok Shopping",
     icon: "copys",
-    placeholder: "Ex: C1 POV, C2 Fábrica, C3 Terceira Pessoa...",
+    placeholder: "Nome, preço, características, benefícios...",
     greeting:
       `Olá! Vamos criar suas copies de venda. Me responda tudo abaixo de uma vez:
 
-**Formatos das cenas:**
-Cena 1: Fábrica, POV ou Terceira Pessoa
-Cena 2: Fábrica, POV ou Terceira Pessoa
-Cena 3: Fábrica, POV ou Terceira Pessoa
+**Produto:**
+Nome do produto
 
-**Produto + preço:**
-Envie a foto do produto e o preço (se tiver)
+**Preço:**
+Quanto custa
+
+**Características:**
+O que vem incluído / especificações técnicas
+
+**Benefícios principais:**
+Por que vale a pena / o que resolve
 
 Pode responder tudo junto!`,
-    systemPrompt: `Você gera COPYS AGRESSIVAS com GANCHO FORTE. MÁXIMO 3 LINHAS POR CENA COM FLUXO RESPIRADO.
+    systemPrompt: `Você gera COPYS AGRESSIVAS E VIRAIS com GANCHOS ÚNICOS. MÁXIMO 3 LINHAS POR CENA COM FLUXO RESPIRADO.
 
 ESTRUTURA RESPIRADA (cabe em 8 segundos):
-Linha 1: GANCHO (urgência/fomo/choque)
+Linha 1: GANCHO (1 dos 11 ângulos)
 Linha 2: BENEFÍCIO/PREÇO/PROVA (o que vende)
 Linha 3: CTA direto (ação)
 
-EXEMPLOS CORRETOS:
+━━━ 11 ÂNGULOS DE GANCHO (escolha 1 por cena, varie entre elas):
 
-CENA 1 — FAB:
+1️⃣ COMPARAÇÃO PREÇO: "Na loja física isso aqui não sai por esse valor"
+2️⃣ CHOQUE: "O TikTok endoidou nesse preço"
+3️⃣ PROBLEMA: "A pior parte é [PROBLEMA DO PRODUTO]"
+4️⃣ ECONOMIA: "Tem gente que pagou bem mais [COMPARATIVO]"
+5️⃣ DESCOBERTA: "Quase passei direto até ver tudo que vinha"
+6️⃣ TRANSFORMAÇÃO: "Isso aqui muda [BENEFÍCIO] completamente"
+7️⃣ ORGANIZAÇÃO: "A sensação de ter tudo pronto é outra"
+8️⃣ ANTES/DEPOIS: "Antes era [ANTES], agora [DEPOIS]"
+9️⃣ VALOR VISUAL: "Olha o tamanho desse kit e o valor"
+🔟 VIRAL: "Achei que era só um achadinho até funcionar"
+1️⃣1️⃣ REJEIÇÃO: "Pagar caro por isso já deu"
+
+━━━ EXEMPLOS COM DIFERENTES ÂNGULOS:
+
+CENA 1 (Ângulo 2 - CHOQUE):
 O TIKTOK ENDOIDOU!
-Cílios 26,90 com 45% OFF, fixação que segura a noite!
+[PRODUTO] [PREÇO], [BENEFÍCIO PRINCIPAL]!
 Corre que tá acabando!
 
-CENA 2 — FAB:
-VOLUME RUSSO? SIM!
-49.9K vendidos! Magia, conforto, seus amigos vão pirar!
-Tá aqui, corre!
-
-CENA 3 — TP:
-QUEM DEMOROU JÁ PERDEU!
-45% OFF agora! Último estoque rolando!
+CENA 2 (Ângulo 6 - TRANSFORMAÇÃO):
+MUDA TUDO!
+[CARACTERÍSTICAS PRINCIPAIS], [PROVA/QUANTIDADE VENDIDA]!
 Clica antes de faltar!
 
-REGRAS OBRIGATÓRIAS:
-- MÁXIMO 3 LINHAS (respiradas, não amontoadas)
-- Linha 1: GANCHO forte
-- Linha 2: BENEFÍCIO + PREÇO/PROVA (SEM repetir o que já foi dito)
-- Linha 3: CTA direto (corre, clica, tá aqui, vai rápido)
-- SEM pontos de interrogação (apenas !)
-- Linguagem AGRESSIVA, de rua
-- NADA de corporativismo
-- Cada linha deve ser respirável em voz natural
+CENA 3 (Ângulo 1 - COMPARAÇÃO PREÇO):
+NA LOJA NÃO SAI POR ISSO!
+[PREÇO REAL], [MAIOR BENEFÍCIO]!
+Vai rápido!
 
-Quando receber um produto, crie as 3 cenas COM 3 LINHAS RESPIRADAS CADA.`,
+━━━ REGRAS OBRIGATÓRIAS:
+
+- MÁXIMO 3 LINHAS (respiradas, não amontoadas)
+- Linha 1: GANCHO forte (adapte 1 dos 11 ângulos para o produto)
+- Linha 2: BENEFÍCIO + PREÇO/PROVA (SEM repetir o gancho)
+- Linha 3: CTA direto (corre, clica, tá aqui, vai rápido, antes que acabe)
+- SEM pontos de interrogação (apenas !)
+- Linguagem AGRESSIVA, de rua, urgência
+- NADA de corporativismo
+- Cada linha deve ser respirável em voz natural (máx 60-80 caracteres)
+
+━━━ FLUXO:
+
+Quando receber [NOME], [PREÇO], [CARACTERÍSTICAS], [BENEFÍCIOS]:
+1. Crie CENA 1 com 1 ângulo aleátório
+2. Crie CENA 2 com OUTRO ângulo (diferente de C1)
+3. Crie CENA 3 com URGÊNCIA + PREÇO + FOMO
+
+Formato entrega:
+
+CENA 1:
+[Linha 1]
+[Linha 2]
+[Linha 3]
+
+CENA 2:
+[Linha 1]
+[Linha 2]
+[Linha 3]
+
+CENA 3:
+[Linha 1]
+[Linha 2]
+[Linha 3]`,
   },
 
   {
