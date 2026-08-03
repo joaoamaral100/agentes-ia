@@ -79,39 +79,93 @@ export async function POST(req: Request) {
 
 Nunca adicionar referencia_visual, composicao_frame, iluminacao, camera_tecnica, sincronizacao_PERFEITA ou timestamps.`;
 
-        const systemPrompt = agentId === "videos" ? videosSystemPrompt : agent.systemPrompt;
+        const formattersSystemPrompt = `Você é um formatador JSON. Receba o texto abaixo e extraia APENAS as informações essenciais, reformatando em exatamente 3 JSONs neste formato:
 
-        const messageStream = anthropic.messages.stream({
-          model,
-          temperature: config.temperature,
-          max_tokens: config.max_tokens,
-          system: systemPrompt,
-          messages: messages.map((m) => {
-            if (m.images && m.images.length > 0) {
-              return {
-                role: m.role,
-                content: [
-                  ...m.images.map((img) => ({
-                    type: "image" as const,
-                    source: {
-                      type: "base64" as const,
-                      media_type: img.mediaType as "image/jpeg" | "image/png" | "image/gif" | "image/webp",
-                      data: img.base64,
-                    },
-                  })),
-                  { type: "text" as const, text: m.apiText ?? m.content },
-                ],
-              };
-            }
-            return { role: m.role, content: m.apiText ?? m.content };
-          }),
-        });
+{\"cena\":1,\"prompt\":{\"referencia_produto\":\"[produto da imagem em 1 frase]\",\"cena\":\"[o que acontece em 2 frases]\",\"anatomia\":\"1 pessoa, 2 mãos, 5 dedos cada.\",\"acoes\":\"[ações em 2 frases sem timestamps]\",\"camera\":\"[1 frase]\",\"audio\":{\"voz\":\"Feminina, brasileira, natural.\",\"fala_exata\":\"[copy exata]\",\"sincronizacao\":\"Fala contínua e sincronizada.\"},\"restricoes\":[\"Sem texto.\",\"Sem legendas.\",\"Sem logos.\",\"Movimento natural.\"]}}
 
-        messageStream.on("text", (text) => {
-          controller.enqueue(encoder.encode(text));
-        });
+Retorne APENAS os 3 JSONs. Nada mais.`;
 
-        await messageStream.finalMessage();
+        if (agentId === "videos") {
+          // Primeira chamada: coletar resposta completa
+          const firstMessage = await anthropic.messages.create({
+            model,
+            temperature: config.temperature,
+            max_tokens: config.max_tokens,
+            system: videosSystemPrompt,
+            messages: messages.map((m) => {
+              if (m.images && m.images.length > 0) {
+                return {
+                  role: m.role,
+                  content: [
+                    ...m.images.map((img) => ({
+                      type: "image" as const,
+                      source: {
+                        type: "base64" as const,
+                        media_type: img.mediaType as "image/jpeg" | "image/png" | "image/gif" | "image/webp",
+                        data: img.base64,
+                      },
+                    })),
+                    { type: "text" as const, text: m.apiText ?? m.content },
+                  ],
+                };
+              }
+              return { role: m.role, content: m.apiText ?? m.content };
+            }),
+          });
+
+          const firstResponse = firstMessage.content[0].type === "text" ? firstMessage.content[0].text : "";
+
+          // Segunda chamada: formatador com streaming
+          const secondStream = anthropic.messages.stream({
+            model,
+            temperature: 0,
+            max_tokens: 2000,
+            system: formattersSystemPrompt,
+            messages: [{ role: "user", content: firstResponse }],
+          });
+
+          secondStream.on("text", (text) => {
+            controller.enqueue(encoder.encode(text));
+          });
+
+          await secondStream.finalMessage();
+        } else {
+          // Outros agentes: streaming normal
+          const systemPrompt = agent.systemPrompt;
+
+          const messageStream = anthropic.messages.stream({
+            model,
+            temperature: config.temperature,
+            max_tokens: config.max_tokens,
+            system: systemPrompt,
+            messages: messages.map((m) => {
+              if (m.images && m.images.length > 0) {
+                return {
+                  role: m.role,
+                  content: [
+                    ...m.images.map((img) => ({
+                      type: "image" as const,
+                      source: {
+                        type: "base64" as const,
+                        media_type: img.mediaType as "image/jpeg" | "image/png" | "image/gif" | "image/webp",
+                        data: img.base64,
+                      },
+                    })),
+                    { type: "text" as const, text: m.apiText ?? m.content },
+                  ],
+                };
+              }
+              return { role: m.role, content: m.apiText ?? m.content };
+            }),
+          });
+
+          messageStream.on("text", (text) => {
+            controller.enqueue(encoder.encode(text));
+          });
+
+          await messageStream.finalMessage();
+        }
+
         controller.close();
       } catch (err) {
         const message =
