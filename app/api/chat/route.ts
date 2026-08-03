@@ -60,27 +60,6 @@ export async function POST(req: Request) {
 
   const encoder = new TextEncoder();
 
-  const cleanVideosJSON = (text: string): string => {
-    try {
-      const jsonMatches = text.match(/\{\s*"cena"[\s\S]*?\n\}/g);
-      if (!jsonMatches || jsonMatches.length === 0) return text;
-
-      const cleaned = jsonMatches.map((jsonStr) => {
-        const parsed = JSON.parse(jsonStr);
-        return {
-          cena: parsed.cena,
-          visual: parsed.visual,
-          audio: parsed.audio,
-          restricoes: parsed.restricoes,
-        };
-      });
-
-      return `[\n${cleaned.map((j) => JSON.stringify(j)).join(",\n")}\n]`;
-    } catch {
-      return text;
-    }
-  };
-
   const stream = new ReadableStream({
     async start(controller) {
       try {
@@ -126,15 +105,11 @@ export async function POST(req: Request) {
           }),
         });
 
-        let fullText = "";
         messageStream.on("text", (text) => {
-          fullText += text;
+          controller.enqueue(encoder.encode(text));
         });
 
         await messageStream.finalMessage();
-
-        const processedText = agentId === "videos" ? cleanVideosJSON(fullText) : fullText;
-        controller.enqueue(encoder.encode(processedText));
         controller.close();
       } catch (err) {
         const message =
