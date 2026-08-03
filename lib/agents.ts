@@ -164,25 +164,43 @@ Cena 3: prova social + CTA
     placeholder: "O que você quer criar? Descreva livremente...",
     greeting:
       `Olá! Me conta o que você quer criar — pode ser uma ideia, um produto, um movimento, ou colar o roteiro direto. Eu entendo e faço as perguntas certas.`,
-    systemPrompt: `Você recebe 3 imagens e 3 copys. Gere 3 prompts de vídeo em texto corrido para Veo 3, um por cena, máximo 8 segundos cada.
+    systemPrompt: `Você recebe imagens do produto e copys das cenas. Gere exatamente 3 JSONs separados, 1 por cena, seguindo EXATAMENTE esta estrutura:
 
-Formato de saída:
+{
+  "cena": 1,
+  "prompt": {
+    "formato": "Vídeo vertical 9:16, UGC realista, gravação doméstica autêntica.",
+    "referencia_produto": "Manter produto fiel à imagem enviada. Não alterar cores, formato, proporções ou componentes.",
+    "cena": "[o que acontece nesta cena em 2-3 frases]",
+    "anatomia": "Apenas 1 pessoa, exatamente 2 mãos e 5 dedos em cada mão, sem duplicações.",
+    "acoes": "[sequência de ações naturais em 2-3 frases]",
+    "camera": "[enquadramento e movimento básico]",
+    "audio": {
+      "voz": "Feminina, brasileira, natural, espontânea e contínua.",
+      "fala_exata": "[copy exata desta cena]",
+      "sincronizacao": "Fala contínua e sincronizada com as ações, sem cortes."
+    },
+    "restricoes": [
+      "Sem texto na tela.",
+      "Sem legendas.",
+      "Sem logos ou elementos gráficos.",
+      "Não alterar o produto.",
+      "Não duplicar pessoa, mãos ou dedos.",
+      "Movimentos naturais e contínuos."
+    ]
+  }
+}
 
-CENA 1:
-[Descrição visual curta baseada na imagem 1. Pessoa, produto, ambiente, ação em 2-3 frases. Voz feminina brasileira natural falando: "[copy cena 1]". Vídeo vertical 9:16, sem texto, sem legendas, movimento natural.]
-
-CENA 2:
-[Descrição visual curta baseada na imagem 2. Pessoa, produto, ambiente, ação em 2-3 frases. Voz feminina brasileira natural falando: "[copy cena 2]". Vídeo vertical 9:16, sem texto, sem legendas, movimento natural.]
-
-CENA 3:
-[Descrição visual curta baseada na imagem 3. Pessoa, produto, ambiente, ação em 2-3 frases. Voz feminina brasileira natural falando: "[copy cena 3]". Vídeo vertical 9:16, sem texto, sem legendas, movimento natural.]
+CENA 1: Unboxing - pessoa abrindo/recebendo produto
+CENA 2: Demonstração - pessoa usando/testando produto
+CENA 3: CTA - pessoa segura produto, olha câmera, gesto discreto pra baixo
 
 REGRAS:
-- Exatamente 3 cenas
-- Máximo 3 frases por cena
-- Nunca passar de 8 segundos
-- Sem JSON, sem campos, só texto
-- Audio é sempre a copy exata recebida`,
+- Exatamente 3 JSONs separados
+- Nunca juntar em 1 JSON só
+- Nunca adicionar campos extras
+- Nunca adicionar timestamps
+- Adaptar cena, acoes e audio para o produto recebido`,
   },
 
   {
