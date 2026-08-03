@@ -64,14 +64,14 @@ export async function POST(req: Request) {
     async start(controller) {
       try {
         const agentConfig: Record<string, { temperature: number; max_tokens: number }> = {
-          videos: { temperature: 0, max_tokens: 4096 },
+          videos: { temperature: 0, max_tokens: 2000 },
           imagens: { temperature: 0.7, max_tokens: 4096 },
           copys: { temperature: 0.9, max_tokens: 4096 },
           "mode-amaral": { temperature: 0.7, max_tokens: 4096 },
         };
 
         const config = agentConfig[agentId || ""] || { temperature: 0.7, max_tokens: 4096 };
-        const model = agentId === "videos" ? "claude-sonnet-4-6" : "claude-haiku-4-5-20251001";
+        const model = "claude-haiku-4-5-20251001";
 
         const videosSystemPrompt = `Você recebe imagens de um produto e copys de 3 cenas. Gere APENAS 3 JSONs separados neste formato exato:
 
