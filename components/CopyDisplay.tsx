@@ -19,16 +19,32 @@ export default function CopyDisplay({ content }: CopyDisplayProps) {
 
   const parseJsonBlocks = (text: string): BlockItem[] => {
     const blocks: BlockItem[] = [];
-    const jsonRegex = /\{[\s\S]*?\n\}/g;
-    const matches = text.match(jsonRegex);
+    let braceCount = 0;
+    let startIdx = -1;
+    let cenaNum = 1;
 
-    if (matches) {
-      matches.forEach((json, idx) => {
-        blocks.push({
-          title: `CENA ${idx + 1}`,
-          content: json
-        });
-      });
+    for (let i = 0; i < text.length; i++) {
+      const char = text[i];
+
+      if (char === '{') {
+        if (braceCount === 0) {
+          startIdx = i;
+        }
+        braceCount++;
+      } else if (char === '}') {
+        braceCount--;
+        if (braceCount === 0 && startIdx !== -1) {
+          const jsonBlock = text.substring(startIdx, i + 1);
+          if (jsonBlock.trim().length > 2) {
+            blocks.push({
+              title: `CENA ${cenaNum}`,
+              content: jsonBlock
+            });
+            cenaNum++;
+          }
+          startIdx = -1;
+        }
+      }
     }
 
     return blocks;
