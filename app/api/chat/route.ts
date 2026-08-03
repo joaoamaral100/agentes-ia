@@ -64,7 +64,7 @@ export async function POST(req: Request) {
     async start(controller) {
       try {
         const agentConfig: Record<string, { temperature: number; max_tokens: number }> = {
-          videos: { temperature: 0, max_tokens: 800 },
+          videos: { temperature: 0, max_tokens: 4096 },
           imagens: { temperature: 0.7, max_tokens: 4096 },
           copys: { temperature: 0.9, max_tokens: 4096 },
           "mode-amaral": { temperature: 0.7, max_tokens: 4096 },
