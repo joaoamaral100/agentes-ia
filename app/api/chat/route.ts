@@ -86,49 +86,56 @@ Nunca adicionar referencia_visual, composicao_frame, iluminacao, camera_tecnica,
 Retorne APENAS os 3 JSONs. Nada mais.`;
 
         if (agentId === "videos") {
-          // Primeira chamada: coletar resposta completa
-          const firstMessage = await anthropic.messages.create({
-            model,
-            temperature: config.temperature,
-            max_tokens: config.max_tokens,
-            system: videosSystemPrompt,
-            messages: messages.map((m) => {
-              if (m.images && m.images.length > 0) {
-                return {
-                  role: m.role,
-                  content: [
-                    ...m.images.map((img) => ({
-                      type: "image" as const,
-                      source: {
-                        type: "base64" as const,
-                        media_type: img.mediaType as "image/jpeg" | "image/png" | "image/gif" | "image/webp",
-                        data: img.base64,
-                      },
-                    })),
-                    { type: "text" as const, text: m.apiText ?? m.content },
-                  ],
-                };
-              }
-              return { role: m.role, content: m.apiText ?? m.content };
-            }),
-          });
+          const scenesystemPrompt = `Gere APENAS 1 JSON para esta cena específica. Formato obrigatório:
+{\"cena\":NUMERO,\"prompt\":{\"referencia_produto\":\"1 frase\",\"cena\":\"2 frases\",\"anatomia\":\"1 pessoa, 2 mãos, 5 dedos.\",\"acoes\":\"2 frases\",\"camera\":\"1 frase\",\"audio\":{\"voz\":\"Feminina, brasileira, natural.\",\"fala_exata\":\"COPY_AQUI\",\"sincronizacao\":\"Fala contínua.\"},\"restricoes\":[\"Sem texto.\",\"Sem legendas.\",\"Sem logos.\",\"Movimento natural.\"]}}
+PROIBIDO: mais de 1 frase por campo. PROIBIDO: timestamps. PROIBIDO: campos extras.`;
 
-          const firstResponse = firstMessage.content[0].type === "text" ? firstMessage.content[0].text : "";
+          // Extrair imagens e preparar para 3 chamadas
+          const userMessage = messages.find((m) => m.role === "user");
+          const imageData = userMessage?.images || [];
 
-          // Segunda chamada: formatador com streaming
-          const secondStream = anthropic.messages.stream({
-            model,
-            temperature: 0,
-            max_tokens: 2000,
-            system: formattersSystemPrompt,
-            messages: [{ role: "user", content: firstResponse }],
-          });
+          // Fazer 3 chamadas separadas, uma por cena
+          const responses: string[] = [];
 
-          secondStream.on("text", (text) => {
-            controller.enqueue(encoder.encode(text));
-          });
+          for (let sceneNum = 1; sceneNum <= 3; sceneNum++) {
+            const sceneMessage = await anthropic.messages.create({
+              model,
+              temperature: 0,
+              max_tokens: 400,
+              system: scenesystemPrompt,
+              messages: [
+                {
+                  role: "user",
+                  content:
+                    imageData.length > 0
+                      ? [
+                          {
+                            type: "image" as const,
+                            source: {
+                              type: "base64" as const,
+                              media_type: imageData[sceneNum - 1]?.mediaType as "image/jpeg" | "image/png" | "image/gif" | "image/webp",
+                              data: imageData[sceneNum - 1]?.base64 || "",
+                            },
+                          },
+                          {
+                            type: "text" as const,
+                            text: `Cena ${sceneNum}: ${userMessage?.apiText ?? userMessage?.content}`,
+                          },
+                        ]
+                      : `Cena ${sceneNum}: ${userMessage?.apiText ?? userMessage?.content}`,
+                },
+              ],
+            });
 
-          await secondStream.finalMessage();
+            const sceneResponse = sceneMessage.content[0].type === "text" ? sceneMessage.content[0].text : "";
+            responses.push(sceneResponse);
+          }
+
+          // Fazer stream das 3 respostas concatenadas
+          const concatenated = responses.join("\n");
+          for (const char of concatenated) {
+            controller.enqueue(encoder.encode(char));
+          }
         } else {
           // Outros agentes: streaming normal
           const systemPrompt = agent.systemPrompt;
