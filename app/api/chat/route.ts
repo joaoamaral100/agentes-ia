@@ -145,7 +145,7 @@ PROIBIDO GERAL: mais de 1 frase por campo. PROIBIDO: timestamps. PROIBIDO: campo
           const responses: string[] = [];
 
           for (let sceneNum = 1; sceneNum <= 3; sceneNum++) {
-            const messageContent: Array<{ type: string; [key: string]: any }> = [];
+            const messageContent: any[] = [];
 
             // Adicionar TODAS as imagens em cada chamada
             if (imageData.length > 0) {
