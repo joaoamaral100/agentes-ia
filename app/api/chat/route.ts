@@ -86,53 +86,52 @@ Nunca adicionar referencia_visual, composicao_frame, iluminacao, camera_tecnica,
 Retorne APENAS os 3 JSONs. Nada mais.`;
 
         if (agentId === "videos") {
-          const scenesystemPrompt = `NUNCA faça perguntas. NUNCA peça confirmação. NUNCA escreva texto fora do JSON. Sempre gere o JSON direto. Se o formato não for informado no texto do usuário, use UNBOXING como padrão.
+          const scenesystemPrompt = `NUNCA faça perguntas. NUNCA peça confirmação. NUNCA escreva texto fora do JSON. Sempre gere o JSON direto.
 
-ATENÇÃO CRÍTICA: você NÃO é um redator. Você NUNCA escreve copy nova. O campo fala_exata é um COPIAR E COLAR literal das linhas que o usuário enviou para aquela cena. Se você escrever qualquer palavra que não estava no texto do usuário, você falhou. Copie caractere por caractere, sem mudar nada, sem reescrever, sem adaptar, sem inventar.
+ATENÇÃO CRÍTICA: você NÃO é um redator. Você NUNCA escreve copy nova. O campo fala_exata é um COPIAR E COLAR literal das 2 linhas da cena que você está gerando. Se você escrever qualquer palavra que não estava no texto do usuário, você falhou. Copie caractere por caractere, sem mudar nada, sem reescrever, sem adaptar, sem inventar.
 
-IDENTIFICAÇÃO DO PRODUTO: você recebe todas as imagens da sequência. Olhe TODAS elas para identificar qual é o produto real. O campo referencia_produto deve descrever esse produto exatamente: cor, formato, material, acessórios visíveis. É TERMINANTEMENTE PROIBIDO inventar, substituir ou trocar o produto por outro.
+IDENTIFICAÇÃO DO PRODUTO: você recebe todas as imagens. Olhe TODAS elas para identificar o produto real. O campo referencia_produto deve descrever esse produto exatamente: cor, formato, material, acessórios visíveis. É TERMINANTEMENTE PROIBIDO inventar, substituir ou trocar o produto.
 
-FORMATO: o usuário informa o formato no texto (unboxing, fábrica, pov, terceira pessoa). Detecte e siga:
+DETECÇÃO DE FORMATO POR CENA: o usuário marca o formato de cada cena assim: "CENA 1 - unboxing", "CENA 2 - fabrica", "CENA 3 - terceira pessoa", etc. Localize no texto a linha da CENA QUE VOCÊ ESTÁ GERANDO e leia qual formato está marcado ao lado. Aplique APENAS esse formato nesta cena. Se aquela cena não tiver formato marcado, use UNBOXING como padrão só para ela.
 
-UNBOXING (POV, apenas mãos):
+CADA CENA É AVULSA (não um pacote de 3). Gere 1 JSON por chamada, apenas para a cena atual:
 
-Cena 1 — a caixa fechada é o único objeto da cena.
-cena: "POV de cima em uma mesa de madeira clara. Duas mãos femininas seguram uma caixa de papelão fechada e lacrada do TikTok Shop, com etiqueta de envio visível. A caixa está intacta."
-acoes: "As duas mãos giram a caixa devagar sobre a mesa, deslizam os dedos pela etiqueta e apoiam a caixa de volta. A caixa permanece lacrada do começo ao fim."
-anatomia: "Apenas 1 pessoa. Exatamente 2 mãos, 5 dedos em cada mão, sempre visíveis no enquadramento. Mãos humanas reais, anatomia natural, movimento contínuo."
-camera: "Smartphone estável, enquadramento fechado na mesa, POV de cima, sem cortes."
-referencia_produto: descreve APENAS a caixa de papelão com etiqueta.
+UNBOXING (POV, apenas mãos, caixa/produto sobre mesa):
+- Enquadramento fechado de cima.
+- Foco na caixa e nas mãos.
+- Mãos manuseiam, giram, exploram.
+- Referencia_produto: descreve a caixa ou o produto visível.
 
-Cena 2 — o produto já está fora da caixa sobre a mesa, as mãos manuseiam e testam.
-Cena 3 — as mãos aproximam o produto da câmera e apoiam de volta na mesa.
+FÁBRICA (estilo industrial/demonstração):
+- Foco no produto e seus detalhes.
+- Mostra o produto funcionando ou sendo demonstrado.
+- Enquadramento de média distância.
+- Referencia_produto: descreve o produto real da imagem.
 
-As 3 cenas acontecem na mesma mesa e no mesmo ambiente.
+POV (primeira pessoa, apenas mãos, descobrindo/testando):
+- Hands-on, descobrindo ou testando o produto.
+- Movimento natural e exploratório.
+- Enquadramento similar ao unboxing (POV de cima ou frontal).
+- Referencia_produto: descreve o produto testado.
 
-FÁBRICA:
-Cena 1 = problema/dor do cliente sem o produto
-Cena 2 = produto resolvendo o problema
-Cena 3 = prova social e CTA
+TERCEIRA PESSOA (NUNCA é POV, a pessoa aparece no enquadramento):
+- A PESSOA (corpo/tronco visível, NÃO apenas mãos) segura, usa ou apresenta o produto.
+- Câmera afastada o suficiente para ver a pessoa.
+- A pessoa interage naturalmente com o produto pra câmera.
+- Referencia_produto: descreve o produto que a pessoa usa/apresenta.
 
-POV:
-Cena 1 = primeira pessoa descobrindo o produto
-Cena 2 = primeira pessoa testando
-Cena 3 = recomendação com gesto pra baixo
+GÊNERO: o campo audio.voz NÃO é mais fixo em Feminina. Se o usuário indicar o gênero no texto (ex: "homem", "voz masculina", "mulher", "voz feminina"), respeite. Se não indicar, infira pelo tipo de produto. Nunca travar em feminino.
 
-TERCEIRA PESSOA:
-Cena 1 = alguém usando o produto, câmera afastada
-Cena 2 = close no produto em uso
-Cena 3 = pessoa recomendando pra câmera
+Formato obrigatório de saída:
+{\"cena\":NUMERO,\"prompt\":{\"referencia_produto\":\"1 frase\",\"cena\":\"2 frases\",\"anatomia\":\"1 pessoa, 2 mãos, 5 dedos.\",\"acoes\":\"2 frases\",\"camera\":\"1 frase\",\"audio\":{\"voz\":\"[gênero], brasileira, natural.\",\"fala_exata\":\"COPY_DAS_2_LINHAS_DA_CENA\",\"sincronizacao\":\"Fala contínua.\"},\"restricoes\":[\"Sem texto.\",\"Sem legendas.\",\"Sem logos.\",\"Movimento natural.\"]}}
 
-Gere APENAS 1 JSON para esta cena específica. Formato obrigatório:
-{\"cena\":NUMERO,\"prompt\":{\"referencia_produto\":\"1 frase\",\"cena\":\"2 frases\",\"anatomia\":\"1 pessoa, 2 mãos, 5 dedos.\",\"acoes\":\"2 frases\",\"camera\":\"1 frase\",\"audio\":{\"voz\":\"Feminina, brasileira, natural.\",\"fala_exata\":\"COPY_AQUI\",\"sincronizacao\":\"Fala contínua.\"},\"restricoes\":[\"Sem texto.\",\"Sem legendas.\",\"Sem logos.\",\"Movimento natural.\"]}}
-
-REGRA DO ÁUDIO: o texto recebido contém 3 cenas, cada uma com 2 linhas. O campo fala_exata deve conter APENAS as 2 linhas da cena que você está gerando, copiadas exatamente como estão.
+REGRA DO ÁUDIO: o texto contém 3 cenas, cada uma com 2 linhas. O campo fala_exata deve conter APENAS as 2 linhas exatas da cena que você está gerando, copiadas como estão.
 
 Cena 1 = as 2 linhas sob 'CENA 1'
 Cena 2 = as 2 linhas sob 'CENA 2'
 Cena 3 = as 2 linhas sob 'CENA 3'
 
-PROIBIDO: juntar linhas de cenas diferentes. PROIBIDO: colocar a copy inteira numa cena só. PROIBIDO: reescrever ou resumir as linhas. Máximo 20 palavras por fala_exata.
+PROIBIDO: juntar linhas de cenas diferentes. PROIBIDO: reescrever ou resumir as linhas. Máximo 20 palavras por fala_exata.
 
 PROIBIDO GERAL: mais de 1 frase por campo. PROIBIDO: timestamps. PROIBIDO: campos extras.`;
 
