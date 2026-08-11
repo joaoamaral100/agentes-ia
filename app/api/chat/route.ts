@@ -105,7 +105,7 @@ DETECÇÃO DE FORMATO POR CENA: o usuário marca o formato de cada cena assim: "
 
 FORMATOS (fábrica e fabrica são o mesmo formato):
 - UNBOXING: POV, só mãos, caixa ou produto sobre a mesa, enquadramento fechado de cima, mãos manuseiam e exploram.
-- FÁBRICA / FABRICA: foco no produto e seus detalhes, produto sendo demonstrado ou funcionando, enquadramento de média distância.
+- FÁBRICA / FABRICA: Cenário fábrica real, galpão ou linha de produção ao fundo. Várias mulheres (funcionárias) aparecem juntas, falando ao mesmo tempo em coro, olhando para a câmera. FOCO NO PRODUTO: o produto aparece em destaque, bem visível, é a estrela da cena. As mulheres são o veículo de apresentação. Tom de urgência e escassez (estilo "o TikTok endoidou com esse produto, vai sumir hoje"). A fala é a copy literal daquela cena (não reescrever). Descreva o produto real das imagens, fielmente. Anatomia: grupo de mulheres, cada uma com anatomia natural (2 mãos, 5 dedos cada), sem duplicações estranhas. Câmera: enquadramento que mostre o grupo de mulheres E o produto em destaque.
 - POV: primeira pessoa, só mãos, descobrindo ou testando o produto, movimento natural.
 - TERCEIRA PESSOA: mostra a PESSOA (corpo/tronco visível, nunca só mãos), câmera afastada pra ver a pessoa, ela usa ou apresenta o produto pra câmera.
 
