@@ -124,12 +124,44 @@ EXEMPLO do resultado ideal:
           const userText = userMessage?.apiText ?? userMessage?.content ?? "";
           const imageData = userMessage?.images || [];
 
+          // Função para extrair apenas o bloco da cena atual
+          const extractSceneBlock = (text: string, sceneNum: number): string => {
+            // Regex que encontra "CENA N" (case-insensitive, aceita espaços variáveis)
+            const searchPattern = new RegExp(`CENA\\s+${sceneNum}\\b`, 'i');
+            const nextPattern = new RegExp(`CENA\\s+${sceneNum + 1}\\b`, 'i');
+
+            const sceneStartIdx = text.search(searchPattern);
+            if (sceneStartIdx === -1) {
+              console.log(`⚠️ Marcador CENA ${sceneNum} não encontrado, usando texto completo como fallback`);
+              return text;
+            }
+
+            // Encontra o início da próxima cena
+            const remainingText = text.substring(sceneStartIdx + 1);
+            const nextSceneIdx = remainingText.search(nextPattern);
+            let sceneEndIdx: number;
+
+            if (nextSceneIdx === -1) {
+              // Não há próxima cena, vai até o fim
+              sceneEndIdx = text.length;
+            } else {
+              // Vai até o início da próxima cena
+              sceneEndIdx = sceneStartIdx + 1 + nextSceneIdx;
+            }
+
+            return text.substring(sceneStartIdx, sceneEndIdx).trim();
+          };
+
           // Fazer 3 chamadas separadas, uma por cena
           const responses: string[] = [];
 
           for (let sceneNum = 1; sceneNum <= 3; sceneNum++) {
             console.log(`\n🎬 Iniciando processamento da CENA ${sceneNum}...`);
             const messageContent: any[] = [];
+
+            // Extrair apenas o bloco da cena atual
+            const sceneBlock = extractSceneBlock(userText, sceneNum);
+            console.log(`📝 Bloco extraído para CENA ${sceneNum}:`, sceneBlock.substring(0, 100) + (sceneBlock.length > 100 ? '...' : ''));
 
             // Adicionar TODAS as imagens em cada chamada
             if (imageData.length > 0) {
@@ -145,10 +177,10 @@ EXEMPLO do resultado ideal:
               });
             }
 
-            // Adicionar texto
+            // Adicionar apenas o bloco da cena atual
             messageContent.push({
               type: "text" as const,
-              text: `Cena ${sceneNum}: ${userText}`,
+              text: sceneBlock,
             });
 
             const sceneMessage = await anthropic.messages.create({
