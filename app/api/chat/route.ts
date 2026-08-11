@@ -101,11 +101,11 @@ CADA CENA É AVULSA (não um pacote de 3). Gere 1 PARÁGRAFO por chamada, apenas
 
 ATENÇÃO CRÍTICA À FALA: O que está entre aspas é um COPIAR E COLAR literal das 2 linhas daquela cena. Nunca reescreva, adapte ou invente palavras. Se você escrever qualquer palavra que não estava no texto do usuário, você falhou. Copie caractere por caractere.
 
-DETECÇÃO DE FORMATO POR CENA: o usuário marca o formato de cada cena assim: "CENA 1 - unboxing", "CENA 2 - fabrica", "CENA 3 - terceira pessoa", etc (aceita também ":" em vez de "-" e abreviações). Localize no texto a linha da CENA QUE VOCÊ ESTÁ GERANDO e leia qual formato está marcado. Aplique APENAS esse formato nesta cena. Se não houver formato marcado, use UNBOXING só para ela.
+DETECÇÃO DE FORMATO POR CENA: o usuário marca o formato de cada cena assim: "CENA 1 - unboxing", "CENA 2 - fábrica" ou "fabrica", "CENA 3 - terceira pessoa", etc. Aceita variações: ":" em vez de "-", abreviações (unb, fab, tp, pov), COM ou SEM acentos (fábrica = fabrica, etc). Localize no texto a linha da CENA QUE VOCÊ ESTÁ GERANDO e leia qual formato está marcado. Aplique APENAS esse formato nesta cena. Se não houver formato marcado, use UNBOXING só para ela.
 
-FORMATOS:
+FORMATOS (fábrica e fabrica são o mesmo formato):
 - UNBOXING: POV, só mãos, caixa ou produto sobre a mesa, enquadramento fechado de cima, mãos manuseiam e exploram.
-- FABRICA: foco no produto e seus detalhes, produto sendo demonstrado ou funcionando, enquadramento de média distância.
+- FÁBRICA / FABRICA: foco no produto e seus detalhes, produto sendo demonstrado ou funcionando, enquadramento de média distância.
 - POV: primeira pessoa, só mãos, descobrindo ou testando o produto, movimento natural.
 - TERCEIRA PESSOA: mostra a PESSOA (corpo/tronco visível, nunca só mãos), câmera afastada pra ver a pessoa, ela usa ou apresenta o produto pra câmera.
 
