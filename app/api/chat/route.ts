@@ -202,8 +202,10 @@ EXEMPLO do resultado ideal:
             responses.push(sceneResponse);
           }
 
-          // Fazer stream das 3 respostas concatenadas
-          const concatenated = responses.join("\n");
+          // Fazer stream das 3 respostas concatenadas com cabeçalhos de cena
+          const concatenated = responses
+            .map((response, idx) => `CENA ${idx + 1}\n${response}`)
+            .join("\n\n");
           for (const char of concatenated) {
             controller.enqueue(encoder.encode(char));
           }
