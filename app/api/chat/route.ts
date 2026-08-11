@@ -86,54 +86,38 @@ Nunca adicionar referencia_visual, composicao_frame, iluminacao, camera_tecnica,
 Retorne APENAS os 3 JSONs. Nada mais.`;
 
         if (agentId === "videos") {
-          const scenesystemPrompt = `NUNCA faça perguntas. NUNCA peça confirmação. NUNCA escreva texto fora do JSON. Sempre gere o JSON direto.
+          const scenesystemPrompt = `GARANTIA CRÍTICA - VOCÊ SEMPRE RECEBE TUDO JUNTO: As imagens E o texto SEMPRE chegam juntos NA MESMA MENSAGEM. NUNCA diga que falta informação. NUNCA peça nada. A ÚNICA SAÍDA POSSÍVEL é UM PARÁGRAFO CORRIDO de texto, pronto pra colar no Veo 3.
 
-ATENÇÃO CRÍTICA: você NÃO é um redator. Você NUNCA escreve copy nova. O campo fala_exata é um COPIAR E COLAR literal das 2 linhas da cena que você está gerando. Se você escrever qualquer palavra que não estava no texto do usuário, você falhou. Copie caractere por caractere, sem mudar nada, sem reescrever, sem adaptar, sem inventar.
+NUNCA faça perguntas. NUNCA peça confirmação. Sempre gere o parágrafo direto, fluido, natural, sem estruturas, sem rótulos, sem JSON.
 
-IDENTIFICAÇÃO DO PRODUTO: você recebe todas as imagens. Olhe TODAS elas para identificar o produto real. O campo referencia_produto deve descrever esse produto exatamente: cor, formato, material, acessórios visíveis. É TERMINANTEMENTE PROIBIDO inventar, substituir ou trocar o produto.
+CADA CENA É AVULSA (não um pacote de 3). Gere 1 PARÁGRAFO por chamada, apenas para a cena atual, contendo de forma integrada e fluida:
+- Formato do vídeo (vertical 9:16, UGC realista)
+- Descrição FIEL do produto visto nas imagens (cor, formato, material, acessórios visíveis - NUNCA inventar ou trocar)
+- O que acontece na cena e as ações naturais
+- Anatomia: sempre 1 pessoa, 2 mãos com 5 dedos cada, SEMPRE VISÍVEIS
+- Enquadramento de câmera
+- Voz com gênero (não fixo em feminino - inferir pelo produto ou respeitar se indicado no texto) e a fala entre aspas
+- Restrições no final (sem texto, sem legendas, sem logos, movimento natural)
 
-DETECÇÃO DE FORMATO POR CENA: o usuário marca o formato de cada cena assim: "CENA 1 - unboxing", "CENA 2 - fabrica", "CENA 3 - terceira pessoa", etc. Localize no texto a linha da CENA QUE VOCÊ ESTÁ GERANDO e leia qual formato está marcado ao lado. Aplique APENAS esse formato nesta cena. Se aquela cena não tiver formato marcado, use UNBOXING como padrão só para ela.
+ATENÇÃO CRÍTICA À FALA: O que está entre aspas é um COPIAR E COLAR literal das 2 linhas daquela cena. Nunca reescreva, adapte ou invente palavras. Se você escrever qualquer palavra que não estava no texto do usuário, você falhou. Copie caractere por caractere.
 
-CADA CENA É AVULSA (não um pacote de 3). Gere 1 JSON por chamada, apenas para a cena atual:
+DETECÇÃO DE FORMATO POR CENA: o usuário marca o formato de cada cena assim: "CENA 1 - unboxing", "CENA 2 - fabrica", "CENA 3 - terceira pessoa", etc (aceita também ":" em vez de "-" e abreviações). Localize no texto a linha da CENA QUE VOCÊ ESTÁ GERANDO e leia qual formato está marcado. Aplique APENAS esse formato nesta cena. Se não houver formato marcado, use UNBOXING só para ela.
 
-UNBOXING (POV, apenas mãos, caixa/produto sobre mesa):
-- Enquadramento fechado de cima.
-- Foco na caixa e nas mãos.
-- Mãos manuseiam, giram, exploram.
-- Referencia_produto: descreve a caixa ou o produto visível.
+FORMATOS:
+- UNBOXING: POV, só mãos, caixa ou produto sobre a mesa, enquadramento fechado de cima, mãos manuseiam e exploram.
+- FABRICA: foco no produto e seus detalhes, produto sendo demonstrado ou funcionando, enquadramento de média distância.
+- POV: primeira pessoa, só mãos, descobrindo ou testando o produto, movimento natural.
+- TERCEIRA PESSOA: mostra a PESSOA (corpo/tronco visível, nunca só mãos), câmera afastada pra ver a pessoa, ela usa ou apresenta o produto pra câmera.
 
-FÁBRICA (estilo industrial/demonstração):
-- Foco no produto e seus detalhes.
-- Mostra o produto funcionando ou sendo demonstrado.
-- Enquadramento de média distância.
-- Referencia_produto: descreve o produto real da imagem.
-
-POV (primeira pessoa, apenas mãos, descobrindo/testando):
-- Hands-on, descobrindo ou testando o produto.
-- Movimento natural e exploratório.
-- Enquadramento similar ao unboxing (POV de cima ou frontal).
-- Referencia_produto: descreve o produto testado.
-
-TERCEIRA PESSOA (NUNCA é POV, a pessoa aparece no enquadramento):
-- A PESSOA (corpo/tronco visível, NÃO apenas mãos) segura, usa ou apresenta o produto.
-- Câmera afastada o suficiente para ver a pessoa.
-- A pessoa interage naturalmente com o produto pra câmera.
-- Referencia_produto: descreve o produto que a pessoa usa/apresenta.
-
-GÊNERO: o campo audio.voz NÃO é mais fixo em Feminina. Se o usuário indicar o gênero no texto (ex: "homem", "voz masculina", "mulher", "voz feminina"), respeite. Se não indicar, infira pelo tipo de produto. Nunca travar em feminino.
-
-Formato obrigatório de saída:
-{\"cena\":NUMERO,\"prompt\":{\"referencia_produto\":\"1 frase\",\"cena\":\"2 frases\",\"anatomia\":\"1 pessoa, 2 mãos, 5 dedos.\",\"acoes\":\"2 frases\",\"camera\":\"1 frase\",\"audio\":{\"voz\":\"[gênero], brasileira, natural.\",\"fala_exata\":\"COPY_DAS_2_LINHAS_DA_CENA\",\"sincronizacao\":\"Fala contínua.\"},\"restricoes\":[\"Sem texto.\",\"Sem legendas.\",\"Sem logos.\",\"Movimento natural.\"]}}
-
-REGRA DO ÁUDIO: o texto contém 3 cenas, cada uma com 2 linhas. O campo fala_exata deve conter APENAS as 2 linhas exatas da cena que você está gerando, copiadas como estão.
-
+REGRA DA FALA: o texto contém 3 cenas, cada uma com 2 linhas. A fala entre aspas deve conter APENAS as 2 linhas exatas daquela cena, copiadas como estão:
 Cena 1 = as 2 linhas sob 'CENA 1'
 Cena 2 = as 2 linhas sob 'CENA 2'
 Cena 3 = as 2 linhas sob 'CENA 3'
 
-PROIBIDO: juntar linhas de cenas diferentes. PROIBIDO: reescrever ou resumir as linhas. Máximo 20 palavras por fala_exata.
+PROIBIDO: juntar linhas de cenas diferentes. PROIBIDO: reescrever, resumir ou adaptar. Máximo 20 palavras entre as aspas.
 
-PROIBIDO GERAL: mais de 1 frase por campo. PROIBIDO: timestamps. PROIBIDO: campos extras.`;
+EXEMPLO do resultado ideal:
+"Vídeo vertical 9:16, UGC realista. Mãos femininas seguram uma caixa de papelão fechada e lacrada do TikTok Shop, com etiqueta de envio visível, sobre uma mesa de madeira clara. As mãos giram a caixa devagar e deslizam os dedos pela etiqueta, mantendo-a fechada o tempo todo. Apenas 1 pessoa, 2 mãos com 5 dedos cada, sempre visíveis, anatomia natural. Câmera de smartphone estável, enquadramento fechado de cima, sem cortes. Voz feminina brasileira natural, falando de forma contínua: 'Não é possível que isso custa trinta reais. Chegou aqui em casa e achei que era fake.' Sem texto na tela, sem legendas, sem logos, movimento natural."`;
 
           // Preparar para 3 chamadas separadas, com imagens correspondentes
           const userMessage = [...messages].reverse().find((m) => m.role === "user");
@@ -144,6 +128,7 @@ PROIBIDO GERAL: mais de 1 frase por campo. PROIBIDO: timestamps. PROIBIDO: campo
           const responses: string[] = [];
 
           for (let sceneNum = 1; sceneNum <= 3; sceneNum++) {
+            console.log(`\n🎬 Iniciando processamento da CENA ${sceneNum}...`);
             const messageContent: any[] = [];
 
             // Adicionar TODAS as imagens em cada chamada
@@ -180,6 +165,8 @@ PROIBIDO GERAL: mais de 1 frase por campo. PROIBIDO: timestamps. PROIBIDO: campo
             });
 
             const sceneResponse = sceneMessage.content[0].type === "text" ? sceneMessage.content[0].text : "";
+            console.log(`✅ Resposta CENA ${sceneNum}:`, sceneResponse);
+            console.log(`📊 Total de respostas até agora: ${sceneNum}`);
             responses.push(sceneResponse);
           }
 
