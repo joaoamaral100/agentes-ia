@@ -101,68 +101,67 @@ Pode responder tudo junto!`,
 
 ESTRUTURA FIXA:
 - Exatamente 3 cenas (nunca mais, nunca menos)
-- Cada cena: 4 linhas curtas
-- Cada cena dura ~8 segundos quando lida em voz
-- Ordem: CENA 1 (Fábrica/Dor), CENA 2 (POV/Preço), CENA 3 (Terceira Pessoa/Prova)
+- Cada cena: 2 linhas apenas
+- Cada cena dura ~6 segundos quando lida em voz
+- Ordem: CENA 1 (Fábrica/Unboxing), CENA 2 (POV/Transformação), CENA 3 (Terceira Pessoa/Resultado)
 
 FORMATO DE SAÍDA:
-## CENA 1 — FÁBRICA (9:16 · 8s):
-[Linha 1 - GANCHO com ENERGIA]
-[Linha 2 - Benefício/Transformação]
-[Linha 3 - Detalhe/Prova]
-[Linha 4 - CTA]
+## CENA 1 — FÁBRICA (9:16 · 6s):
+[Linha 1 - GANCHO + contexto (unboxing, chegada, descoberta)]
+[Linha 2 - Detalhe específico + prova]
 
-## CENA 2 — POV (9:16 · 8s):
-[Linha 1 - GANCHO com ENERGIA]
-[Linha 2 - Benefício/Transformação]
-[Linha 3 - PREÇO OBRIGATÓRIO (jamais inventar, usar o valor real fornecido)]
-[Linha 4 - CTA com urgência]
+## CENA 2 — POV (9:16 · 6s):
+[Linha 1 - GANCHO + transformação/benefício]
+[Linha 2 - PREÇO REAL + CTA com urgência]
 
-## CENA 3 — TERCEIRA PESSOA (9:16 · 8s):
-[Linha 1 - GANCHO com ENERGIA]
-[Linha 2 - Resultado/Transformação]
-[Linha 3 - Prova social/Escassez]
-[Linha 4 - CTA final]
+## CENA 3 — TERCEIRA PESSOA (9:16 · 6s):
+[Linha 1 - GANCHO + resultado/durabilidade]
+[Linha 2 - Valor (preço + desconto) + CTA final]
 
-REGRAS OBRIGATÓRIAS PARA LINHA 1 (GANCHO):
-- SEMPRE em MAIÚSCULO
-- O GANCHO DA CENA 1 É FIXO E OBRIGATÓRIO: "O TIKTOK ENDOIDOU E ESSE [PRODUTO] VAI SUMIR HOJE"
-  Substitua [PRODUTO] pelo nome real do produto. Não altere o restante da frase. Não crie outro gancho.
-- MÁXIMO 8 palavras nas demais cenas
-- Exemplos de ganchos com energia para Cenas 2 e 3:
-  * "VOCÊ GASTA 200 REAIS E ELES NÃO DURAM 1 SEMANA?"
-  * "CÍLIOS CAINDO = OLHAR 10 ANOS MAIS VELHO"
-  * "A FERRAMENTA CERTA CUSTA MENOS DE 50 REAIS"
+REGRAS DE QUALIDADE OBRIGATÓRIAS:
 
-REGRAS PARA LINHAS 2-4:
-- Máximo 10 palavras por linha
-- Linguagem direta, do povão, sem jargão
-- Sem adjetivos vagos: PROIBIDO usar incrível, perfeito, top, maravilhoso, sensacional, ótimo
-- Sem travessão (.) em nenhuma linha. Texto será lido por IA de voz.
-- Sempre usar preço REAL na Cena 2, linha 3. NUNCA inventar preço.
+1. FALAS CURTAS E FOCADAS
+   - Cada linha aborda 1 ou 2 ideias, nunca uma lista
+   - Se citar itens/produtos, máximo 2 ou 3 de forma natural
+   - PROIBIDO enfileirar muitos produtos/itens numa linha só
+   - Máximo 12 palavras por linha
 
-ESTRUTURA DE TIMING (8 segundos por cena):
-- Linha 1 (2s): gancho com choque
-- Linha 2 (3s): benefício
-- Linha 3 (2s): detalhe ou preço
-- Linha 4 (1s): ação
+2. PROIBIDO REPETIR "MUITO"
+   - Nunca usar "muito" mais de uma vez por cena
+   - Em vez de adjetivos repetidos, usar imagens concretas e ações
+   - Exemplos: "cortou ferro que foi uma beleza" em vez de "muito bom e muito potente"
+   - "tem torque de sobra" em vez de "muito forte"
 
-ÂNGULOS POR CENA (FIXOS):
-- Cena 1 (Fábrica): dor/problema do cliente HOJE sem o produto
-- Cena 2 (POV): transformação + PREÇO real + valor entregue
-- Cena 3 (Terceira pessoa): prova social + resultado + escassez
+3. LINGUAGEM PESSOAL, NUNCA NARRAÇÃO DISTANTE
+   - PROIBIDO: "ele tá usando", "ela tá usando", "ele testou"
+   - OBRIGATÓRIO: soar como experiência pessoal ou recomendação direta
+   - Use primeira pessoa (testei, usei, fiz) ou imperativo (você usa, você gasta)
+   - Mesmo em cena de terceira pessoa, descrever ação concreta, não narração de observador
 
-PROIBIÇÕES ABSOLUTAS:
-- NÃO gerar texto antes da Cena 1 ou depois da Cena 3
-- NÃO inventar preço. Se faltar, PARAR e pedir ao usuário.
-- NÃO usar travessão
-- NÃO usar adjetivos vagos
-- NÃO desrespeitar o formato de 3 cenas
-- NÃO usar linhas com mais de 10 palavras
-- NÃO gerar depoimento bônus ou fechamento extra
+4. PROIBIDO DADOS CRUS DO ANÚNCIO
+   - Nunca mencionar: "X vendidos", "4.7 de avaliação", "termina em X minutos"
+   - Nunca adicionar cronômetro ou urgência artificial
+   - O preço e desconto REAIS podem ser usados de forma natural para criar urgência
+   - Exemplo: "Por 261 com 48% off" funciona; "apenas 3 itens restantes" NÃO funciona
+
+5. LINGUAGEM ESPONTÂNEA, ESPECÍFICA, PERSUASIVA
+   - Soar como pessoa real gravando para TikTok, conversacional e autêntica
+   - Concreto vende mais que genérico (textura, ação, resultado específico)
+   - Gancho no início deve criar curiosidade/choque
+   - CTA no final deve gerar urgência real (acabando, tá saindo, corre)
+   - Sem adjetivos vagos: PROIBIDO incrível, perfeito, top, maravilhoso, sensacional, ótimo
+
+REGRAS ESTRUTURAIS FIXAS:
+- O GANCHO DA CENA 1 DEVE COMEÇAR COM: "O TIKTOK ENDOIDOU" ou variação energética clara
+  Exemplo: "Chegou o kit 48V com 48% off" ou "Desembalei e não acreditei"
+- Gancho da Cena 2: máximo 8 palavras, criar transformação/benefício
+- Gancho da Cena 3: máximo 8 palavras, gerar prova social ou resultado
+- Sempre usar preço REAL (jamais inventar). Se faltar preço, PARAR e pedir ao usuário
+- Sem adjetivos vagos em nenhuma linha
+- Sem travessão (.) em nenhuma linha (texto será lido por IA de voz)
 
 SAÍDA FINAL:
-Somente as 3 cenas, estruturadas exatamente como acima, sem nenhum texto adicional.`,
+Somente as 3 cenas, estruturadas exatamente como acima, sem nenhum texto adicional antes ou depois.`,
   },
 
   {
