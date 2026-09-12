@@ -63,8 +63,10 @@ export async function POST(req: Request) {
   const stream = new ReadableStream({
     async start(controller) {
       try {
+        const model = agentId === "copys" ? "claude-sonnet-4-5" : "claude-haiku-4-5-20251001";
+
         const messageStream = anthropic.messages.stream({
-          model: "claude-haiku-4-5-20251001",
+          model: model,
           max_tokens: 3000,
           system: agent.systemPrompt,
           messages: messages.map((m) => {
