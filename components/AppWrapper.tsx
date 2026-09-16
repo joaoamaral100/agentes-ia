@@ -245,6 +245,9 @@ export default function AppWrapper({ children }: { children: React.ReactNode }) 
   // Keep a ref so retryApproval doesn't close over a stale user value
   const userRef = useRef<User | null>(null);
 
+  // Track consecutive session mismatches (require 2 to kick out, not 1)
+  const consecutiveMismatchesRef = useRef(0);
+
   // ── Query the profiles table to determine access ─────────────────────────
   async function checkApproval(u: User) {
     console.log("[Auth] checkApproval →", u.email);
@@ -326,6 +329,12 @@ export default function AppWrapper({ children }: { children: React.ReactNode }) 
     const userId = user.id;
 
     async function verifySingleSession() {
+      // Skip verification if tab is in background (pause during inactive periods)
+      if (document.hidden) {
+        console.log("[Session] ⊘ aba em background — pulando verificação");
+        return;
+      }
+
       const localToken = localStorage.getItem("jarvis_session_token");
 
       if (!localToken) {
@@ -368,21 +377,42 @@ export default function AppWrapper({ children }: { children: React.ReactNode }) 
       }
 
       if (dbToken !== localToken) {
-        console.log("[Session] MISMATCH — outro dispositivo tomou a sessão. Deslogando este...");
-        setKickedOut(true);
-        await supabase.auth.signOut();
+        consecutiveMismatchesRef.current += 1;
+        console.log("[Session] ⚠ MISMATCH detectado (contagem:", consecutiveMismatchesRef.current + ")");
+
+        if (consecutiveMismatchesRef.current >= 2) {
+          console.log("[Session] MISMATCH confirmado (2+ vezes) — outro dispositivo tomou a sessão. Deslogando...");
+          setKickedOut(true);
+          await supabase.auth.signOut();
+        }
       } else {
-        console.log("[Session] ✓ sessão válida — tokens coincidem");
+        if (consecutiveMismatchesRef.current > 0) {
+          console.log("[Session] ✓ mismatch resolvido — resetando contagem");
+        } else {
+          console.log("[Session] ✓ sessão válida — tokens coincidem");
+        }
+        consecutiveMismatchesRef.current = 0;
       }
     }
 
-    console.log("[Session] interval registrado para userId:", userId.slice(0, 8) + "... (check a cada 15s)");
+    // Listener para retomar verificações quando aba fica visível novamente
+    function handleVisibilityChange() {
+      if (document.visibilityState === "visible") {
+        console.log("[Session] aba voltou a ser visível — resetando contagem de mismatches");
+        consecutiveMismatchesRef.current = 0;
+      }
+    }
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    console.log("[Session] interval registrado para userId:", userId.slice(0, 8) + "... (check a cada 15s, pause em background)");
     verifySingleSession(); // check imediato ao entrar no estado aprovado
     const interval = setInterval(verifySingleSession, 15_000);
 
     return () => {
       console.log("[Session] interval limpo (user saiu ou approval mudou)");
       clearInterval(interval);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   // user?.id evita re-run em cada refresh de token (referência muda mas id é o mesmo)
   // eslint-disable-next-line react-hooks/exhaustive-deps
