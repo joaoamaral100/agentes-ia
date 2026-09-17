@@ -245,6 +245,9 @@ export default function AppWrapper({ children }: { children: React.ReactNode }) 
   // Keep a ref so retryApproval doesn't close over a stale user value
   const userRef = useRef<User | null>(null);
 
+  // Track whether auth state has been determined (prevents flash of login screen)
+  const authReadyRef = useRef(false);
+
   // Track consecutive session mismatches (require 2 to kick out, not 1)
   const consecutiveMismatchesRef = useRef(0);
 
@@ -292,18 +295,10 @@ export default function AppWrapper({ children }: { children: React.ReactNode }) 
   }
 
   // ── Subscribe to auth state ───────────────────────────────────────────────
+  // onAuthStateChange is the single source of truth for auth state.
+  // It automatically fires INITIAL_SESSION if a persisted session exists,
+  // eliminating the need for a separate getSession() call that causes race conditions.
   useEffect(() => {
-    // 1. Read persisted session from localStorage on mount
-    supabase.auth.getSession().then(({ data: { session }, error }) => {
-      const u = session?.user ?? null;
-      console.log("[Auth] getSession →", u?.email ?? "no session", error?.message ?? "ok");
-      userRef.current = u;
-      setUser(u);
-      setAuthReady(true); // gate lifts once we know whether there's a session
-      if (u) checkApproval(u);
-    });
-
-    // 2. Keep state in sync with auth events (but avoid unnecessary re-renders on token sync)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       const u = session?.user ?? null;
       const prevUserId = userRef.current?.id;
@@ -314,6 +309,12 @@ export default function AppWrapper({ children }: { children: React.ReactNode }) 
       // Always update user ref and state (needed for token refresh in background)
       userRef.current = u;
       setUser(u);
+
+      // First auth event signals that session has been determined
+      if (!authReadyRef.current) {
+        authReadyRef.current = true;
+        setAuthReady(true);
+      }
 
       // Only trigger approval check on meaningful auth changes (not token refreshes or cross-tab sync of same user)
       if (event === "SIGNED_IN" || (event === "SIGNED_OUT")) {
