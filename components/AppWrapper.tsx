@@ -363,10 +363,7 @@ export default function AppWrapper({ children }: { children: React.ReactNode }) 
       }
 
       const dbToken = data?.active_session_id ?? null;
-      console.log(
-        "[Session] check — local:", localToken.slice(0, 8) + "...",
-        "| DB:", dbToken ? dbToken.slice(0, 8) + "..." : "NULL"
-      );
+      console.log("[Session] Comparando tokens:", { dbToken, localToken, match: dbToken === localToken });
 
       if (!dbToken) {
         console.warn(
@@ -395,23 +392,22 @@ export default function AppWrapper({ children }: { children: React.ReactNode }) 
       }
     }
 
-    // Listener para retomar verificações quando aba fica visível novamente
+    // Listener para verificar sessão quando aba fica visível novamente
     function handleVisibilityChange() {
       if (document.visibilityState === "visible") {
-        console.log("[Session] aba voltou a ser visível — resetando contagem de mismatches");
+        console.log("[Session] aba voltou a ser visível — executando verificação");
         consecutiveMismatchesRef.current = 0;
+        verifySingleSession();
       }
     }
 
     document.addEventListener("visibilitychange", handleVisibilityChange);
 
-    console.log("[Session] interval registrado para userId:", userId.slice(0, 8) + "... (check a cada 15s, pause em background)");
+    console.log("[Session] verificação registrada para userId:", userId.slice(0, 8) + "... (check ao montar e quando aba fica visível)");
     verifySingleSession(); // check imediato ao entrar no estado aprovado
-    const interval = setInterval(verifySingleSession, 15_000);
 
     return () => {
-      console.log("[Session] interval limpo (user saiu ou approval mudou)");
-      clearInterval(interval);
+      console.log("[Session] listener removido (user saiu ou approval mudou)");
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   // user?.id evita re-run em cada refresh de token (referência muda mas id é o mesmo)

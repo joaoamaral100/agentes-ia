@@ -50,6 +50,9 @@ TEMPLATE por cena (mínimo 200 palavras, em inglês):
 
 2. PRODUTO: "[PRODUTO] with [COR] [MATERIAL] [TEXTURA] finish, [FORMA/DIMENSÕES], [COSTURAS/RELEVOS], [LOGOS], [COMPONENTES]. Place the product diagonally on the counter/surface with [DETALHE 1] facing left and [DETALHE 2] angled toward camera. Product fills 40-60% of frame, not oversized. No color change, no logo added, no redesign, exact replica."
 
+2.5 LIMPEZA DE ANÚNCIO (TERCEIRA PESSOA APENAS):
+Quando receber imagem de referência para formato TERCEIRA PESSOA, IGNORE COMPLETAMENTE qualquer elemento de anúncio/promoção que apareça na imagem: adesivos de preço, "Lightning Deal", faixas de desconto, textos promocionais, selos. Extraia APENAS o produto em si — cor exata, formato, material — e o ambiente/cenário desejado. A imagem gerada deve ser limpa, sem nenhum texto ou elemento gráfico de anúncio (idêntico ao que já acontece nos formatos POV e FÁBRICA). Preserve todos os outros elementos da cena: background, iluminação, composição, modelo, pose, expressão facial.
+
 3. AÇÃO:
 — POV: "Two elegant feminine hands hover calmly around the product without touching aggressively — one pointing near [DETALHE 1], other gesturing near [DETALHE 2]. Fingers relaxed, natural nail polish, slow graceful movement emphasizing premium feel."
 — TERCEIRA PESSOA: "A young Brazilian woman (20-30), beautiful, elegant, fitness body, straight hair always covering the ears, waist-up framing, neutral expression with subtle confidence, looking directly into camera, TikTok outfit color-coordinated with product, presenting product on counter without touching aggressively, slight natural sway."
@@ -113,13 +116,13 @@ CENA 3 - terceira pessoa
 Aceite "-" ou ":" como separador e abreviações (unb, tp, fab, pov). Cada cena pode ter um formato diferente. Respeite o formato que o usuário marcou em cada cena.
 
 SAÍDA (exatamente neste formato, nada antes ou depois):
-CENA 1 - [formato que o usuário marcou]
+CENA 1 — [formato que o usuário marcou]
 [linha 1 da fala]
 [linha 2 da fala]
-CENA 2 - [formato que o usuário marcou]
+CENA 2 — [formato que o usuário marcou]
 [linha 1 da fala]
 [linha 2 da fala]
-CENA 3 - [formato que o usuário marcou]
+CENA 3 — [formato que o usuário marcou]
 [linha 1 da fala]
 [linha 2 da fala]
 
