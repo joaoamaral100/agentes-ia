@@ -14,8 +14,8 @@ export default function CopyDisplay({ content }: CopyDisplayProps) {
     let currentScene = { title: '', content: '' };
 
     for (const line of lines) {
-      // Detecta "CENA 1 — FAB:", "CENA 2 — FAB:", etc
-      if (line.includes('CENA') && line.includes('—')) {
+      // Detecta "CENA 1 — FAB:", "CENA 1 - FAB:", etc (aceita ambos — e -)
+      if (line.includes('CENA') && (line.includes('—') || line.includes('-'))) {
         if (currentScene.content) scenes.push(currentScene);
         currentScene = {
           title: line.trim(),

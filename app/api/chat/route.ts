@@ -90,12 +90,28 @@ export async function POST(req: Request) {
           }),
         });
 
-        messageStream.on("text", (text) => {
-          controller.enqueue(encoder.encode(text));
-        });
+        // Para agente "imagens", coletar resposta completa para pós-processamento
+        if (agentId === "imagens") {
+          let fullResponse = "";
+          messageStream.on("text", (text) => {
+            fullResponse += text;
+          });
 
-        await messageStream.finalMessage();
-        controller.close();
+          const finalMessage = await messageStream.finalMessage();
+
+          // Pós-processamento: garantir que cada CENA tem cabeçalho "CENA X —"
+          const processedResponse = ensureSceneHeaders(fullResponse);
+          controller.enqueue(encoder.encode(processedResponse));
+          controller.close();
+        } else {
+          // Para outros agentes, streamar normalmente
+          messageStream.on("text", (text) => {
+            controller.enqueue(encoder.encode(text));
+          });
+
+          await messageStream.finalMessage();
+          controller.close();
+        }
       } catch (err) {
         const message =
           err instanceof Error ? err.message : "Erro desconhecido ao chamar a API do Claude.";
@@ -104,6 +120,42 @@ export async function POST(req: Request) {
       }
     },
   });
+
+  // Função auxiliar: garante que cada bloco de código tem um cabeçalho "CENA X —"
+  function ensureSceneHeaders(text: string): string {
+    // Dividir por blocos de código
+    const parts = text.split("```");
+
+    if (parts.length < 7) {
+      // Menos de 3 blocos (cada bloco são 2 ```)
+      return text;
+    }
+
+    const result: string[] = [parts[0]];
+
+    for (let i = 1; i < parts.length; i += 2) {
+      result.push("```");
+
+      if (i < parts.length - 1) {
+        const blockContent = parts[i].trim();
+        const sceneNum = Math.ceil(i / 2);
+
+        // Verificar se já tem "CENA X" no início
+        if (!blockContent.startsWith(`CENA ${sceneNum}`)) {
+          result.push(`\nCENA ${sceneNum} — ${blockContent}`);
+        } else {
+          result.push(`\n${blockContent}`);
+        }
+
+        result.push("```");
+        if (i + 1 < parts.length) {
+          result.push(parts[i + 1]);
+        }
+      }
+    }
+
+    return result.join("");
+  }
 
   return new Response(stream, {
     headers: {
