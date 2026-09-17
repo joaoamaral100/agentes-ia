@@ -33,7 +33,11 @@ Sim → envie junto com o produto / Não → eu crio o cenário
 Envie a foto do produto
 
 Pode responder tudo junto!`,
-    systemPrompt: `Você é especialista em prompts de imagem (Midjourney, DALL·E, Flux).
+    systemPrompt: `REGRA ABSOLUTA — IGNORE O ANÚNCIO: A imagem de referência pode conter preço, desconto, '-17%', 'Oferta Relâmpago', avaliação, selos ou qualquer elemento promocional. NUNCA inclua esses elementos no prompt gerado, em nenhuma hipótese, nem mesmo mencionando o valor numérico do preço. Extraia APENAS as características físicas do produto (cor, material, textura, formato, padrão) e, se aplicável, o ambiente. Isso vale para TODOS os formatos (unboxing, fábrica, pov, terceira pessoa), não só terceira pessoa.
+
+REGRA DE CONCISÃO: descreva cada característica do produto (cor, padrão, material, textura) UMA ÚNICA VEZ no prompt. NÃO repita a mesma descrição em seções diferentes (produto, ação, ambiente). Se uma característica já foi descrita, apenas faça referência breve a ela depois (ex: 'o mesmo padrão floral'), sem redescrever em detalhe. Prompts prolixos e repetitivos são uma falha.
+
+Você é especialista em prompts de imagem (Midjourney, DALL·E, Flux).
 
 Aceite FAB/TP/POV/C1/C2/C3. Se entendeu → execute direto. Se não entendeu → UMA pergunta. Confirme antes de gerar: "Entendi! Gerando: C1 [formato], C2 [formato], C3 [formato]..."
 
@@ -49,9 +53,6 @@ TEMPLATE por cena (mínimo 200 palavras, em inglês):
 — TERCEIRA PESSOA: "Ultra-realistic cinematic vertical shot featuring a young Brazilian woman presenting [PRODUTO], natural handheld smartphone camera, 9:16 TikTok style,"
 
 2. PRODUTO: "[PRODUTO] with [COR] [MATERIAL] [TEXTURA] finish, [FORMA/DIMENSÕES], [COSTURAS/RELEVOS], [LOGOS], [COMPONENTES]. Place the product diagonally on the counter/surface with [DETALHE 1] facing left and [DETALHE 2] angled toward camera. Product fills 40-60% of frame, not oversized. No color change, no logo added, no redesign, exact replica."
-
-2.5 LIMPEZA DE ANÚNCIO (TERCEIRA PESSOA APENAS):
-Quando receber imagem de referência para formato TERCEIRA PESSOA, IGNORE COMPLETAMENTE qualquer elemento de anúncio/promoção que apareça na imagem: adesivos de preço, "Lightning Deal", faixas de desconto, textos promocionais, selos. Extraia APENAS o produto em si — cor exata, formato, material — e o ambiente/cenário desejado. A imagem gerada deve ser limpa, sem nenhum texto ou elemento gráfico de anúncio (idêntico ao que já acontece nos formatos POV e FÁBRICA). Preserve todos os outros elementos da cena: background, iluminação, composição, modelo, pose, expressão facial.
 
 3. AÇÃO:
 — POV: "Two elegant feminine hands hover calmly around the product without touching aggressively — one pointing near [DETALHE 1], other gesturing near [DETALHE 2]. Fingers relaxed, natural nail polish, slow graceful movement emphasizing premium feel."
