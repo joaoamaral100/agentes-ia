@@ -5,7 +5,7 @@ import Sidebar from "@/components/Sidebar";
 import ChatView from "@/components/ChatView";
 import Footer from "@/components/Footer";
 import { ChatMessage } from "@/components/MessageBubble";
-import { AGENTS, AgentId, Agent, getAgent } from "@/lib/agents";
+import { AGENTS, AgentId, Agent, getAgent, getVisibleAgents } from "@/lib/agents";
 import { supabase } from "@/lib/supabase";
 
 type ChatState = Record<AgentId, ChatMessage[]>;
@@ -435,7 +435,7 @@ function HeroHome({ chats, onSelectAgent, onMenuClick }: {
             gridTemplateColumns: "repeat(2, 1fr)",
             gap: "20px",
           }}>
-            {AGENTS.map((agent, i) => (
+            {getVisibleAgents().map((agent, i) => (
               <AgentCard
                 key={agent.id}
                 agent={agent}

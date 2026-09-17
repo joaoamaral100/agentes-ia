@@ -7,6 +7,9 @@ interface CopyDisplayProps {
 
 export default function CopyDisplay({ content }: CopyDisplayProps) {
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+  const [copiedAll, setCopiedAll] = useState(false);
+  const [evaluating, setEvaluating] = useState(false);
+  const [evaluation, setEvaluation] = useState<string>("");
 
   const parseCopys = (text: string) => {
     const scenes = [];
@@ -35,10 +38,98 @@ export default function CopyDisplay({ content }: CopyDisplayProps) {
     setTimeout(() => setCopiedIndex(null), 2000);
   };
 
+  const handleCopyAll = () => {
+    navigator.clipboard.writeText(content);
+    setCopiedAll(true);
+    setTimeout(() => setCopiedAll(false), 2000);
+  };
+
+  const handleEvaluate = async () => {
+    setEvaluating(true);
+    setEvaluation("");
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          agentId: "avaliador-copy",
+          messages: [{ role: "user", content }]
+        }),
+      });
+
+      if (!res.ok || !res.body) {
+        setEvaluation("Erro ao avaliar copy.");
+        setEvaluating(false);
+        return;
+      }
+
+      const reader = res.body.getReader();
+      const dec = new TextDecoder();
+      let acc = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        acc += dec.decode(value, { stream: true });
+        setEvaluation(acc);
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Erro de conexão";
+      setEvaluation(`Erro: ${msg}`);
+    } finally {
+      setEvaluating(false);
+    }
+  };
+
   const scenes = parseCopys(content);
 
   return (
     <div className="copy-container">
+      {/* Header com botões "Copiar tudo" e "Avaliar" */}
+      <div style={{
+        display: "flex",
+        gap: "8px",
+        marginBottom: "16px",
+        flexWrap: "wrap"
+      }}>
+        <button
+          onClick={handleCopyAll}
+          style={{
+            padding: "8px 14px",
+            borderRadius: "6px",
+            fontSize: "12px",
+            fontWeight: 600,
+            background: copiedAll ? "rgba(34,197,94,0.2)" : "rgba(0,217,255,0.1)",
+            border: `1px solid ${copiedAll ? "rgba(34,197,94,0.4)" : "rgba(0,217,255,0.2)"}`,
+            color: copiedAll ? "#22c55e" : "#00d9ff",
+            cursor: "pointer",
+            transition: "all 0.2s ease"
+          }}
+        >
+          {copiedAll ? "✓ Copiado!" : "Copiar tudo"}
+        </button>
+
+        <button
+          onClick={handleEvaluate}
+          disabled={evaluating}
+          style={{
+            padding: "8px 14px",
+            borderRadius: "6px",
+            fontSize: "12px",
+            fontWeight: 600,
+            background: evaluating ? "rgba(192,132,252,0.2)" : "rgba(192,132,252,0.1)",
+            border: `1px solid ${evaluating ? "rgba(192,132,252,0.4)" : "rgba(192,132,252,0.2)"}`,
+            color: evaluating ? "#c084fc" : "#a78bfa",
+            cursor: evaluating ? "not-allowed" : "pointer",
+            opacity: evaluating ? 0.7 : 1,
+            transition: "all 0.2s ease"
+          }}
+        >
+          {evaluating ? "Avaliando..." : "Avaliar copy"}
+        </button>
+      </div>
+
+      {/* Cenas */}
       {scenes.map((scene, idx) => (
         <div key={idx} className="copy-scene-box">
           <div className="scene-header">
@@ -57,6 +148,27 @@ export default function CopyDisplay({ content }: CopyDisplayProps) {
           </div>
         </div>
       ))}
+
+      {/* Avaliação */}
+      {evaluation && (
+        <div style={{
+          marginTop: "20px",
+          padding: "16px",
+          borderRadius: "8px",
+          background: "rgba(192,132,252,0.08)",
+          border: "1px solid rgba(192,132,252,0.2)",
+          fontSize: "13px",
+          lineHeight: "1.6",
+          color: "#e0e6ff",
+          whiteSpace: "pre-wrap",
+          wordBreak: "break-word"
+        }}>
+          <div style={{ fontWeight: 700, marginBottom: "12px", color: "#c084fc" }}>
+            Avaliação da Copy
+          </div>
+          {evaluation}
+        </div>
+      )}
     </div>
   );
 }

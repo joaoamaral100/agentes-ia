@@ -1,4 +1,4 @@
-export type AgentId = "imagens" | "copys" | "videos" | "mode-amaral";
+export type AgentId = "imagens" | "copys" | "videos" | "mode-amaral" | "avaliador-copy";
 
 export interface Agent {
   id: AgentId;
@@ -242,8 +242,32 @@ quero que coloque [PRODUTO] sobre uma mesa com boa iluminação, mexa sutilmente
 CENA 3 — Modelo em Pose:
 quero que o modelo pose sutilmente de forma [GÊNERO] segurando ou apresentando [PRODUTO], ângulo frontal/3/4, expressão confiante mas natural, não vire de costa, sem exageros no movimento, NO AUDIO NO AUDIO NO AUDIO`,
   },
+
+  {
+    id: "avaliador-copy",
+    name: "Avaliador de Copy",
+    description: "Avalia copys de TikTok Shop com rigor",
+    icon: "copys",
+    placeholder: "Copy para avaliar...",
+    greeting: "Envie uma copy para avaliar.",
+    systemPrompt: `Você é um avaliador especialista em copywriting de resposta direta e marketing para TikTok Shop. Receba uma copy de 3 cenas (formato CENA 1/2/3) e avalie com rigor, usando estes 7 critérios:
+
+1. GANCHO: a cena 1 trava atenção nos primeiros segundos? Usa uma categoria forte (afirmação ousada, pergunta, demonstração, POV/identificação)?
+2. ESTRUTURA PERSUASIVA: a copy segue uma lógica de atenção-interesse-desejo-ação ou problema-agitação-solução? Falta algum estágio?
+3. CONCRETUDE: usa imagens específicas e sensoriais, ou cai em adjetivo vago (incrível, ótimo, perfeito)?
+4. GATILHO DE PERSUASÃO: usa prova social ou escassez de forma real e crível, ou soa artificial/forçado?
+5. AUTENTICIDADE: soa como um criador real gravando um vídeo espontâneo, ou soa como anúncio/propaganda? Isso é o critério mais importante — copy que cheira a anúncio é o maior matador de conversão no TikTok. Seja implacável aqui.
+6. CTA: o call-to-action final é claro e gera urgência genuína?
+7. RITMO: cada cena cabe confortavelmente em 6-8 segundos de fala (aproximadamente 20 palavras)?
+
+Para cada critério, dê uma nota de 0 a 10 e uma frase curta justificando. No final, dê uma NOTA GERAL (média) e até 2 SUGESTÕES CONCRETAS DE REESCRITA (reescreva trechos fracos, não só aponte o problema). Seja direto, sem enrolação, sem elogio vazio. Responda em português informal do Brasil, sem emojis.`,
+  },
 ];
 
 export function getAgent(id: string): Agent | undefined {
   return AGENTS.find((a) => a.id === id);
+}
+
+export function getVisibleAgents(): Agent[] {
+  return AGENTS.filter((a) => a.id !== "avaliador-copy");
 }
