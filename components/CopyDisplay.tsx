@@ -8,8 +8,12 @@ interface CopyDisplayProps {
 export default function CopyDisplay({ content }: CopyDisplayProps) {
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
   const [copiedAll, setCopiedAll] = useState(false);
+  const [copiedRevisedIndex, setCopiedRevisedIndex] = useState<number | null>(null);
+  const [copiedRevisedAll, setCopiedRevisedAll] = useState(false);
   const [evaluating, setEvaluating] = useState(false);
   const [evaluation, setEvaluation] = useState<string>("");
+  const [isRewriting, setIsRewriting] = useState(false);
+  const [revisedCopy, setRevisedCopy] = useState<string>("");
 
   const parseCopys = (text: string) => {
     const scenes = [];
@@ -81,7 +85,59 @@ export default function CopyDisplay({ content }: CopyDisplayProps) {
     }
   };
 
+  const handleRewrite = async () => {
+    setIsRewriting(true);
+    setRevisedCopy("");
+    try {
+      const feedbackMessage = `COPY ORIGINAL:\n${content}\n\nAVALIAÇÃO:\n${evaluation}`;
+
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          agentId: "reescrever-copy",
+          messages: [{ role: "user", content: feedbackMessage }]
+        }),
+      });
+
+      if (!res.ok || !res.body) {
+        setRevisedCopy("Erro ao reescrever copy.");
+        setIsRewriting(false);
+        return;
+      }
+
+      const reader = res.body.getReader();
+      const dec = new TextDecoder();
+      let acc = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        acc += dec.decode(value, { stream: true });
+        setRevisedCopy(acc);
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Erro de conexão";
+      setRevisedCopy(`Erro: ${msg}`);
+    } finally {
+      setIsRewriting(false);
+    }
+  };
+
+  const handleCopyRevised = (text: string, index: number) => {
+    navigator.clipboard.writeText(text.trim());
+    setCopiedRevisedIndex(index);
+    setTimeout(() => setCopiedRevisedIndex(null), 2000);
+  };
+
+  const handleCopyRevisedAll = () => {
+    navigator.clipboard.writeText(revisedCopy);
+    setCopiedRevisedAll(true);
+    setTimeout(() => setCopiedRevisedAll(false), 2000);
+  };
+
   const scenes = parseCopys(content);
+  const revisedScenes = revisedCopy ? parseCopys(revisedCopy) : [];
 
   return (
     <div className="copy-container">
@@ -109,7 +165,7 @@ export default function CopyDisplay({ content }: CopyDisplayProps) {
           {copiedAll ? "✓ Copiado!" : "Copiar tudo"}
         </button>
 
-        <button
+<button
           onClick={handleEvaluate}
           disabled={evaluating}
           style={{
@@ -127,6 +183,27 @@ export default function CopyDisplay({ content }: CopyDisplayProps) {
         >
           {evaluating ? "Avaliando..." : "Avaliar copy"}
         </button>
+
+        {evaluation && !evaluation.includes("Erro") && (
+          <button
+            onClick={handleRewrite}
+            disabled={isRewriting}
+            style={{
+              padding: "8px 14px",
+              borderRadius: "6px",
+              fontSize: "12px",
+              fontWeight: 600,
+              background: isRewriting ? "rgba(59,130,246,0.2)" : "rgba(59,130,246,0.1)",
+              border: `1px solid ${isRewriting ? "rgba(59,130,246,0.4)" : "rgba(59,130,246,0.2)"}`,
+              color: isRewriting ? "#3b82f6" : "#60a5fa",
+              cursor: isRewriting ? "not-allowed" : "pointer",
+              opacity: isRewriting ? 0.7 : 1,
+              transition: "all 0.2s ease"
+            }}
+          >
+            {isRewriting ? "Reescrevendo..." : "Refazer copy"}
+          </button>
+        )}
       </div>
 
       {/* Cenas */}
@@ -167,6 +244,59 @@ export default function CopyDisplay({ content }: CopyDisplayProps) {
             Avaliação da Copy
           </div>
           {evaluation}
+        </div>
+      )}
+
+      {/* Copy Revisada */}
+      {revisedCopy && !revisedCopy.includes("Erro") && (
+        <div style={{ marginTop: "28px" }}>
+          {/* Header com botões "Copiar tudo revisada" */}
+          <div style={{
+            display: "flex",
+            gap: "8px",
+            marginBottom: "16px",
+            flexWrap: "wrap"
+          }}>
+            <div style={{ fontWeight: 700, fontSize: "14px", color: "#3b82f6", width: "100%" }}>
+              Copy Revisada
+            </div>
+            <button
+              onClick={handleCopyRevisedAll}
+              style={{
+                padding: "8px 14px",
+                borderRadius: "6px",
+                fontSize: "12px",
+                fontWeight: 600,
+                background: copiedRevisedAll ? "rgba(34,197,94,0.2)" : "rgba(59,130,246,0.1)",
+                border: `1px solid ${copiedRevisedAll ? "rgba(34,197,94,0.4)" : "rgba(59,130,246,0.2)"}`,
+                color: copiedRevisedAll ? "#22c55e" : "#3b82f6",
+                cursor: "pointer",
+                transition: "all 0.2s ease"
+              }}
+            >
+              {copiedRevisedAll ? "✓ Copiado!" : "Copiar tudo"}
+            </button>
+          </div>
+
+          {/* Cenas Revisadas */}
+          {revisedScenes.map((scene, idx) => (
+            <div key={idx} className="copy-scene-box">
+              <div className="scene-header">
+                <h3>{scene.title}</h3>
+                <button
+                  onClick={() => handleCopyRevised(scene.content, idx)}
+                  className={`copy-button ${copiedRevisedIndex === idx ? 'copied' : ''}`}
+                >
+                  {copiedRevisedIndex === idx ? '✓ Copiado!' : 'Copiar'}
+                </button>
+              </div>
+              <div className="scene-content">
+                {scene.content.split('\n').map((line, lineIdx) =>
+                  line.trim() && <p key={lineIdx}>{line}</p>
+                )}
+              </div>
+            </div>
+          ))}
         </div>
       )}
     </div>

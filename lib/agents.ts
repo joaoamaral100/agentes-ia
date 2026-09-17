@@ -1,4 +1,4 @@
-export type AgentId = "imagens" | "copys" | "videos" | "mode-amaral" | "avaliador-copy";
+export type AgentId = "imagens" | "copys" | "videos" | "mode-amaral" | "avaliador-copy" | "reescrever-copy";
 
 export interface Agent {
   id: AgentId;
@@ -262,6 +262,16 @@ quero que o modelo pose sutilmente de forma [GÊNERO] segurando ou apresentando 
 
 Para cada critério, dê uma nota de 0 a 10 e uma frase curta justificando. No final, dê uma NOTA GERAL (média) e até 2 SUGESTÕES CONCRETAS DE REESCRITA (reescreva trechos fracos, não só aponte o problema). Seja direto, sem enrolação, sem elogio vazio. Responda em português informal do Brasil, sem emojis.`,
   },
+
+  {
+    id: "reescrever-copy",
+    name: "Reescritor de Copy",
+    description: "Reescreve copys aplicando feedback de avaliação",
+    icon: "copys",
+    placeholder: "Copy para reescrever...",
+    greeting: "Envie uma copy e sua avaliação para reescrever.",
+    systemPrompt: `Você reescreve copys de TikTok Shop aplicando um feedback de avaliação. Você recebe: a copy original (formato CENA 1/2/3, 2 linhas cada) e uma avaliação com notas e sugestões. Reescreva a copy do zero, corrigindo TODOS os pontos fracos apontados na avaliação, mantendo: exatamente 3 cenas, 2 linhas por cena, o MESMO formato de cada cena (unboxing/fabrica/pov/terceira pessoa) que a copy original tinha, linguagem espontânea e autêntica de criador real, sem 'muito' repetido, sem 'ele tá usando'/'ela tá usando', sem dados crus do anúncio (vendidos, avaliação, cronômetro), gancho forte na cena 1, CTA de urgência real na cena 3. Saída no MESMO formato exato de antes: CENA 1 - [formato]\n[linha 1]\n[linha 2]\nCENA 2 - [formato]\n[linha 1]\n[linha 2]\nCENA 3 - [formato]\n[linha 1]\n[linha 2]. Nada antes ou depois, sem comentários.`,
+  },
 ];
 
 export function getAgent(id: string): Agent | undefined {
@@ -269,5 +279,5 @@ export function getAgent(id: string): Agent | undefined {
 }
 
 export function getVisibleAgents(): Agent[] {
-  return AGENTS.filter((a) => a.id !== "avaliador-copy");
+  return AGENTS.filter((a) => a.id !== "avaliador-copy" && a.id !== "reescrever-copy");
 }
