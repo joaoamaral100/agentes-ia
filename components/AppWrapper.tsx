@@ -303,17 +303,36 @@ export default function AppWrapper({ children }: { children: React.ReactNode }) 
       if (u) checkApproval(u);
     });
 
-    // 2. Keep state in sync with any auth event (sign-in, sign-out, token refresh)
+    // 2. Keep state in sync with auth events (but avoid unnecessary re-renders on token sync)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       const u = session?.user ?? null;
+      const prevUserId = userRef.current?.id;
+      const newUserId = u?.id;
+
       console.log("[Auth] onAuthStateChange →", event, u?.email ?? "signed out");
+
+      // Always update user ref and state (needed for token refresh in background)
       userRef.current = u;
       setUser(u);
-      if (u) {
+
+      // Only trigger approval check on meaningful auth changes (not token refreshes or cross-tab sync of same user)
+      if (event === "SIGNED_IN" || (event === "SIGNED_OUT")) {
+        // Real sign in/out event
+        if (event === "SIGNED_IN" && u) {
+          setApproval("loading");
+          checkApproval(u);
+        }
+        // SIGNED_OUT: AppWrapper re-renders with !user → LoginScreen (no need to manually trigger)
+      } else if (event === "INITIAL_SESSION" && u) {
+        // Initial session load from persistence
+        setApproval("loading");
+        checkApproval(u);
+      } else if (prevUserId && newUserId && prevUserId !== newUserId) {
+        // User ID changed (unlikely but if it does, re-check approval)
         setApproval("loading");
         checkApproval(u);
       }
-      // When user signs out, AppWrapper re-renders with !user → LoginScreen
+      // For TOKEN_REFRESHED, USER_UPDATED, etc: just keep user/token in sync, no re-check needed
     });
 
     return () => subscription.unsubscribe();
