@@ -317,19 +317,24 @@ export default function AppWrapper({ children }: { children: React.ReactNode }) 
       }
 
       // Only trigger approval check on meaningful auth changes (not token refreshes or cross-tab sync of same user)
-      if (event === "SIGNED_IN" || (event === "SIGNED_OUT")) {
-        // Real sign in/out event
-        if (event === "SIGNED_IN" && u) {
+      if (event === "SIGNED_IN") {
+        // SIGNED_IN can fire repeatedly when Supabase syncs session across tabs (same user, same session)
+        // Only treat as real login if it's a NEW user or user ID changed
+        const isNewUser = !prevUserId; // First time user logged in
+        const isUserChange = prevUserId && newUserId && prevUserId !== newUserId; // Different user
+
+        if ((isNewUser || isUserChange) && u) {
+          console.log("[Auth] SIGNED_IN: real login/user change detected");
           setApproval("loading");
           checkApproval(u);
+        } else if (prevUserId === newUserId) {
+          // Same user, same session: ignore (this is cross-tab sync, not a real login)
+          console.log("[Auth] SIGNED_IN: ignoring — same user session sync (cross-tab)");
         }
+      } else if (event === "SIGNED_OUT") {
         // SIGNED_OUT: AppWrapper re-renders with !user → LoginScreen (no need to manually trigger)
       } else if (event === "INITIAL_SESSION" && u) {
         // Initial session load from persistence
-        setApproval("loading");
-        checkApproval(u);
-      } else if (prevUserId && newUserId && prevUserId !== newUserId) {
-        // User ID changed (unlikely but if it does, re-check approval)
         setApproval("loading");
         checkApproval(u);
       }
