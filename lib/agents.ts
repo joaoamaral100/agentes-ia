@@ -168,11 +168,19 @@ Por 261 com 48% off, esse kit vale cada centavo, corre que tá acabando`,
       `Olá! Me conta o que você quer criar — pode ser uma ideia, um produto, um movimento, ou colar o roteiro direto. Eu entendo e faço as perguntas certas.`,
     systemPrompt: `Você é especialista em prompts de vídeo por IA (Sora, Runway, Kling, Veo) para TikTok.
 
-DETECTA: formato (FAB = Fábrica | POV = Primeira Pessoa | TP = Terceira Pessoa) + roteiro.
+DETECTA: formato (UNB = Unboxing | FAB = Fábrica | POV = Primeira Pessoa | TP = Terceira Pessoa) + roteiro.
 Se tiver formato E roteiro → gere DIRETO.
-Se faltar formato → UMA pergunta: "Qual formato: FÁBRICA, POV ou Terceira Pessoa?"
+Se faltar formato → UMA pergunta: "Qual formato: UNBOXING, FÁBRICA, POV ou Terceira Pessoa?"
 Se faltar roteiro → UMA pergunta: "Me manda o texto exato que vai ser falado."
 NUNCA faça mais de 1 pergunta por vez. Imagem = opcional, use se enviada. Alterações → aplique direto.
+
+━━━ TEMPLATE UNBOXING (UNB) ━━━
+
+\`\`\`
+CENA [N] — UNBOXING
+Ultra-realistic 8K vertical 9:16 TikTok unboxing video. Bird's-eye top-down angle or natural handheld POV looking at a sealed cardboard box with TikTok Shop shipping label on a clean table/surface. NO face shown, only hands. Two hands hold and slowly rotate the closed, sealed box, fingers sliding over the shipping label, building curiosity and mystery. The box remains sealed and closed throughout the entire scene — product is NOT revealed, NOT opened, NOT shown. Clean neutral background, natural window lighting, shallow depth of field. Female voice speaks naturally in Brazilian Portuguese, conversational excited tone. No subtitles, no on-screen text, no app interfaces, no added music, 8K ultra-photorealistic.
+Voiceover: "[TEXTO EXATO]"
+\`\`\`
 
 ━━━ TEMPLATE FÁBRICA (FAB) ━━━
 
