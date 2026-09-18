@@ -49,18 +49,25 @@ DETECÇÃO:
 — 1 imagem: crie o cenário do zero
 — 2 imagens: IMAGEM 1 = produto (preserve todos os detalhes) | IMAGEM 2 = cenário de referência
 
+GÊNERO DINÂMICO (TERCEIRA PESSOA):
+Se o usuário indicar gênero no texto (ex: "homem", "modelo masculino", "mulher"), respeite. Caso contrário, infira do produto:
+— Produtos tipicamente masculinos (ferramentas, eletrônicos industriais, motos, equipamentos, ração de motos) → use "man" / "beautiful" → "handsome"
+— Produtos tipicamente femininos (moda, beleza, skincare, acessórios femininos) → use "woman" / "handsome" → "beautiful"
+— Produtos neutros (livros, alimentos, decoração, eletrônicos gerais) → use "person" / "beautiful/handsome" → "attractive"
+A descrição de roupa ("TikTok outfit") vale para todos os gêneros, ajustando tom conforme necessário.
+
 TEMPLATE por cena (mínimo 200 palavras, em inglês):
 
 1. ABERTURA:
 — FÁBRICA: "Ultra-realistic cinematic factory product showcase shot of [PRODUTO], filmed vertically with a natural handheld smartphone perspective, 9:16 vertical TikTok commerce format,"
 — POV: "Ultra-realistic cinematic first-person POV shot, natural handheld perspective examining [PRODUTO] up close, 9:16 vertical TikTok showcase style,"
-— TERCEIRA PESSOA: "Ultra-realistic cinematic vertical shot featuring a young Brazilian woman presenting [PRODUTO], natural handheld smartphone camera, 9:16 TikTok style,"
+— TERCEIRA PESSOA: "Ultra-realistic cinematic vertical shot featuring a young Brazilian [GENDER] presenting [PRODUTO], natural handheld smartphone camera, 9:16 TikTok style,"
 
 2. PRODUTO: "[PRODUTO] with [COR] [MATERIAL] [TEXTURA] finish, [FORMA/DIMENSÕES], [COSTURAS/RELEVOS], [LOGOS], [COMPONENTES]. Place the product diagonally on the counter/surface with [DETALHE 1] facing left and [DETALHE 2] angled toward camera. Product fills 40-60% of frame, not oversized. No color change, no logo added, no redesign, exact replica."
 
 3. AÇÃO:
 — POV: "Two elegant feminine hands hover calmly around the product without touching aggressively — one pointing near [DETALHE 1], other gesturing near [DETALHE 2]. Fingers relaxed, natural nail polish, slow graceful movement emphasizing premium feel."
-— TERCEIRA PESSOA: "A young Brazilian woman (20-30), beautiful, elegant, fitness body, straight hair always covering the ears, waist-up framing, neutral expression with subtle confidence, looking directly into camera, TikTok outfit color-coordinated with product, presenting product on counter without touching aggressively, slight natural sway."
+— TERCEIRA PESSOA: "A young Brazilian [GENDER] (20-30), [ADJECTIVE], elegant, fit body, straight hair always covering the ears, waist-up framing, neutral expression with subtle confidence, looking directly into camera, TikTok outfit color-coordinated with product, presenting product on counter without touching aggressively, slight natural sway."
 — FÁBRICA: "Multiple Brazilian female workers (20-30), straight hair, TikTok uniforms color-coordinated with product, all looking directly at camera, standing around a central workshop table where the product is displayed. Product placed on the central table — proportional size, fills 40-60% of the table surface, NOT oversized, NOT filling the full frame. Multiple units of the product stacked and arranged on the table but leaving space around them. All collaborators fully visible, not blocked by the product — workers have clear space around the product. Workshop table perspective: product prominent but proportional, workers visible from waist up on both sides. Giant mountain of the same product stacked floor-to-ceiling in the center background. Loaded truck unloading in far background. Promotional TikTok banners throughout warehouse."
 
 4. AMBIENTE: "Realistic Brazilian [factory warehouse / contemporary lifestyle] with [elementos do produto], depth with blurred workers, industrial shelving with same product, yellow forklifts, concrete floor."
