@@ -191,35 +191,40 @@ NUNCA faça mais de 1 pergunta por vez. Imagem = opcional, use se enviada. Alter
 
 ━━━ TEMPLATE UNBOXING (UNB) ━━━
 
-\`\`\`
 CENA [N] — UNBOXING
 Ultra-realistic 8K vertical 9:16 TikTok unboxing video. Bird's-eye top-down angle or natural handheld POV looking at a cardboard box with TikTok Shop shipping label on a clean table/surface. NO face shown, only hands. Two hands open the box flaps carefully, revealing [PRODUTO] visible inside, nestled in protective packaging (foam/paper), resting at the bottom of the box — not lifted out, not held in hands, not removed from the box. Fingers gently touch the box edges and protective packaging material. The product remains nested inside throughout — clear visual of the freshly-delivered unboxing moment, product visible but still secured in its protective nest. Clean neutral background, natural window lighting, shallow depth of field. Female voice speaks naturally in Brazilian Portuguese, conversational excited tone. No subtitles, no on-screen text, no app interfaces, no added music, 8K ultra-photorealistic.
 Voiceover: "[TEXTO EXATO]"
-\`\`\`
 
 ━━━ TEMPLATE FÁBRICA (FAB) ━━━
 
-\`\`\`
 CENA [N] — FÁBRICA
 Ultra-realistic 8K vertical 9:16 factory TikTok video. Modern clean industrial warehouse, mass production energy. Multiple Brazilian female workers (5-8 people, ages 20-30), all with straight hair, all wearing color-coordinated uniforms matching the product color. ALL workers stand in formation around a central conveyor table loaded with many units of [PRODUTO] stacked and arranged — product visible but proportional, not oversized. ALL workers look DIRECTLY into camera simultaneously. ALL workers SCREAM the hook together in PERFECT SYNCHRONY — all mouths open wide, high-energy simultaneous shout, all pointing at products and camera together as a group at the exact same moment. Background: towering stacks of same product piled floor-to-ceiling, yellow forklifts moving pallets, industrial metal shelving fully stocked, large TikTok promotional banners. Handheld smartphone feel, industrial overhead LED lighting, ultra-photorealistic, no subtitles, no on-screen text, no app interfaces, no added music.
 All workers SCREAM in unison: "[TEXTO EXATO]"
-\`\`\`
 
 ━━━ TEMPLATE POV — PRIMEIRA PESSOA ━━━
 
-\`\`\`
 CENA [N] — POV
 Ultra-realistic 8K vertical 9:16 POV TikTok video. Bird's-eye top-down angle looking straight down at [PRODUTO] centered on a clean minimal surface. NO face shown at any point — NO person visible, only hands. Two elegant feminine hands enter from frame edges: one hand gently points near product details without covering them, other hand gestures near secondary features. Hands hover and move naturally, never grabbing or blocking the product. Product is the absolute protagonist filling center of frame. Clean neutral background, soft diffused top-down lighting, shallow depth of field highlighting product texture and details. Female voice speaks naturally in Brazilian Portuguese, conversational tone — voice only, no body shown. No subtitles, no on-screen text, no app interfaces, no added music, 8K ultra-photorealistic.
 Female voiceover (no body shown): "[TEXTO EXATO]"
-\`\`\`
 
 ━━━ TEMPLATE TERCEIRA PESSOA (TP) ━━━
 
-\`\`\`
 CENA [N] — TERCEIRA PESSOA
 Ultra-realistic 8K vertical 9:16 third-person TikTok video. Single young Brazilian woman (20-30), beautiful, straight hair, positioned centrally in frame, waist-up visible. Setting: modern minimal home interior or clean studio with a white surface/table. [PRODUTO] placed on the white table clearly visible in front of or beside presenter. Presenter looks DIRECTLY into camera with strong confident eye contact throughout. High urgency energy: animated expressive face, pointing decisively at the product with one hand while maintaining camera eye contact. Presenter speaks with conviction, strong sales energy. Handheld smartphone camera at chest/face level, slight natural movement. Warm clean modern lighting. No subtitles, no on-screen text, no app interfaces, no added music, 8K ultra-photorealistic, maximum realism.
 Presenter speaks: "[TEXTO EXATO]"
-\`\`\``,
+
+SAÍDA: responda APENAS com as 3 cenas, nada antes e nada depois. Sem introdução, sem comentários, sem conclusão, sem markdown (nada de #, ##, negrito, emoji), sem blocos de código com crase. Formato exato, texto puro:
+
+CENA 1 — [formato]
+[prompt completo da cena 1]
+
+CENA 2 — [formato]
+[prompt completo da cena 2]
+
+CENA 3 — [formato]
+[prompt completo da cena 3]
+
+Nada além disso. Qualquer texto fora desse formato é uma falha.`,
   },
 
   {
