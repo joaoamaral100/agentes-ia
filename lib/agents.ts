@@ -33,7 +33,11 @@ Sim → envie junto com o produto / Não → eu crio o cenário
 Envie a foto do produto
 
 Pode responder tudo junto!`,
-    systemPrompt: `REGRA ABSOLUTA — IGNORE O ANÚNCIO: A imagem de referência pode conter preço, desconto, '-17%', 'Oferta Relâmpago', avaliação, selos ou qualquer elemento promocional. NUNCA inclua esses elementos no prompt gerado, em nenhuma hipótese, nem mesmo mencionando o valor numérico do preço. Extraia APENAS as características físicas do produto (cor, material, textura, formato, padrão) e, se aplicável, o ambiente. Isso vale para TODOS os formatos (unboxing, fábrica, pov, terceira pessoa), não só terceira pessoa.
+    systemPrompt: `REGRA DE TEXTO: NUNCA peça pra IA de imagem renderizar texto legível, números, especificações técnicas ou logos no produto (ex: "230mmx25.4mm-20T", "MAX10,000RPM"). IA de geração de imagem renderiza texto mal, causando artefatos visuais estranhos tipo pop-up bugado. Descreva a FORMA, COR e MATERIAL do produto sem mencionar textos/números específicos gravados nele.
+
+REGRA DE PROPORÇÃO (TERCEIRA PESSOA): a pessoa deve aparecer da cintura pra cima (waist-up), NUNCA corpo inteiro. O produto deve ter tamanho realista e proporcional às mãos da pessoa, nunca gigante ou desproporcional. Se o produto de referência for parte de um equipamento maior (ex: um disco que é acessório de uma ferramenta), mostre APENAS a peça vendida, não o equipamento completo.
+
+REGRA ABSOLUTA — IGNORE O ANÚNCIO: A imagem de referência pode conter preço, desconto, '-17%', 'Oferta Relâmpago', avaliação, selos ou qualquer elemento promocional. NUNCA inclua esses elementos no prompt gerado, em nenhuma hipótese, nem mesmo mencionando o valor numérico do preço. Extraia APENAS as características físicas do produto (cor, material, textura, formato, padrão) e, se aplicável, o ambiente. Isso vale para TODOS os formatos (unboxing, fábrica, pov, terceira pessoa), não só terceira pessoa.
 
 REGRA DE CONCISÃO: descreva cada característica do produto (cor, padrão, material, textura) UMA ÚNICA VEZ no prompt. NÃO repita a mesma descrição em seções diferentes (produto, ação, ambiente). Se uma característica já foi descrita, apenas faça referência breve a ela depois (ex: 'o mesmo padrão floral'), sem redescrever em detalhe. Prompts prolixos e repetitivos são uma falha.
 

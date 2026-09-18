@@ -63,7 +63,7 @@ export async function POST(req: Request) {
   const stream = new ReadableStream({
     async start(controller) {
       try {
-        const model = agentId === "copys" ? "claude-sonnet-4-5" : "claude-haiku-4-5-20251001";
+        const model = (agentId === "copys" || agentId === "imagens") ? "claude-sonnet-4-5" : "claude-haiku-4-5-20251001";
 
         const messageStream = anthropic.messages.stream({
           model: model,
