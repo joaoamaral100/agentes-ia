@@ -21,9 +21,14 @@ export default function CopyDisplay({ content }: CopyDisplayProps) {
     let currentScene = { title: '', content: '' };
 
     for (const line of lines) {
+      // Ignora linhas que sejam só crases (depois de tirar espaços)
+      if (/^`+$/.test(line.trim())) {
+        continue;
+      }
+
       // Detecta "CENA 1 — FAB:", "CENA 1 - FAB:", etc (aceita ambos — e -)
       if (line.includes('CENA') && (line.includes('—') || line.includes('-'))) {
-        if (currentScene.content) scenes.push(currentScene);
+        if (currentScene.content && currentScene.title.trim() !== '') scenes.push(currentScene);
         currentScene = {
           title: line.trim(),
           content: ''
@@ -32,7 +37,7 @@ export default function CopyDisplay({ content }: CopyDisplayProps) {
         currentScene.content += line + '\n';
       }
     }
-    if (currentScene.content) scenes.push(currentScene);
+    if (currentScene.content && currentScene.title.trim() !== '') scenes.push(currentScene);
     return scenes;
   };
 
